@@ -15,12 +15,14 @@
 import assert from 'assert';
 import path from 'path';
 import fs from 'fs';
+import os from 'os';
 import { fileURLToPath } from 'url';
 import {
   AgentRunner,
   SkillLoader,
   PromptBuilder,
   ResponseSanitizer,
+  resolveCliPath,
 } from '../src/engine/agent_runner.js';
 import { DAGRunner, DAGNode } from '../src/engine/dag_runner.js';
 import { Logger, Colors } from '../src/utils/logger.js';
@@ -243,14 +245,103 @@ async function testSyntheticFallback() {
 }
 
 // =====================================================================
-// Test 6: Real Antigravity CLI Execution Pipeline
+// Test 6: Antigravity CLI Path Resolver Precedence & Error Reporting
+// =====================================================================
+async function testCliPathResolver() {
+  Logger.info('Testing CLI path resolver precedence, PATH discovery, and failure reporting...');
+
+  const origEnv = process.env.ANTIGRAVITY_CLI_PATH;
+  const origPath = process.env.PATH;
+
+  try {
+    // 1. options.cliPath takes highest precedence
+    delete process.env.ANTIGRAVITY_CLI_PATH;
+    const fromOptions = resolveCliPath({ cliPath: '/opt/custom/antigravity' });
+    assert.strictEqual(fromOptions, '/opt/custom/antigravity', 'options.cliPath must take highest precedence');
+
+    // 2. process.env.ANTIGRAVITY_CLI_PATH takes precedence over PATH
+    process.env.ANTIGRAVITY_CLI_PATH = '/env/custom/antigravity';
+    const fromEnv = resolveCliPath({});
+    assert.strictEqual(fromEnv, '/env/custom/antigravity', 'process.env.ANTIGRAVITY_CLI_PATH must take precedence over PATH');
+
+    // 3. 'agy' found on PATH
+    delete process.env.ANTIGRAVITY_CLI_PATH;
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'agy-resolver-test-'));
+    const dummyBinaryName = process.platform === 'win32' ? 'agy.exe' : 'agy';
+    const dummyBinaryPath = path.join(tempDir, dummyBinaryName);
+    fs.writeFileSync(dummyBinaryPath, '#!/bin/sh\necho agy', 'utf8');
+
+    process.env.PATH = `${tempDir}${path.delimiter}${origPath}`;
+    const fromPath = resolveCliPath({});
+    assert.strictEqual(path.resolve(fromPath), path.resolve(dummyBinaryPath), 'CLI resolver must discover "agy" on PATH');
+
+    // Also verify AgentRunner constructor resolves this.cliPath when agy is on PATH
+    const runnerWithAgy = new AgentRunner({ agencyDir, rootDir, executionMode: 'cli' });
+    assert.strictEqual(path.resolve(runnerWithAgy.cliPath), path.resolve(dummyBinaryPath), 'AgentRunner.cliPath must resolve to agy on PATH');
+
+    // 4. Throw clear error naming ANTIGRAVITY_CLI_PATH when not found
+    delete process.env.ANTIGRAVITY_CLI_PATH;
+    process.env.PATH = ''; // Empty PATH
+
+    let resolverError = null;
+    try {
+      resolveCliPath({});
+    } catch (err) {
+      resolverError = err;
+    }
+    assert(resolverError, 'resolveCliPath must throw when CLI binary cannot be located');
+    assert(
+      resolverError.message.includes('ANTIGRAVITY_CLI_PATH'),
+      `Error message must name ANTIGRAVITY_CLI_PATH, got: "${resolverError.message}"`
+    );
+
+    let constructorError = null;
+    try {
+      new AgentRunner({ agencyDir, rootDir, executionMode: 'auto' });
+    } catch (err) {
+      constructorError = err;
+    }
+    assert(constructorError, 'AgentRunner constructor must throw in auto/cli mode when CLI binary cannot be located');
+    assert(
+      constructorError.message.includes('ANTIGRAVITY_CLI_PATH'),
+      `Constructor error message must name ANTIGRAVITY_CLI_PATH, got: "${constructorError.message}"`
+    );
+
+    // Clean up temp dir
+    try {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    } catch {
+      // ignore
+    }
+
+    Logger.success('CLI path resolver precedence, PATH discovery, and failure reporting fully verified.');
+  } finally {
+    if (origEnv !== undefined) {
+      process.env.ANTIGRAVITY_CLI_PATH = origEnv;
+    } else {
+      delete process.env.ANTIGRAVITY_CLI_PATH;
+    }
+    process.env.PATH = origPath;
+  }
+}
+
+// =====================================================================
+// Test 7: Real Antigravity CLI Execution Pipeline
 // =====================================================================
 async function testRealCliExecution() {
   Logger.info('Testing native Antigravity CLI execution pipeline...');
-  const cliPath = process.env.ANTIGRAVITY_CLI_PATH || 'C:\\Users\\ksrit\\Downloads\\cli_windows_x64.exe';
+  let cliPath;
+  try {
+    cliPath = AgentRunner.resolveCliPath();
+  } catch {
+    if (fs.existsSync('C:\\Users\\ksrit\\Downloads\\cli_windows_x64.exe')) {
+      process.env.ANTIGRAVITY_CLI_PATH = 'C:\\Users\\ksrit\\Downloads\\cli_windows_x64.exe';
+      cliPath = AgentRunner.resolveCliPath();
+    }
+  }
 
-  if (!fs.existsSync(cliPath)) {
-    Logger.warn(`CLI binary not found at ${cliPath}, skipping live CLI test.`);
+  if (!cliPath || !fs.existsSync(cliPath)) {
+    Logger.warn(`CLI binary not found, skipping live CLI test.`);
     return;
   }
 
@@ -426,10 +517,11 @@ async function runAllTests() {
     await testPromptConstruction();
     await testResponseSanitizer();
     await testSyntheticFallback();
+    await testCliPathResolver();
     await testDynamicConditionalDAGActivation();
     await testRealCliExecution();
 
-    console.log(`\n${Colors.brightGreen}${Colors.bold}>>> ALL 7 AGENT RUNNER TESTS PASSED (100% SUCCESS) <<<${Colors.reset}\n`);
+    console.log(`\n${Colors.brightGreen}${Colors.bold}>>> ALL 8 AGENT RUNNER TESTS PASSED (100% SUCCESS) <<<${Colors.reset}\n`);
   } catch (err) {
     console.error(`\n${Colors.brightRed}${Colors.bold}TEST FAILURE:${Colors.reset}`, err);
     process.exit(1);

@@ -360,7 +360,7 @@ Hope this helps!`;
   recordCheck('AgentRunner safely catches and reports non-existent agent definitions', true);
 
   // 3. Timeout bound configuration
-  const timeoutRunner = new AgentRunner({ agencyDir, rootDir, cliTimeoutMs: 1500 });
+  const timeoutRunner = new AgentRunner({ agencyDir, rootDir, executionMode: 'synthetic', cliTimeoutMs: 1500 });
   assert.strictEqual(timeoutRunner.cliTimeoutMs, 1500, 'CLI timeout bounds must be configurable');
   recordCheck('Agent execution timeout configuration verified', true);
 

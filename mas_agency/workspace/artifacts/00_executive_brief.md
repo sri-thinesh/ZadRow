@@ -1,6 +1,6 @@
-# Executive Brief: Studio Synthetix
+# Executive Brief: authenticity
 
-Deliver an Awwwards Site-of-the-Day caliber experience for Studio Synthetix featuring kinetic typography, dark-luxury aesthetics, interactive bento systems, and zero-compromise performance.
+Deliver an Awwwards Site-of-the-Day caliber experience for authenticity featuring kinetic typography, dark-luxury aesthetics, interactive bento systems, and zero-compromise performance.
 
 ## Value Pillars
 - **Kinetic Aesthetics & Storytelling**: Real-time procedural canvas visuals paired with synchronized typography.

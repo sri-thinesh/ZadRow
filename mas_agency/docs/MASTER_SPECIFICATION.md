@@ -1,4 +1,4 @@
-# MASTER TECHNICAL SPECIFICATION: Remediation Test
+# MASTER TECHNICAL SPECIFICATION: STUDIO SYNTHETIX
 **Specification Version**: 2.0.0  
 **Governing Standard**: RFC 2119 ('MUST', 'REQUIRED', 'SHALL')  
 **Architect**: A13 Master Specification Architect  
@@ -6,7 +6,7 @@
 ---
 
 ## 1. Executive Technical Summary
-This document represents the immutable engineering contract for **Remediation Test**. Every component interface, user interaction, acceptance criterion, and performance budget specified herein MUST be implemented without deviation.
+This document represents the immutable engineering contract for **STUDIO SYNTHETIX**. Every component interface, user interaction, acceptance criterion, and performance budget specified herein MUST be implemented without deviation.
 
 ---
 

@@ -339,6 +339,7 @@ async function testExecutionAuthenticityAndFailureHandling() {
   const recoveringRunner = new AgentRunner({
     agencyDir,
     rootDir,
+    cliPath: 'mock-cli',
     executionMode: 'cli',
     allowFallback: false,
     maxRetries: 2,

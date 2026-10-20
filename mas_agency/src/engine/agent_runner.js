@@ -311,9 +311,82 @@ export class ResponseSanitizer {
 }
 
 /**
+ * Resolves the Antigravity CLI binary path using strict precedence:
+ * 1. options.cliPath
+ * 2. process.env.ANTIGRAVITY_CLI_PATH
+ * 3. 'agy' found on PATH (scan process.env.PATH for agy, agy.exe, cli_*.exe)
+ * 4. throw a clear Error naming ANTIGRAVITY_CLI_PATH as the thing to set.
+ * Never falls back to a hardcoded user directory.
+ *
+ * @param {Object} [options={}]
+ * @returns {string} Resolved CLI binary path
+ */
+export function resolveCliPath(options = {}) {
+  // 1. options.cliPath
+  if (options && options.cliPath && typeof options.cliPath === 'string' && options.cliPath.trim().length > 0) {
+    return options.cliPath.trim();
+  }
+
+  // 2. process.env.ANTIGRAVITY_CLI_PATH
+  if (process.env.ANTIGRAVITY_CLI_PATH && process.env.ANTIGRAVITY_CLI_PATH.trim().length > 0) {
+    return process.env.ANTIGRAVITY_CLI_PATH.trim();
+  }
+
+  // 3. 'agy' found on PATH (scan process.env.PATH for agy, agy.exe, cli_*.exe)
+  const pathEnv = process.env.PATH || '';
+  const pathDirs = pathEnv.split(path.delimiter).filter(Boolean);
+
+  const exactNames = process.platform === 'win32'
+    ? ['agy.exe', 'agy.cmd', 'agy.bat', 'agy']
+    : ['agy'];
+
+  for (const dir of pathDirs) {
+    // Check exact binary names first
+    for (const name of exactNames) {
+      const candidate = path.join(dir, name);
+      try {
+        if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
+          return candidate;
+        }
+      } catch {
+        // Skip inaccessible paths
+      }
+    }
+
+    // Scan directory for cli_*.exe (Windows) or cli_* (POSIX)
+    try {
+      if (fs.existsSync(dir) && fs.statSync(dir).isDirectory()) {
+        const files = fs.readdirSync(dir);
+        const cliMatch = files.find((file) => {
+          if (process.platform === 'win32') {
+            return /^cli_.*\.exe$/i.test(file);
+          }
+          return /^cli_[a-z0-9_]+$/i.test(file);
+        });
+        if (cliMatch) {
+          const candidate = path.join(dir, cliMatch);
+          if (fs.statSync(candidate).isFile()) {
+            return candidate;
+          }
+        }
+      }
+    } catch {
+      // Skip directory read errors (permissions, locked folders)
+    }
+  }
+
+  // 4. throw a clear Error naming ANTIGRAVITY_CLI_PATH as the thing to set
+  throw new Error(
+    'Antigravity CLI binary not found. Please set the ANTIGRAVITY_CLI_PATH environment variable to the CLI executable or ensure "agy" is installed on your PATH.'
+  );
+}
+
+/**
  * AgentRunner: Executes agent tasks via Antigravity CLI or synthetic fallback
  */
 export class AgentRunner {
+  static resolveCliPath = resolveCliPath;
+
   constructor(options = {}) {
     this.rootDir = options.rootDir || path.resolve(__dirname, '../../..');
     this.agencyDir = options.agencyDir || path.resolve(__dirname, '../..');
@@ -325,7 +398,6 @@ export class AgentRunner {
     ];
     this.artifactsDir = options.artifactsDir || path.join(this.agencyDir, 'workspace', 'artifacts');
 
-    this.cliPath = options.cliPath || process.env.ANTIGRAVITY_CLI_PATH || 'C:\\Users\\ksrit\\Downloads\\cli_windows_x64.exe';
     this.cliTimeoutMs = options.cliTimeoutMs || options.timeoutMs || 120000;
     this.timeoutMs = this.cliTimeoutMs;
     this.sanitizer = ResponseSanitizer;
@@ -333,6 +405,18 @@ export class AgentRunner {
     this.effort = options.effort || process.env.ANTIGRAVITY_EFFORT || 'low';
     this.executionMode = options.executionMode || 'auto'; // 'auto' | 'cli' | 'synthetic'
     this.allowFallback = options.allowFallback !== false;
+
+    // Resolve CLI binary path according to strict priority order:
+    // 1. options.cliPath -> 2. process.env.ANTIGRAVITY_CLI_PATH -> 3. 'agy' on PATH -> 4. throw naming ANTIGRAVITY_CLI_PATH
+    if (this.executionMode === 'synthetic') {
+      try {
+        this.cliPath = resolveCliPath(options);
+      } catch {
+        this.cliPath = null;
+      }
+    } else {
+      this.cliPath = resolveCliPath(options);
+    }
 
     this.personas = new Map();
     this.skillLoader = new SkillLoader(this.skillsDirs);
