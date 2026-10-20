@@ -1,0 +1,79 @@
+{
+  "project_id": "proj_studio_synthetix_1792430490795",
+  "motion_narrative": "Precision spring physics conveying spatial clarity and tactile momentum, avoiding gratuitous ornament.",
+  "library_selection": {
+    "primary_library": "motion_for_react",
+    "advanced_libraries_needed": false,
+    "advanced_libraries": [],
+    "rationale": "Motion for React provides hardware-accelerated spring animations, full exit transitions, and < 35KB footprint without requiring heavy external GSAP/Lenis bundles."
+  },
+  "bezier_curves": {
+    "smooth_out": "cubic-bezier(0.16, 1, 0.3, 1)",
+    "snappy_bounce": "cubic-bezier(0.34, 1.56, 0.64, 1)",
+    "gentle_fade": "cubic-bezier(0.25, 0.1, 0.25, 1)"
+  },
+  "entrance_sequence": {
+    "stagger_delay": 0.08,
+    "total_duration": 0.8,
+    "elements": [
+      {
+        "element": "header_nav",
+        "delay": 0.1,
+        "transform": "translateY(-16px) -> 0"
+      },
+      {
+        "element": "hero_headline",
+        "delay": 0.2,
+        "transform": "translateY(24px) -> 0"
+      },
+      {
+        "element": "hero_actions",
+        "delay": 0.35,
+        "transform": "translateY(16px) -> 0"
+      }
+    ]
+  },
+  "scroll_choreography": {
+    "smooth_scroll_enabled": false,
+    "lenis_config": null,
+    "scroll_triggers": []
+  },
+  "interaction_contracts": [
+    {
+      "interaction_id": "INT-01",
+      "purpose": "Provide tactile visual confirmation on link/button hover",
+      "trigger": "pointerenter",
+      "expected_behavior": "Element scales subtly (1.02) with border highlight transition",
+      "visual_feedback": "Border transitions to primary cyan token over 150ms",
+      "timing_ms": 150,
+      "input_modality": "pointer (hover: hover)",
+      "accessibility_fallback": "Standard CSS border highlight on focus-visible"
+    },
+    {
+      "interaction_id": "INT-02",
+      "purpose": "Reveal project dossier details on selection",
+      "trigger": "click / Enter key",
+      "expected_behavior": "Accordion or detail pane expands smoothly using Motion layout animation",
+      "visual_feedback": "Content opacity and height transition in 250ms",
+      "timing_ms": 250,
+      "input_modality": "all",
+      "accessibility_fallback": "Instantaneous DOM visibility change when reduced motion is preferred"
+    }
+  ],
+  "reduced_motion_contract": {
+    "replacement_behavior": "All transitions become instantaneous opacity fades or static state switches (0ms duration).",
+    "css_override_rule": "@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }",
+    "exempt_properties": [
+      "opacity"
+    ]
+  },
+  "performance_budget": {
+    "target_fps": 60,
+    "max_frame_time_ms": 16.6,
+    "test_environment": "Chrome Headless, 60Hz display, simulated mid-tier CPU",
+    "escalation_policy": {
+      "trigger_threshold_ms": 16.6,
+      "fallback_action": "Disable spring physics and use pure CSS transform transitions"
+    }
+  }
+}

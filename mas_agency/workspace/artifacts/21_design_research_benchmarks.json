@@ -1,0 +1,161 @@
+{
+  "project_id": "proj_studio_synthetix_1792430490795",
+  "benchmark_teardowns": [
+    {
+      "benchmark_name": "Active Theory Portfolio Studies",
+      "url_or_reference": "https://activetheory.net",
+      "verified_observations": [
+        "Custom canvas layer rendered behind DOM content",
+        "Typography uses custom fluid clamp formulas",
+        "Navigation collapses into full-screen kinetic overlay on mobile"
+      ],
+      "interpretations_and_takeaways": [
+        "Spatial depth can be achieved without cluttering content",
+        "Touch devices benefit from simplified particle counts"
+      ],
+      "composition_analysis": "Non-standard asymmetric hero with progressive scroll unveils.",
+      "typography_analysis": "High-contrast sans display paired with geometric body font.",
+      "interaction_motion_analysis": "Inertia-based smooth scroll with velocity-sensitive hover states.",
+      "accessibility_feasibility_notes": "Must ensure canvas remains non-interactive background to prevent screen reader interference."
+    },
+    {
+      "benchmark_name": "Locomotive Digital Architecture",
+      "url_or_reference": "https://locomotive.ca",
+      "verified_observations": [
+        "Layered parallax depth with staggered scroll triggers",
+        "Minimal color palette with single neon keyline accent",
+        "Strict semantic section DOM tree with descriptive aria-labels"
+      ],
+      "interpretations_and_takeaways": [
+        "High craft comes from micro-interactions rather than decorative overload",
+        "Zero horizontal overflow across all viewports"
+      ],
+      "composition_analysis": "Editorial column grid with alternating project showcases.",
+      "typography_analysis": "Editorial serif accents on technical grotesque body.",
+      "interaction_motion_analysis": "Page transitions using native view transitions and staggered elements.",
+      "accessibility_feasibility_notes": "Ensure all scroll triggers pause when prefers-reduced-motion is active."
+    },
+    {
+      "benchmark_name": "Studio Dumbar Experimental Identity",
+      "url_or_reference": "https://studiodumbar.com",
+      "verified_observations": [
+        "Kinetic typography reacting to mouse velocity",
+        "Brutalist black-and-white grid with high-luminance accent colors",
+        "Total zero placeholder content"
+      ],
+      "interpretations_and_takeaways": [
+        "Bold type hierarchy creates stronger distinction than generic photography",
+        "Accessible focus rings must be preserved in high-contrast layouts"
+      ],
+      "composition_analysis": "Monolithic type hero transitioning into modular case dossier.",
+      "typography_analysis": "Heavy grotesque display with tight letter-spacing and monospaced indices.",
+      "interaction_motion_analysis": "Typography distortion on hover with instantaneous reset.",
+      "accessibility_feasibility_notes": "Maintain 44px minimum hit targets on all text links."
+    }
+  ],
+  "anti_patterns_to_avoid": [
+    {
+      "anti_pattern_name": "Repetitive Uniform Bento Grid",
+      "why_harmful": "Creates generic SaaS landing page appearance and flattens content hierarchy.",
+      "project_alternative": "Asymmetric editorial sections with varied scale and dedicated focus per work item."
+    },
+    {
+      "anti_pattern_name": "Unmotivated Glow & Glassmorphism Blur",
+      "why_harmful": "Heavy GPU composite layers that cause frame drops on mobile and look like 2022 AI templates.",
+      "project_alternative": "Crisp precision borders, purposeful surface elevation, and high-contrast typography."
+    },
+    {
+      "anti_pattern_name": "Fake Testimonials and Fictional Metrics",
+      "why_harmful": "Destroys credibility and violates zero-placeholder factual integrity.",
+      "project_alternative": "Strict factual traceability derived only from verified client brief."
+    }
+  ],
+  "creative_decision_linkage": {
+    "accepted_insights": [
+      "Editorial asymmetric typography hierarchy",
+      "Lightweight Motion for React physics over heavy scroll-jacking",
+      "Subtle keyline border highlights"
+    ],
+    "rejected_insights": [
+      "Heavy WebGL shaders (rejected for bundle size and battery conservation)",
+      "Mandatory audio synthesis (rejected to avoid user annoyance)"
+    ],
+    "differentiation_strategy": "Craft a bespoke architectural editorial experience tailored strictly to the client identity with zero boilerplate cards."
+  },
+  "moodboard_directions": [
+    {
+      "direction_id": "MOOD_01",
+      "theme_name": "Architectural Editorial",
+      "visual_keywords": [
+        "monumental",
+        "disciplined",
+        "high-contrast",
+        "spacious",
+        "refined"
+      ],
+      "texture_and_materials": "Fine-grain matte stone, crisp 1px borders, razor-sharp typography",
+      "spatial_pacing": "Expansive whitespace with sudden bursts of monumental scale",
+      "compositional_character": "Asymmetric split-grid with editorial margins"
+    },
+    {
+      "direction_id": "MOOD_02",
+      "theme_name": "Cyber-Precision Humanist",
+      "visual_keywords": [
+        "kinetic",
+        "technical",
+        "tactile",
+        "luminescent",
+        "exact"
+      ],
+      "texture_and_materials": "Dark obsidian glass, neon keyline filaments, monospaced metadata",
+      "spatial_pacing": "Tight modular rhythms with smooth spring transitions",
+      "compositional_character": "Technical dossiers with modular indices"
+    }
+  ],
+  "moodboard_curation": {
+    "theme_name": "Architectural Editorial",
+    "visual_keywords": [
+      "monumental",
+      "disciplined",
+      "high-contrast",
+      "spacious",
+      "refined"
+    ],
+    "texture_and_materials": "Fine-grain matte stone, crisp 1px borders, razor-sharp typography",
+    "spatial_pacing": "Expansive whitespace with sudden bursts of monumental scale"
+  },
+  "typography_explorations": [
+    {
+      "pairing_name": "Syne & Inter",
+      "display_font": "Syne, Space Grotesk, sans-serif",
+      "body_font": "Inter, system-ui, sans-serif",
+      "vibe": "Modernist luxury with industrial precision"
+    },
+    {
+      "pairing_name": "Playfair & Plus Jakarta Sans",
+      "display_font": "Playfair Display, serif",
+      "body_font": "Plus Jakarta Sans, sans-serif",
+      "vibe": "Refined editorial authority"
+    }
+  ],
+  "color_atmosphere": {
+    "primary_mood": "Obsidian Clarity with Luminous Cyan Accent",
+    "suggested_harmonies": [
+      "#090a0f",
+      "#11131c",
+      "#00f0ff",
+      "#f8fafc"
+    ]
+  },
+  "aesthetic_style": "Avant-Garde Architectural Editorial",
+  "typography_pairing": {
+    "display": "Syne, Space Grotesk, sans-serif",
+    "body": "Inter, system-ui, sans-serif",
+    "mono": "JetBrains Mono, monospace"
+  },
+  "motion_principles": [
+    "Inertia-based damping",
+    "Spring physics",
+    "Zero layout thrashing"
+  ]
+}

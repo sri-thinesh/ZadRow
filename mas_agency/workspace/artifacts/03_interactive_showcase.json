@@ -1,0 +1,11 @@
+{
+  "agentId": "ENG_InteractiveShowcase",
+  "componentName": "InteractiveShowcase",
+  "file": "src/components/InteractiveShowcase.tsx",
+  "features": [
+    "Interactive parameter tuning slider",
+    "Live telemetry counter simulation",
+    "Interactive tabbed code/architecture preview",
+    "Live benchmark comparison indicators"
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "project_id": "proj_studio_synthetix_1792430490795",
+  "framework": "Next.js 15 (App Router)",
+  "target_runtime": "React 19 (Server + Client Components)",
+  "status": "ARCHITECTED",
+  "core_stack": {
+    "framework": "Next.js 15 (App Router)",
+    "runtime": "React 19 (Server + Client Components)",
+    "styling": "Tailwind CSS v3 + CSS Custom Properties",
+    "language": "TypeScript 5.x",
+    "graphics": "HTML5 Canvas 2D / WebGL / Procedural SVG"
+  },
+  "backend_status": "STANDBY_STATIC_ONLY",
+  "performance_targets": {
+    "targetFPS": 60,
+    "lcpBudgetMs": 1200,
+    "clsTarget": 0
+  },
+  "performance_measurement_plan": {
+    "lcp_target_ms": 1200,
+    "cls_target": 0.02,
+    "inp_target_ms": 100,
+    "test_environment": "Chrome Headless, 60Hz display, simulated mid-tier CPU, zero-cache",
+    "measurement_methodology": "Synthetic Lighthouse/Playwright CWV audit run against production build",
+    "acceptance_criteria": "LCP < 1.2s and CLS < 0.02 under standard test conditions"
+  },
+  "dependency_rationale_matrix": [
+    {
+      "package_name": "motion",
+      "purpose": "Hardware-accelerated layout and exit animations",
+      "bundle_impact_kb": 32,
+      "justification": "Approved standard motion library replacing heavier GSAP runtime"
+    }
+  ],
+  "directory_structure": {
+    "src/app": "Next.js 15 App Router pages and layouts",
+    "src/components": "UI components and atomic widgets",
+    "src/lib": "Utilities, persistence, and validation helpers"
+  },
+  "frontend_architecture_summary": {
+    "rsc_default": true,
+    "client_component_leaves": true
+  },
+  "build_config": {
+    "framework": "Next.js 15",
+    "typescript_strict": true
+  }
+}

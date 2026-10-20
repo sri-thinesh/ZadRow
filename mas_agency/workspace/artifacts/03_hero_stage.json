@@ -1,0 +1,12 @@
+{
+  "agentId": "ENG_HeroStage",
+  "componentName": "HeroStage",
+  "file": "src/components/HeroStage.tsx",
+  "features": [
+    "Interactive 60FPS particle wave simulation on HTML5 Canvas",
+    "Mouse interaction coordinate projection with damping",
+    "Gradient kinetic typography H1",
+    "Floating status badge with pulse indicator",
+    "Dual conversion action buttons with magnetic hover effect"
+  ]
+}

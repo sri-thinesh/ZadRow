@@ -1,0 +1,183 @@
+{
+  "timestamp": "2026-10-20T13:18:29.123Z",
+  "targetDir": "C:\\Users\\ksrit\\OneDrive\\Documents\\multiagent system 2.0\\mas_agency\\output\\website",
+  "passed": true,
+  "gateVerdict": "ALL_GATES_PASSED",
+  "defectSummary": {
+    "totalDefects": 0,
+    "p0Count": 0,
+    "p1Count": 0,
+    "p2Count": 0,
+    "p3Count": 0
+  },
+  "defects": [],
+  "wcagContrast": {
+    "passed": true,
+    "extractedTokens": {
+      "bgCanvas": "#090a0f",
+      "bgSurface": "#11131c",
+      "bgCard": "rgba(17, 19, 28, 0.75)",
+      "bgElevated": "#171a26",
+      "textPrimary": "#f8fafc",
+      "textSecondary": "#94a3b8",
+      "textMuted": "#64748b",
+      "colorPrimary": "#00f0ff",
+      "colorSecondary": "#7000ff",
+      "borderSubtle": "#222738",
+      "borderHighlight": "rgba(0, 240, 255, 0.55)"
+    },
+    "results": [
+      {
+        "name": "Primary Text on Canvas",
+        "fg": "#f8fafc",
+        "bg": "#090a0f",
+        "ratio": 18.9,
+        "formattedRatio": "18.9:1",
+        "passAA": true,
+        "passAAA": true,
+        "minAA": 4.5,
+        "minAAA": 7
+      },
+      {
+        "name": "Secondary Text on Surface",
+        "fg": "#94a3b8",
+        "bg": "#11131c",
+        "ratio": 7.22,
+        "formattedRatio": "7.22:1",
+        "passAA": true,
+        "passAAA": true,
+        "minAA": 4.5,
+        "minAAA": 7
+      },
+      {
+        "name": "Accent Primary on Black",
+        "fg": "#00f0ff",
+        "bg": "#000000",
+        "ratio": 14.91,
+        "formattedRatio": "14.91:1",
+        "passAA": true,
+        "passAAA": true,
+        "minAA": 3,
+        "minAAA": 4.5
+      },
+      {
+        "name": "Black Text on Accent Primary Button",
+        "fg": "#000000",
+        "bg": "#00f0ff",
+        "ratio": 14.91,
+        "formattedRatio": "14.91:1",
+        "passAA": true,
+        "passAAA": true,
+        "minAA": 4.5,
+        "minAAA": 7
+      },
+      {
+        "name": "Muted Text on Canvas",
+        "fg": "#64748b",
+        "bg": "#090a0f",
+        "ratio": 4.16,
+        "formattedRatio": "4.16:1",
+        "passAA": true,
+        "passAAA": false,
+        "minAA": 3,
+        "minAAA": 4.5
+      },
+      {
+        "name": "Focus Ring Highlight on Canvas",
+        "fg": "rgba(0, 240, 255, 0.55)",
+        "bg": "#090a0f",
+        "ratio": 4.71,
+        "formattedRatio": "4.71:1",
+        "passAA": true,
+        "passAAA": false,
+        "minAA": 3,
+        "minAAA": 3
+      }
+    ],
+    "failures": []
+  },
+  "placeholderAudit": {
+    "passed": true,
+    "scannedFilesCount": 22,
+    "findings": []
+  },
+  "importResolution": {
+    "passed": true,
+    "brokenImports": []
+  },
+  "syntaxAudit": {
+    "passed": true,
+    "scannedFilesCount": 22,
+    "issues": []
+  },
+  "responsiveAudit": {
+    "passed": true,
+    "viewportSafety": {
+      "hasDynamicViewport": true,
+      "hasRigid100vh": false
+    },
+    "hoverGating": {
+      "customCursorFound": true,
+      "customCursorGated": true
+    },
+    "zeroHorizontalOverflow": true,
+    "violations": []
+  },
+  "accessibilityAudit": {
+    "passed": true,
+    "h1Count": 1,
+    "headingTree": [
+      {
+        "tag": "h2",
+        "level": 2,
+        "text": "Engineered for Unbounded Precision.",
+        "file": "src\\components\\FeatureBento.tsx"
+      },
+      {
+        "tag": "h3",
+        "level": 3,
+        "text": "{card.title}",
+        "file": "src\\components\\FeatureBento.tsx"
+      },
+      {
+        "tag": "h2",
+        "level": 2,
+        "text": "Ready to construct the extraordinary?",
+        "file": "src\\components\\FooterConversion.tsx"
+      },
+      {
+        "tag": "h1",
+        "level": 1,
+        "text": "Forging Impossible \n          Digital Realities.",
+        "file": "src\\components\\HeroStage.tsx"
+      },
+      {
+        "tag": "h2",
+        "level": 2,
+        "text": "Speed, Precision, and Impact Quantified.",
+        "file": "src\\components\\InteractiveShowcase.tsx"
+      },
+      {
+        "tag": "h3",
+        "level": 3,
+        "text": "Control Parameters",
+        "file": "src\\components\\InteractiveShowcase.tsx"
+      },
+      {
+        "tag": "h3",
+        "level": 3,
+        "text": "Curated Production Gallery",
+        "file": "src\\components\\InteractiveShowcase.tsx"
+      }
+    ],
+    "landmarks": {
+      "hasHeaderOrNav": true,
+      "hasMain": true,
+      "hasFooter": true,
+      "hasSkipLink": true
+    },
+    "violations": []
+  },
+  "errors": [],
+  "warnings": []
+}

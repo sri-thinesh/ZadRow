@@ -1,0 +1,38 @@
+{
+  "name": "zadrow-agency",
+  "version": "2.0.0",
+  "description": "ZadRow Multi-Agent Digital Studio - High-Performance Runtime Orchestration Engine & CLI",
+  "type": "module",
+  "main": "src/index.js",
+  "bin": {
+    "zadrow": "src/cli.js",
+    "mas-agency": "src/cli.js",
+    "aura": "src/cli.js"
+  },
+  "scripts": {
+    "start": "node src/cli.js",
+    "build-site": "node src/cli.js --build-only",
+    "validate": "node src/cli.js --validate-only",
+    "test": "node test/engine_test.js && node test/skill_loader_test.js && node test/qa_verifier_test.js",
+    "test:skills": "node test/skill_loader_test.js",
+    "test:qa": "node test/qa_verifier_test.js",
+    "dev": "node src/cli.js",
+    "cli": "node src/cli.js"
+  },
+  "keywords": [
+    "multi-agent-system",
+    "orchestration-engine",
+    "dag-executor",
+    "nextjs",
+    "awwwards",
+    "code-generation"
+  ],
+  "author": "ZadRow Multi-Agent Systems Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "playwright": "^1.64.1"
+  }
+}

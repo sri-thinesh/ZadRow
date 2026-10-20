@@ -1,0 +1,11 @@
+{
+  "project_id": "proj_archiv_1792238842827",
+  "lead_agent": "A50 Frontend Engineering Lead",
+  "delivery_plan": {
+    "scaffolding": "A51 App Shell Engineer",
+    "page_assembly": "A52 Page Engineer Lead",
+    "components": "A53 Component Engineering Lead",
+    "visual_fx": "A54 Visual Experience Engineer"
+  },
+  "status": "READY_FOR_SYNTHESIS"
+}

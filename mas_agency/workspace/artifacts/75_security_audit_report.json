@@ -1,0 +1,10 @@
+{
+  "project_id": "proj_archiv_1792238842827",
+  "vulnerabilities_found": 0,
+  "headers": {
+    "xFrameOptions": "DENY",
+    "xContentTypeOptions": "nosniff",
+    "strictTransportSecurity": "max-age=63072000"
+  },
+  "status": "PASSED"
+}

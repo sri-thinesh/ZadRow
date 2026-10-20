@@ -1,0 +1,116 @@
+{
+  "project_id": "proj_studio_synthetix_1792430490795",
+  "tokens": {
+    "colors": {
+      "background": "#090a0f",
+      "surface": "#11131c",
+      "surfaceElevated": "#171a26",
+      "borderSubtle": "#222738",
+      "borderHighlight": "#00f0ff",
+      "textPrimary": "#f8fafc",
+      "textSecondary": "#94a3b8",
+      "textMuted": "#64748b",
+      "primary": "#00f0ff",
+      "primaryGlow": "rgba(0, 240, 255, 0.4)",
+      "secondary": "#7000ff",
+      "accent": "#10b981"
+    },
+    "spacing": {
+      "xs": "0.25rem",
+      "sm": "0.5rem",
+      "md": "1.0rem",
+      "lg": "1.5rem",
+      "xl": "2.5rem",
+      "2xl": "4.0rem",
+      "3xl": "6.0rem"
+    },
+    "typography": {
+      "fontFamily": {
+        "display": "Syne, Space Grotesk, sans-serif",
+        "body": "Inter, system-ui, sans-serif",
+        "mono": "JetBrains Mono, monospace"
+      },
+      "fontSize": {
+        "h1": "clamp(2.5rem, 6vw, 4.5rem)",
+        "h2": "clamp(2.0rem, 4vw, 3.25rem)",
+        "body": "1rem",
+        "small": "0.875rem"
+      }
+    },
+    "radii": {
+      "sm": "0.25rem",
+      "md": "0.5rem",
+      "lg": "0.75rem",
+      "full": "9999px"
+    },
+    "shadows": {
+      "subtle": "0 2px 8px rgba(0,0,0,0.4)",
+      "elevated": "0 8px 24px rgba(0,0,0,0.6)"
+    },
+    "z_index": {
+      "base": 0,
+      "dropdown": 10,
+      "sticky": 20,
+      "modal": 50
+    }
+  },
+  "tailwind_theme_extension": {
+    "colors": {
+      "background": "var(--bg-canvas, #090a0f)",
+      "surface": "var(--bg-surface, #11131c)",
+      "primary": "var(--color-primary, #00f0ff)",
+      "textPrimary": "var(--text-primary, #f8fafc)",
+      "textSecondary": "var(--text-secondary, #94a3b8)",
+      "border": "var(--border-subtle, #222738)"
+    }
+  },
+  "focus_ring_spec": {
+    "color": "var(--color-primary, #00f0ff)",
+    "width": "2px",
+    "offset": "2px"
+  },
+  "component_styles": [
+    {
+      "component_name": "Navigation",
+      "visual_identity_expression": "Precision keyline header with understated text links and high-contrast active indicator.",
+      "base_classes": "w-full px-6 py-4 flex items-center justify-between border-b border-white/10 bg-black/60 backdrop-blur-md",
+      "variants": {
+        "scrolled": "shadow-lg bg-black/80",
+        "transparent": "bg-transparent border-transparent"
+      },
+      "states": {
+        "default": "text-neutral-400",
+        "hover": "text-cyan-400 transition-colors duration-150",
+        "focus_visible": "outline-none ring-2 ring-cyan-400 ring-offset-2 ring-offset-black",
+        "active": "text-white font-medium",
+        "disabled": "text-neutral-700 cursor-not-allowed",
+        "touch": "active:bg-white/5"
+      },
+      "contrast_verification": {
+        "text_to_bg_ratio": 14.2,
+        "passed_wcag_aa": true
+      }
+    },
+    {
+      "component_name": "Button",
+      "visual_identity_expression": "Razor-sharp interactive control with 1px border and instantaneous tactile spring response.",
+      "base_classes": "px-6 py-3 rounded-md font-medium inline-flex items-center justify-center transition-all min-h-[44px]",
+      "variants": {
+        "primary": "bg-cyan-400 text-black hover:bg-cyan-300",
+        "secondary": "border border-white/20 text-white hover:border-cyan-400"
+      },
+      "states": {
+        "default": "opacity-100",
+        "hover": "scale-[1.02] shadow-md",
+        "focus_visible": "outline-none ring-2 ring-cyan-400 ring-offset-2 ring-offset-black",
+        "active": "scale-[0.98]",
+        "disabled": "opacity-40 cursor-not-allowed",
+        "touch": "active:scale-95"
+      },
+      "contrast_verification": {
+        "text_to_bg_ratio": 13.96,
+        "passed_wcag_aa": true
+      }
+    }
+  ]
+}

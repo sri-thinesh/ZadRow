@@ -1,0 +1,19 @@
+{
+  "agentId": "SUB_MicroInteractions",
+  "components": [
+    {
+      "name": "MagneticCursor",
+      "file": "src/components/MagneticCursor.tsx"
+    },
+    {
+      "name": "SoundEffects",
+      "file": "src/components/SoundEffects.tsx"
+    }
+  ],
+  "audioSynthesizer": "Web Audio API oscillator (zero mp3 assets needed)",
+  "frequencies": {
+    "click": 800,
+    "hover": 440,
+    "success": 1200
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "framework": "Next.js 15 (App Router)",
+  "react": "React 19",
+  "tailwind": "Tailwind CSS 3.4"
+}

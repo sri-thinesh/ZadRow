@@ -1,0 +1,10 @@
+{
+  "agentId": "SUB_ProceduralAssets",
+  "componentName": "ProceduralGraphics",
+  "file": "src/components/ProceduralGraphics.tsx",
+  "assets": [
+    "Vector grid matrix background",
+    "Generative circular radar scanner SVG",
+    "Procedural corner brackets and futuristic framing"
+  ]
+}

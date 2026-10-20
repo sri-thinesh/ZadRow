@@ -1,0 +1,731 @@
+{
+  "version": "2.0.0",
+  "description": "ZadRow Multi-Agent System Master Agent Registry",
+  "total_agents": 42,
+  "departments": [
+    "executive",
+    "product_docs",
+    "creative_research",
+    "experience_design",
+    "technical_architecture",
+    "frontend_engineering",
+    "backend_engineering",
+    "quality_verification",
+    "release_remediation"
+  ],
+  "agents": {
+    "A00": {
+      "id": "A00",
+      "slug": "ChiefOrchestrator",
+      "title": "Chief Orchestrator & Website Director",
+      "department": "Executive Command",
+      "dept_dir": "executive",
+      "tier": "Tier 0 \u2014 Executive Command",
+      "supervisor": "Human Executive / Client Sponsor",
+      "subagents_count": 11,
+      "skills": [
+        "dispatching-parallel-agents",
+        "subagent-driven-development",
+        "writing-plans",
+        "writing-guidelines"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/00_master_orchestration_manifest.json",
+      "file_path": "mas_agency/agents/executive/A00_ChiefOrchestrator.md"
+    },
+    "A01": {
+      "id": "A01",
+      "slug": "RequirementsScopeDirector",
+      "title": "Requirements & Scope Director",
+      "department": "Executive Command",
+      "dept_dir": "executive",
+      "tier": "Tier 0 \u2014 Strategic Scope & Ingestion",
+      "supervisor": "A00 Chief Orchestrator",
+      "subagents_count": 3,
+      "skills": [
+        "brainstorming",
+        "writing-guidelines",
+        "writing-plans"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/01_scope_charter.json",
+      "file_path": "mas_agency/agents/executive/A01_RequirementsScopeDirector.md"
+    },
+    "A02": {
+      "id": "A02",
+      "slug": "TechnicalProgramManager",
+      "title": "Technical Program Manager",
+      "department": "Executive Command",
+      "dept_dir": "executive",
+      "tier": "Tier 0 \u2014 Program Scheduling & Execution Flow",
+      "supervisor": "A00 Chief Orchestrator",
+      "subagents_count": 3,
+      "skills": [
+        "writing-plans",
+        "dispatching-parallel-agents",
+        "verification-before-completion"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/02_program_execution_dag.json",
+      "file_path": "mas_agency/agents/executive/A02_TechnicalProgramManager.md"
+    },
+    "A03": {
+      "id": "A03",
+      "slug": "ArchitectureQualityArbiter",
+      "title": "Architecture & Quality Arbiter",
+      "department": "Executive Command",
+      "dept_dir": "executive",
+      "tier": "Tier 0 \u2014 Quality Governance & Cross-Domain Arbitration",
+      "supervisor": "A00 Chief Orchestrator",
+      "subagents_count": 3,
+      "skills": [
+        "requesting-code-review",
+        "verification-before-completion",
+        "systematic-debugging"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/03_quality_arbitration_verdict.json",
+      "file_path": "mas_agency/agents/executive/A03_ArchitectureQualityArbiter.md"
+    },
+    "A10": {
+      "id": "A10",
+      "slug": "ProductDocsDirector",
+      "title": "Product & Documentation Director",
+      "department": "Product & Documentation",
+      "dept_dir": "product_docs",
+      "tier": "Tier 1 \u2014 Strategy & Documentation Leadership",
+      "supervisor": "A00 Chief Orchestrator",
+      "subagents_count": 4,
+      "skills": [
+        "doc-coauthoring",
+        "writing-guidelines",
+        "writing-plans"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/10_product_documentation_plan.json",
+      "file_path": "mas_agency/agents/product_docs/A10_ProductDocsDirector.md"
+    },
+    "A11": {
+      "id": "A11",
+      "slug": "ProductAnalyst",
+      "title": "Product Analyst",
+      "department": "Product & Documentation",
+      "dept_dir": "product_docs",
+      "tier": "Tier 1 \u2014 Market Research & Scope Detailing",
+      "supervisor": "A10 Product & Documentation Director",
+      "subagents_count": 3,
+      "skills": [
+        "brainstorming",
+        "writing-guidelines",
+        "writing-plans"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/11_product_analysis.json",
+      "file_path": "mas_agency/agents/product_docs/A11_ProductAnalyst.md"
+    },
+    "A12": {
+      "id": "A12",
+      "slug": "InfoArchitect",
+      "title": "Information Architect",
+      "department": "Product & Documentation",
+      "dept_dir": "product_docs",
+      "tier": "Tier 1 \u2014 Structural Taxonomy & Routing",
+      "supervisor": "A10 Product & Documentation Director",
+      "subagents_count": 3,
+      "skills": [
+        "ui-ux-pro-max",
+        "web-design-guidelines",
+        "doc-coauthoring"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/12_information_architecture.json",
+      "file_path": "mas_agency/agents/product_docs/A12_InfoArchitect.md"
+    },
+    "A13": {
+      "id": "A13",
+      "slug": "MasterSpecArchitect",
+      "title": "Master Specification Architect",
+      "department": "Product & Documentation",
+      "dept_dir": "product_docs",
+      "tier": "Tier 1 \u2014 Technical Specification Authoring",
+      "supervisor": "A10 Product & Documentation Director",
+      "subagents_count": 4,
+      "skills": [
+        "doc-coauthoring",
+        "writing-plans",
+        "writing-guidelines",
+        "find-skills"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/13_master_specification.json",
+      "file_path": "mas_agency/agents/product_docs/A13_MasterSpecArchitect.md"
+    },
+    "A14": {
+      "id": "A14",
+      "slug": "DocVerificationLead",
+      "title": "Documentation Verification Lead",
+      "department": "Product & Documentation",
+      "dept_dir": "product_docs",
+      "tier": "Tier 1 \u2014 Documentation QA & Consistency Audit",
+      "supervisor": "A10 Product & Documentation Director",
+      "subagents_count": 3,
+      "skills": [
+        "verification-before-completion",
+        "doc-coauthoring",
+        "systematic-debugging"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/14_doc_verification_matrix.json",
+      "file_path": "mas_agency/agents/product_docs/A14_DocVerificationLead.md"
+    },
+    "A20": {
+      "id": "A20",
+      "slug": "CreativeResearchDirector",
+      "title": "Creative & Research Director",
+      "department": "Creative & Research",
+      "dept_dir": "creative_research",
+      "tier": "Tier 2 \u2014 Creative & Visual Direction",
+      "supervisor": "A00 Chief Orchestrator",
+      "subagents_count": 3,
+      "skills": [
+        "brand",
+        "design",
+        "algorithmic-art",
+        "brainstorming"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/20_creative_direction_charter.json",
+      "file_path": "mas_agency/agents/creative_research/A20_CreativeResearchDirector.md"
+    },
+    "A21": {
+      "id": "A21",
+      "slug": "DesignResearchLead",
+      "title": "Design Research Lead",
+      "department": "Creative & Research",
+      "dept_dir": "creative_research",
+      "tier": "Tier 2 \u2014 Design Intelligence & Benchmarking",
+      "supervisor": "A20 Creative & Research Director",
+      "subagents_count": 3,
+      "skills": [
+        "find-skills",
+        "web-design-guidelines",
+        "brainstorming"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/21_design_research_benchmarks.json",
+      "file_path": "mas_agency/agents/creative_research/A21_DesignResearchLead.md"
+    },
+    "A22": {
+      "id": "A22",
+      "slug": "CreativeArtDirector",
+      "title": "Creative Art Director",
+      "department": "Creative & Research",
+      "dept_dir": "creative_research",
+      "tier": "Tier 2 \u2014 Visual Identity & Asset Direction",
+      "supervisor": "A20 Creative & Research Director",
+      "subagents_count": 3,
+      "skills": [
+        "brand",
+        "banner-design",
+        "algorithmic-art",
+        "ui-styling"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/22_art_direction_manifest.json",
+      "file_path": "mas_agency/agents/creative_research/A22_CreativeArtDirector.md"
+    },
+    "A23": {
+      "id": "A23",
+      "slug": "InteractionMotionDirector",
+      "title": "Interaction & Motion Director",
+      "department": "Creative & Research",
+      "dept_dir": "creative_research",
+      "tier": "Tier 2 \u2014 Kinetic & Interaction Choreography",
+      "supervisor": "A20 Creative & Research Director",
+      "subagents_count": 3,
+      "skills": [
+        "awwwards-motion-choreography",
+        "kinetic-canvas-hero",
+        "vercel-react-view-transitions"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/23_motion_choreography_spec.json",
+      "file_path": "mas_agency/agents/creative_research/A23_InteractionMotionDirector.md"
+    },
+    "A30": {
+      "id": "A30",
+      "slug": "ExperienceDesignDirector",
+      "title": "Experience Design Director",
+      "department": "Experience Design",
+      "dept_dir": "experience_design",
+      "tier": "Tier 2 \u2014 Experience & Design Systems Leadership",
+      "supervisor": "A00 Chief Orchestrator",
+      "subagents_count": 3,
+      "skills": [
+        "design-system",
+        "ui-ux-pro-max",
+        "web-design-guidelines"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/30_experience_design_strategy.json",
+      "file_path": "mas_agency/agents/experience_design/A30_ExperienceDesignDirector.md"
+    },
+    "A31": {
+      "id": "A31",
+      "slug": "UXDesigner",
+      "title": "UX Designer",
+      "department": "Experience Design",
+      "dept_dir": "experience_design",
+      "tier": "Tier 2 \u2014 User Experience & Wireframe Architecture",
+      "supervisor": "A30 Experience Design Director",
+      "subagents_count": 3,
+      "skills": [
+        "ui-ux-pro-max",
+        "web-design-guidelines",
+        "responsive-touch-gatekeeper"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/31_wireframe_ux_flow.json",
+      "file_path": "mas_agency/agents/experience_design/A31_UXDesigner.md"
+    },
+    "A32": {
+      "id": "A32",
+      "slug": "UIDesigner",
+      "title": "UI Designer",
+      "department": "Experience Design",
+      "dept_dir": "experience_design",
+      "tier": "Tier 2 \u2014 Design System & UI Component Specification",
+      "supervisor": "A30 Experience Design Director",
+      "subagents_count": 3,
+      "skills": [
+        "design-tokens-specifier",
+        "design-system",
+        "ui-styling",
+        "ui-ux-pro-max"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/32_design_tokens_and_components.json",
+      "file_path": "mas_agency/agents/experience_design/A32_UIDesigner.md"
+    },
+    "A33": {
+      "id": "A33",
+      "slug": "ContentConversionStrategist",
+      "title": "Content & Conversion Strategist",
+      "department": "Experience Design",
+      "dept_dir": "experience_design",
+      "tier": "Tier 2 \u2014 High-Impact Copywriting & Conversion Funnels",
+      "supervisor": "A30 Experience Design Director",
+      "subagents_count": 3,
+      "skills": [
+        "writing-guidelines",
+        "slides",
+        "brand"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/33_copywriting_and_conversion.json",
+      "file_path": "mas_agency/agents/experience_design/A33_ContentConversionStrategist.md"
+    },
+    "A40": {
+      "id": "A40",
+      "slug": "ChiefTechArchitect",
+      "title": "Chief Technical Architect",
+      "department": "Technical Architecture",
+      "dept_dir": "technical_architecture",
+      "tier": "Tier 2 \u2014 System Architecture & Engineering Governance",
+      "supervisor": "A00 Chief Orchestrator",
+      "subagents_count": 4,
+      "skills": [
+        "vercel-react-best-practices",
+        "vercel-composition-patterns",
+        "writing-plans"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/40_master_tech_architecture.json",
+      "file_path": "mas_agency/agents/technical_architecture/A40_ChiefTechArchitect.md"
+    },
+    "A41": {
+      "id": "A41",
+      "slug": "FrontendArchitect",
+      "title": "Frontend Architect",
+      "department": "Technical Architecture",
+      "dept_dir": "technical_architecture",
+      "tier": "Tier 2 \u2014 Frontend Component Architecture & Performance",
+      "supervisor": "A40 Chief Technical Architect",
+      "subagents_count": 3,
+      "skills": [
+        "frontend-design",
+        "vercel-react-best-practices",
+        "vercel-composition-patterns"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/41_frontend_architecture.json",
+      "file_path": "mas_agency/agents/technical_architecture/A41_FrontendArchitect.md"
+    },
+    "A42": {
+      "id": "A42",
+      "slug": "BackendArchitect",
+      "title": "Backend Architect",
+      "department": "Technical Architecture",
+      "dept_dir": "technical_architecture",
+      "tier": "Tier 2 \u2014 API & Data Persistence Architecture",
+      "supervisor": "A40 Chief Technical Architect",
+      "subagents_count": 3,
+      "skills": [
+        "mcp-builder",
+        "writing-plans",
+        "systematic-debugging"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/42_backend_architecture.json",
+      "file_path": "mas_agency/agents/technical_architecture/A42_BackendArchitect.md"
+    },
+    "A43": {
+      "id": "A43",
+      "slug": "PlatformBuildArchitect",
+      "title": "Platform & Build Architect",
+      "department": "Technical Architecture",
+      "dept_dir": "technical_architecture",
+      "tier": "Tier 2 \u2014 Toolchain, Package & Build Architecture",
+      "supervisor": "A40 Chief Technical Architect",
+      "subagents_count": 3,
+      "skills": [
+        "subagent-driven-development",
+        "test-driven-development"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/43_build_platform_spec.json",
+      "file_path": "mas_agency/agents/technical_architecture/A43_PlatformBuildArchitect.md"
+    },
+    "A44": {
+      "id": "A44",
+      "slug": "TechRiskReviewer",
+      "title": "Technical Risk Reviewer",
+      "department": "Technical Architecture",
+      "dept_dir": "technical_architecture",
+      "tier": "Tier 2 \u2014 Architecture Risk & Bottleneck Analysis",
+      "supervisor": "A40 Chief Technical Architect",
+      "subagents_count": 2,
+      "skills": [
+        "requesting-code-review",
+        "systematic-debugging",
+        "verification-before-completion"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/44_tech_risk_assessment.json",
+      "file_path": "mas_agency/agents/technical_architecture/A44_TechRiskReviewer.md"
+    },
+    "A50": {
+      "id": "A50",
+      "slug": "FrontendLead",
+      "title": "Frontend Engineering Lead",
+      "department": "Frontend Engineering",
+      "dept_dir": "frontend_engineering",
+      "tier": "Tier 3 \u2014 Frontend Engineering Leadership",
+      "supervisor": "A00 Chief Orchestrator",
+      "subagents_count": 4,
+      "skills": [
+        "subagent-driven-development",
+        "vercel-react-best-practices",
+        "frontend-design"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/50_frontend_delivery_manifest.json",
+      "file_path": "mas_agency/agents/frontend_engineering/A50_FrontendLead.md"
+    },
+    "A51": {
+      "id": "A51",
+      "slug": "AppShellEngineer",
+      "title": "App Shell Engineer",
+      "department": "Frontend Engineering",
+      "dept_dir": "frontend_engineering",
+      "tier": "Tier 3 \u2014 Core Application Shell & Layout Scaffolding",
+      "supervisor": "A50 Frontend Engineering Lead",
+      "subagents_count": 3,
+      "skills": [
+        "vercel-composition-patterns",
+        "vercel-react-view-transitions",
+        "ui-styling"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/51_app_shell_scaffold.json",
+      "file_path": "mas_agency/agents/frontend_engineering/A51_AppShellEngineer.md"
+    },
+    "A52": {
+      "id": "A52",
+      "slug": "PageEngineerLead",
+      "title": "Page Engineering Lead",
+      "department": "Frontend Engineering",
+      "dept_dir": "frontend_engineering",
+      "tier": "Tier 3 \u2014 Page Assembly & Section Engineering",
+      "supervisor": "A50 Frontend Engineering Lead",
+      "subagents_count": 3,
+      "skills": [
+        "frontend-design",
+        "ui-styling",
+        "vercel-react-best-practices"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/52_page_assemblies.json",
+      "file_path": "mas_agency/agents/frontend_engineering/A52_PageEngineerLead.md"
+    },
+    "A53": {
+      "id": "A53",
+      "slug": "ComponentLead",
+      "title": "Component Engineering Lead",
+      "department": "Frontend Engineering",
+      "dept_dir": "frontend_engineering",
+      "tier": "Tier 3 \u2014 Interactive UI Components & Widgets",
+      "supervisor": "A50 Frontend Engineering Lead",
+      "subagents_count": 3,
+      "skills": [
+        "design-system",
+        "vercel-react-best-practices",
+        "ui-styling"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/53_ui_component_library.json",
+      "file_path": "mas_agency/agents/frontend_engineering/A53_ComponentLead.md"
+    },
+    "A54": {
+      "id": "A54",
+      "slug": "VisualExperienceEngineer",
+      "title": "Visual Experience Engineer",
+      "department": "Frontend Engineering",
+      "dept_dir": "frontend_engineering",
+      "tier": "Tier 3 \u2014 Kinetic Canvas, Shaders & Sensory FX",
+      "supervisor": "A50 Frontend Engineering Lead",
+      "subagents_count": 3,
+      "skills": [
+        "kinetic-canvas-hero",
+        "awwwards-motion-choreography",
+        "algorithmic-art"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/54_visual_experience_assets.json",
+      "file_path": "mas_agency/agents/frontend_engineering/A54_VisualExperienceEngineer.md"
+    },
+    "A60": {
+      "id": "A60",
+      "slug": "BackendLead",
+      "title": "Backend Engineering Lead",
+      "department": "Backend Engineering",
+      "dept_dir": "backend_engineering",
+      "tier": "Tier 3 \u2014 Backend Engineering Leadership",
+      "supervisor": "A00 Chief Orchestrator",
+      "subagents_count": 3,
+      "skills": [
+        "subagent-driven-development",
+        "mcp-builder",
+        "test-driven-development"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/60_backend_delivery_manifest.json",
+      "file_path": "mas_agency/agents/backend_engineering/A60_BackendLead.md"
+    },
+    "A61": {
+      "id": "A61",
+      "slug": "ServerAppEngineer",
+      "title": "Server Application Engineer",
+      "department": "Backend Engineering",
+      "dept_dir": "backend_engineering",
+      "tier": "Tier 3 \u2014 Server Route & Business Logic Engineering",
+      "supervisor": "A60 Backend Engineering Lead",
+      "subagents_count": 2,
+      "skills": [
+        "test-driven-development",
+        "mcp-builder"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/61_server_endpoints.json",
+      "file_path": "mas_agency/agents/backend_engineering/A61_ServerAppEngineer.md"
+    },
+    "A62": {
+      "id": "A62",
+      "slug": "DataPersistenceEngineer",
+      "title": "Data Persistence Engineer",
+      "department": "Backend Engineering",
+      "dept_dir": "backend_engineering",
+      "tier": "Tier 3 \u2014 Database & Storage Engineering",
+      "supervisor": "A60 Backend Engineering Lead",
+      "subagents_count": 2,
+      "skills": [
+        "test-driven-development",
+        "systematic-debugging"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/62_data_persistence_spec.json",
+      "file_path": "mas_agency/agents/backend_engineering/A62_DataPersistenceEngineer.md"
+    },
+    "A63": {
+      "id": "A63",
+      "slug": "IntegrationServicesEngineer",
+      "title": "Integration Services Engineer",
+      "department": "Backend Engineering",
+      "dept_dir": "backend_engineering",
+      "tier": "Tier 3 \u2014 Third-Party Integrations & External Protocols",
+      "supervisor": "A60 Backend Engineering Lead",
+      "subagents_count": 2,
+      "skills": [
+        "mcp-builder",
+        "systematic-debugging"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/63_integration_services.json",
+      "file_path": "mas_agency/agents/backend_engineering/A63_IntegrationServicesEngineer.md"
+    },
+    "A70": {
+      "id": "A70",
+      "slug": "QualityVerificationDirector",
+      "title": "Independent QA & Reliability Director",
+      "department": "Quality Verification",
+      "dept_dir": "quality_verification",
+      "tier": "Tier 4 \u2014 Independent Quality Assurance Leadership",
+      "supervisor": "A00 Chief Orchestrator (Independent Reporting to A03 Arbiter)",
+      "subagents_count": 6,
+      "skills": [
+        "verification-before-completion",
+        "webapp-testing",
+        "test-driven-development"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/70_qa_comprehensive_verdict.json",
+      "file_path": "mas_agency/agents/quality_verification/A70_QualityVerificationDirector.md"
+    },
+    "A71": {
+      "id": "A71",
+      "slug": "FunctionalTestLead",
+      "title": "Functional Test Lead",
+      "department": "Quality Verification",
+      "dept_dir": "quality_verification",
+      "tier": "Tier 4 \u2014 Functional Verification & End-to-End Testing",
+      "supervisor": "A70 Quality Verification Director",
+      "subagents_count": 3,
+      "skills": [
+        "webapp-testing",
+        "test-driven-development",
+        "verification-before-completion"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/71_functional_test_report.json",
+      "file_path": "mas_agency/agents/quality_verification/A71_FunctionalTestLead.md"
+    },
+    "A72": {
+      "id": "A72",
+      "slug": "VisualResponsiveQA",
+      "title": "Visual & Responsive QA Specialist",
+      "department": "Quality Verification",
+      "dept_dir": "quality_verification",
+      "tier": "Tier 4 \u2014 Visual Regression & Cross-Breakpoint Verification",
+      "supervisor": "A70 Quality Verification Director",
+      "subagents_count": 3,
+      "skills": [
+        "responsive-touch-gatekeeper",
+        "web-design-guidelines",
+        "verification-before-completion"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/72_visual_responsive_audit.json",
+      "file_path": "mas_agency/agents/quality_verification/A72_VisualResponsiveQA.md"
+    },
+    "A73": {
+      "id": "A73",
+      "slug": "AccessibilityAuditor",
+      "title": "Accessibility Auditor",
+      "department": "Quality Verification",
+      "dept_dir": "quality_verification",
+      "tier": "Tier 4 \u2014 Accessibility & WCAG 2.2 AAA Audit",
+      "supervisor": "A70 Quality Verification Director",
+      "subagents_count": 3,
+      "skills": [
+        "wcag-contrast-auditor",
+        "web-design-guidelines",
+        "verification-before-completion"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/73_accessibility_wcag_audit.json",
+      "file_path": "mas_agency/agents/quality_verification/A73_AccessibilityAuditor.md"
+    },
+    "A74": {
+      "id": "A74",
+      "slug": "PerformanceAuditor",
+      "title": "Performance Auditor",
+      "department": "Quality Verification",
+      "dept_dir": "quality_verification",
+      "tier": "Tier 4 \u2014 Core Web Vitals & Runtime Performance Profiling",
+      "supervisor": "A70 Quality Verification Director",
+      "subagents_count": 3,
+      "skills": [
+        "vercel-react-best-practices",
+        "verification-before-completion",
+        "systematic-debugging"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/74_performance_webvitals_audit.json",
+      "file_path": "mas_agency/agents/quality_verification/A74_PerformanceAuditor.md"
+    },
+    "A75": {
+      "id": "A75",
+      "slug": "SecurityAuditor",
+      "title": "Security Auditor",
+      "department": "Quality Verification",
+      "dept_dir": "quality_verification",
+      "tier": "Tier 4 \u2014 Security & Vulnerability Auditing",
+      "supervisor": "A70 Quality Verification Director",
+      "subagents_count": 3,
+      "skills": [
+        "systematic-debugging",
+        "verification-before-completion",
+        "requesting-code-review"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/75_security_audit_report.json",
+      "file_path": "mas_agency/agents/quality_verification/A75_SecurityAuditor.md"
+    },
+    "A76": {
+      "id": "A76",
+      "slug": "SEOAuditor",
+      "title": "SEO & Social Graph Auditor",
+      "department": "Quality Verification",
+      "dept_dir": "quality_verification",
+      "tier": "Tier 4 \u2014 SEO, Structured Data & Social Graph Verification",
+      "supervisor": "A70 Quality Verification Director",
+      "subagents_count": 3,
+      "skills": [
+        "web-design-guidelines",
+        "writing-guidelines",
+        "verification-before-completion"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/76_seo_social_graph_audit.json",
+      "file_path": "mas_agency/agents/quality_verification/A76_SEOAuditor.md"
+    },
+    "A80": {
+      "id": "A80",
+      "slug": "ReleaseRemediationDirector",
+      "title": "Release & Remediation Director",
+      "department": "Release & Remediation",
+      "dept_dir": "release_remediation",
+      "tier": "Tier 5 \u2014 Remediation & Release Governance",
+      "supervisor": "A00 Chief Orchestrator",
+      "subagents_count": 3,
+      "skills": [
+        "systematic-debugging",
+        "writing-plans",
+        "verification-before-completion"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/80_remediation_release_manifest.json",
+      "file_path": "mas_agency/agents/release_remediation/A80_ReleaseRemediationDirector.md"
+    },
+    "A81": {
+      "id": "A81",
+      "slug": "DefectTriageSpecialist",
+      "title": "Defect Triage Specialist",
+      "department": "Release & Remediation",
+      "dept_dir": "release_remediation",
+      "tier": "Tier 5 \u2014 Defect Analysis & Priority Classification",
+      "supervisor": "A80 Release & Remediation Director",
+      "subagents_count": 2,
+      "skills": [
+        "systematic-debugging",
+        "requesting-code-review"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/81_defect_triage_matrix.json",
+      "file_path": "mas_agency/agents/release_remediation/A81_DefectTriageSpecialist.md"
+    },
+    "A82": {
+      "id": "A82",
+      "slug": "RemediationCoordinator",
+      "title": "Remediation Coordinator",
+      "department": "Release & Remediation",
+      "dept_dir": "release_remediation",
+      "tier": "Tier 5 \u2014 Patch Dispatch & Regression Verification",
+      "supervisor": "A80 Release & Remediation Director",
+      "subagents_count": 2,
+      "skills": [
+        "subagent-driven-development",
+        "systematic-debugging",
+        "verification-before-completion"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/82_remediation_patch_log.json",
+      "file_path": "mas_agency/agents/release_remediation/A82_RemediationCoordinator.md"
+    },
+    "A83": {
+      "id": "A83",
+      "slug": "ReleaseReadinessAuditor",
+      "title": "Release Readiness Auditor",
+      "department": "Release & Remediation",
+      "dept_dir": "release_remediation",
+      "tier": "Tier 5 \u2014 Final Packaging, Build Verification & Release Sign-Off",
+      "supervisor": "A80 Release & Remediation Director",
+      "subagents_count": 3,
+      "skills": [
+        "verification-before-completion",
+        "writing-plans"
+      ],
+      "primary_deliverable": "mas_agency/workspace/artifacts/83_production_release_package.json",
+      "file_path": "mas_agency/agents/release_remediation/A83_ReleaseReadinessAuditor.md"
+    }
+  }
+}

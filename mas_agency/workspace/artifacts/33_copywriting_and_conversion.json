@@ -1,0 +1,89 @@
+{
+  "project_id": "proj_studio_synthetix_1792430490795",
+  "brand_voice_profile": {
+    "archetype": "Creator / Sage",
+    "tone_descriptors": [
+      "Disciplined",
+      "Authoritative",
+      "Authentic",
+      "Craft-Oriented"
+    ],
+    "vocabulary_do": [
+      "precision",
+      "architecture",
+      "verified",
+      "rigor",
+      "craft"
+    ],
+    "vocabulary_dont": [
+      "synergy",
+      "revolutionize",
+      "best-in-class",
+      "game-changing"
+    ]
+  },
+  "factual_traceability_matrix": [
+    {
+      "claim_or_statement": "STUDIO SYNTHETIX is a modern digital practice focused on high-performance web systems.",
+      "brief_source_reference": "Project Brief - Identity & Vision",
+      "verification_status": "VERIFIED_FROM_BRIEF"
+    },
+    {
+      "claim_or_statement": "Focuses on responsive design, accessibility, and zero-compromise performance.",
+      "brief_source_reference": "Project Brief - Technical Constraints",
+      "verification_status": "VERIFIED_FROM_BRIEF"
+    }
+  ],
+  "page_copy": [
+    {
+      "route": "/",
+      "sections": [
+        {
+          "section_id": "hero",
+          "content": {
+            "headline": "STUDIO SYNTHETIX",
+            "subheadline": "Create luxury brand Studio Velox",
+            "primary_cta": "Explore Projects",
+            "secondary_cta": "Get in Touch"
+          }
+        },
+        {
+          "section_id": "work_showcase",
+          "content": {
+            "section_title": "Featured Works",
+            "section_intro": "A selection of systems built with rigorous attention to typography, motion, and performance."
+          }
+        },
+        {
+          "section_id": "contact_portal",
+          "content": {
+            "section_title": "Start a Conversation",
+            "email_label": "Direct Inquiry",
+            "email_address": "hello@studiosynthetix.com"
+          }
+        }
+      ]
+    }
+  ],
+  "global_microcopy": {
+    "nav_links": [
+      {
+        "label": "Work",
+        "href": "#showcase"
+      },
+      {
+        "label": "About",
+        "href": "#about"
+      },
+      {
+        "label": "Contact",
+        "href": "#contact"
+      }
+    ],
+    "contact_actions": {
+      "cta_label": "Connect",
+      "email_action": "Send Message"
+    },
+    "footer_rights": "© 2026 STUDIO SYNTHETIX. All rights reserved."
+  }
+}

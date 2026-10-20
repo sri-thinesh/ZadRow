@@ -1,0 +1,11 @@
+{
+  "project_id": "proj_archiv_1792238842827",
+  "status": "STANDBY_STATIC_ONLY",
+  "certification": "Static presentation / portfolio brief requires zero backend persistence or server runtime.",
+  "api_endpoints": [],
+  "data_models": [],
+  "security_measures": [
+    "Static CSP",
+    "Subresource Integrity"
+  ]
+}

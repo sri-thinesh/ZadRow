@@ -1,0 +1,10 @@
+{
+  "agentId": "A54",
+  "project_id": "proj_archiv_1792238842827",
+  "canvas_shaders": [
+    "ProceduralParticleMesh",
+    "MagneticCursorPhysics"
+  ],
+  "audio_synthesizer": "WebAudioContext Click & Hum Synthesizer",
+  "status": "SYNTHESIZED"
+}

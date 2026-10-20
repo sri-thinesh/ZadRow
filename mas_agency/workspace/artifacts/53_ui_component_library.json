@@ -1,0 +1,12 @@
+{
+  "agentId": "A53",
+  "project_id": "proj_archiv_1792238842827",
+  "components": [
+    "src/components/Navigation.tsx",
+    "src/components/HeroStage.tsx",
+    "src/components/FeatureBento.tsx",
+    "src/components/InteractiveShowcase.tsx",
+    "src/components/FooterConversion.tsx"
+  ],
+  "status": "SYNTHESIZED"
+}

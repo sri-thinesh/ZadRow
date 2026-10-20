@@ -1,0 +1,22 @@
+{
+  "name": "multiagent-system-2-0",
+  "displayName": "ZadRow Autonomous Digital Studio (MAS 2.0)",
+  "version": "2.0.0",
+  "description": "ZadRow: Autonomous multi-agent digital product studio for award-winning production websites. Coordinates 42 specialized AI agents across 9 departments with strict contracts, rigorous QA, and skill integration.",
+  "author": {
+    "name": "ZadRow Multi-Agent Systems"
+  },
+  "keywords": [
+    "zadrow",
+    "multi-agent",
+    "awwwards",
+    "digital-agency",
+    "autonomous-web",
+    "ui-ux-pro-max",
+    "frontend-architecture",
+    "full-stack",
+    "quality-assurance",
+    "gsap-motion",
+    "design-tokens"
+  ]
+}

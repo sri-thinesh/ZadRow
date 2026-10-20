@@ -1,0 +1,22 @@
+{
+  "project_id": "proj_archiv_1792238842827",
+  "release_name": "ARCHIV Production Release",
+  "package_version": "2.0.0",
+  "build_status": "BUILD_SUCCESS",
+  "deployment_instructions": {
+    "local_run_commands": [
+      "npm install",
+      "npm run dev"
+    ],
+    "cloud_deployment_options": [
+      "Vercel: `vercel deploy --prod`",
+      "Docker: `docker build -t app . && docker run -p 3000:3000 app`",
+      "Node standalone server runtime"
+    ]
+  },
+  "release_signoff": {
+    "certified_by": "A83 Release Readiness Auditor",
+    "date": "2026-10-17T12:07:22.880Z",
+    "status": "CERTIFIED_FOR_GLOBAL_PRODUCTION"
+  }
+}

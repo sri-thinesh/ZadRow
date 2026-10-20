@@ -1,0 +1,31 @@
+{
+  "project_id": "proj_studio_synthetix_1792430490795",
+  "routes": [
+    {
+      "path": "/",
+      "component": "HomePage",
+      "description": "Single-page high-impact experience"
+    },
+    {
+      "path": "#features",
+      "component": "FeatureBento",
+      "description": "Deep-dive capability cards"
+    },
+    {
+      "path": "#showcase",
+      "component": "InteractiveShowcase",
+      "description": "Selected digital case studies"
+    },
+    {
+      "path": "#contact",
+      "component": "FooterConversion",
+      "description": "VIP consultation intake funnel"
+    }
+  ],
+  "global_navigation": [
+    "Capabilities",
+    "Showcase",
+    "Studio",
+    "Initiate Mandate"
+  ]
+}

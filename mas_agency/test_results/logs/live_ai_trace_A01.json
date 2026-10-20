@@ -1,0 +1,29 @@
+{
+  "test": "DIMENSION_2_REAL_AI_INVOCATION",
+  "binary_path": "C:\\Users\\ksrit\\Downloads\\cli_windows_x64.exe",
+  "agent_id": "A01",
+  "brief": "Design an artisanal bakery website for LE LEVAIN in Portland featuring sourdough subscriptions and daily baking schedule.",
+  "start_timestamp": "2026-10-17T13:51:37.968Z",
+  "end_timestamp": "2026-10-17T13:52:09.387Z",
+  "wall_clock_duration_seconds": 31.42,
+  "cli_duration_seconds": 17.4476753,
+  "cli_usage": {
+    "input_tokens": 3168,
+    "output_tokens": 1538,
+    "thinking_tokens": 0,
+    "cache_read_tokens": 24949,
+    "total_tokens": 4706
+  },
+  "exit_code": 0,
+  "model_generated_data": {
+    "briefAlignmentScore": 100,
+    "zeroPollutionCertified": true,
+    "valuePillarsCount": 4,
+    "mvpFeatureCount": 6,
+    "outOfScopeCount": 4,
+    "brandName": "LE LEVAIN in Portland"
+  },
+  "produced_artifacts": [
+    "01_scope_charter.json"
+  ]
+}

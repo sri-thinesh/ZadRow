@@ -1,0 +1,11 @@
+{
+  "agentId": "ENG_FooterConversion",
+  "componentName": "FooterConversion",
+  "file": "src/components/FooterConversion.tsx",
+  "features": [
+    "High-conversion VIP waitlist input with real-time validation",
+    "Contact transmission drawer with state feedback",
+    "Dynamic copyright year and studio credits",
+    "Aura MAS digital seal"
+  ]
+}

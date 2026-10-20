@@ -1,0 +1,123 @@
+{
+  "project_id": "proj_studio_synthetix_1792430490795",
+  "total_nodes": 42,
+  "total_waves": 7,
+  "execution_waves": [
+    {
+      "wave_index": 1,
+      "wave_name": "Strategic Intake & Scope Charter",
+      "agents": [
+        "A00",
+        "A01",
+        "A02",
+        "A11",
+        "A12",
+        "A21",
+        "A22",
+        "A40"
+      ],
+      "prerequisites": [],
+      "gatekeeper": "A00 Chief Orchestrator"
+    },
+    {
+      "wave_index": 2,
+      "wave_name": "Master Specification Authoring & Verification Gate",
+      "agents": [
+        "A13",
+        "A14"
+      ],
+      "prerequisites": [
+        "01_scope_charter.json"
+      ],
+      "gatekeeper": "A14 Documentation Verification Lead"
+    },
+    {
+      "wave_index": 3,
+      "wave_name": "Technical Architecture & Conditional Backend Planning",
+      "agents": [
+        "A40",
+        "A41",
+        "A42",
+        "A43",
+        "A50",
+        "A60"
+      ],
+      "prerequisites": [
+        "13_master_specification.json",
+        "14_doc_verification_matrix.json"
+      ],
+      "gatekeeper": "A40 Chief Technical Architect"
+    },
+    {
+      "wave_index": 4,
+      "wave_name": "Implementation Wave (Frontend & Backend Squads)",
+      "agents": [
+        "A51",
+        "A52",
+        "A53",
+        "A54",
+        "A61",
+        "A62",
+        "A63"
+      ],
+      "prerequisites": [
+        "41_frontend_architecture.json",
+        "50_frontend_delivery_manifest.json"
+      ],
+      "gatekeeper": "A50 Frontend Engineering Lead"
+    },
+    {
+      "wave_index": 5,
+      "wave_name": "Comprehensive Quality Verification",
+      "agents": [
+        "A70",
+        "A71",
+        "A72",
+        "A73",
+        "A74",
+        "A75",
+        "A76"
+      ],
+      "prerequisites": [
+        "51_app_shell_scaffold.json",
+        "52_page_assemblies.json"
+      ],
+      "gatekeeper": "A70 Quality Verification Director"
+    },
+    {
+      "wave_index": 6,
+      "wave_name": "Remediation Loop & Regression Testing",
+      "agents": [
+        "A80",
+        "A81",
+        "A82"
+      ],
+      "prerequisites": [
+        "70_qa_comprehensive_verdict.json"
+      ],
+      "gatekeeper": "A80 Release & Remediation Director"
+    },
+    {
+      "wave_index": 7,
+      "wave_name": "Production Packaging & Master Release Sign-Off",
+      "agents": [
+        "A83",
+        "A00"
+      ],
+      "prerequisites": [
+        "80_remediation_release_manifest.json"
+      ],
+      "gatekeeper": "A83 Release Readiness Auditor"
+    }
+  ],
+  "critical_path": [
+    "A01",
+    "A13",
+    "A14",
+    "A40",
+    "A51",
+    "A70",
+    "A80",
+    "A83"
+  ]
+}
