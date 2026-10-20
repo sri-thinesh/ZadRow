@@ -1,5 +1,5 @@
 {
-  "project_id": "proj_archiv_1792238842827",
+  "project_id": "proj_velox_1792521633292",
   "lead_agent": "A50 Frontend Engineering Lead",
   "delivery_plan": {
     "scaffolding": "A51 App Shell Engineer",
@@ -7,5 +7,24 @@
     "components": "A53 Component Engineering Lead",
     "visual_fx": "A54 Visual Experience Engineer"
   },
-  "status": "READY_FOR_SYNTHESIS"
+  "status": "SUBMITTED_TO_QA",
+  "verification_evidence": {
+    "typescript_clean": true,
+    "build_command_exit_code": 0,
+    "synthesized_files_count": 5,
+    "browser_console_errors": 0,
+    "responsive_viewports_checked": [
+      "375px",
+      "768px",
+      "1440px"
+    ]
+  },
+  "qa_readiness_certification": {
+    "certified_for_qa_ingestion": true,
+    "unverified_domains_flagged_for_a70": [
+      "Mathematical WCAG 2.2 color contrast ratios",
+      "Exact touch hit targets under simulated device touch",
+      "Zero-placeholder comprehensive scan"
+    ]
+  }
 }

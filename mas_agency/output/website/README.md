@@ -1,7 +1,7 @@
 # 🌐 STUDIO SYNTHETIX Production Website
 
 > **Engineered by ZadRow Multi-Agent Digital Studio (MAS 2.0)**
-> *Client Brief Vision*: High-Performance Generative AI Architecture Studio
+> *Client Brief Vision*: Test
 
 ---
 

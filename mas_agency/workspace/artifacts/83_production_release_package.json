@@ -1,6 +1,6 @@
 {
-  "project_id": "proj_archiv_1792238842827",
-  "release_name": "ARCHIV Production Release",
+  "project_id": "proj_velox_1792521633292",
+  "release_name": "VELOX Production Release",
   "package_version": "2.0.0",
   "build_status": "BUILD_SUCCESS",
   "deployment_instructions": {
@@ -16,7 +16,7 @@
   },
   "release_signoff": {
     "certified_by": "A83 Release Readiness Auditor",
-    "date": "2026-10-17T12:07:22.880Z",
+    "date": "2026-10-20T18:40:33.385Z",
     "status": "CERTIFIED_FOR_GLOBAL_PRODUCTION"
   }
 }

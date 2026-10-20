@@ -1438,9 +1438,9 @@ export class QAVerifier {
       }
 
       // Start of string literals
-      if (ch === '"') { inDouble = true; continue; }
-      if (ch === "'") { inSingle = true; continue; }
-      if (ch === '`') { inTemplate = true; continue; }
+      if (ch === '"' && prev !== '\\') { inDouble = true; continue; }
+      if (ch === "'" && prev !== '\\') { inSingle = true; continue; }
+      if (ch === '`' && prev !== '\\') { inTemplate = true; continue; }
 
       // Delimiters
       if (ch === '{') braces++;
@@ -1615,7 +1615,9 @@ export class QAVerifier {
       timestamp: results.timestamp,
       targetDir: results.targetDir,
       passed: results.passed,
+      overall_status: results.passed ? 'PASSED' : 'FAILED_REMEDIATION_REQUIRED',
       gateVerdict: results.gateVerdict,
+      total_defects_found: results.defectSummary?.totalDefects || results.defects?.length || 0,
       defectSummary: results.defectSummary,
       defects: results.defects,
       audits: {

@@ -92,9 +92,16 @@ export class CodeSynthesizer {
     this._generateSoundEffects();
     this._generateProceduralGraphics();
 
-    // 9. Generate server API endpoints if backend active
+    // 9. Generate server API endpoints if backend active; otherwise clean up stale api routes
     if (backendEndpoints) {
       this._generateApiRoutes(backendEndpoints);
+    } else {
+      const apiDir = path.join(this.outputDir, 'src', 'app', 'api');
+      if (fs.existsSync(apiDir)) {
+        try {
+          fs.rmSync(apiDir, { recursive: true, force: true });
+        } catch (_) {}
+      }
     }
 
     // 10. Generate README.md
@@ -2604,7 +2611,7 @@ npm run start
     const persistenceLib = `import fs from 'fs';
 import path from 'path';
 
-const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_\`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&\\x27*+/=?^_\\x60{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
 export const DEFAULT_ADMIN_KEY = process.env.ADMIN_API_KEY || 'zadrow-admin-secure-key-2026';
 
 class MutexManager {

@@ -229,10 +229,20 @@ async function testCreativeAndDesignGates() {
       strictGates: true,
     });
 
+    // Injected weak creative charter: 1 concept, no selected concept, status REJECTED
+    coordinator.saveArtifact('20_creative_direction_charter.json', {
+      project_id: 'gate_a_test',
+      concept_explorations: [{ concept_id: 'C1', concept_name: 'Generic SaaS' }],
+      selected_concept: null,
+      gate_a_creative_approval: {
+        status: 'REJECTED',
+        evaluation_notes: 'Creative direction rejected: only 1 concept and lacks differentiation',
+      },
+    });
+
     let threwGateAError = false;
     try {
       await coordinator.run('Build generic website', {
-        simulateCreativeGateFailure: true,
         skipCodeSynthesis: true,
       });
     } catch (err) {
@@ -260,10 +270,19 @@ async function testCreativeAndDesignGates() {
       strictGates: true,
     });
 
+    // Injected unapproved design review / empty screens
+    coordinator.saveArtifact('30_experience_design_strategy.json', {
+      project_id: 'gate_b_test',
+      gate_b_design_review: {
+        verdict: 'REVISION_REQUIRED',
+        feedback_and_revisions: ['Wireframe defaults to generic card grid; revise to bespoke editorial composition.'],
+      },
+    });
+    coordinator.saveArtifact('31_wireframe_ux_flow.json', { screens: [] });
+
     let threwGateBError = false;
     try {
       await coordinator.run('Build generic template', {
-        simulateDesignGateFailure: true,
         skipCodeSynthesis: true,
       });
     } catch (err) {
@@ -280,7 +299,85 @@ async function testCreativeAndDesignGates() {
     cleanTestDir(gateBTestDir);
   }
 
-  Logger.success('Gate A & Gate B enforcement verified with 100% halt compliance.');
+  // Test Gate C failure stops pipeline before code synthesis
+  const gateCTestDir = createTestDir('gate_c_failure');
+  try {
+    const coordinator = new WorkflowCoordinator({
+      agencyDir,
+      rootDir,
+      artifactsDir: gateCTestDir,
+      executionMode: 'synthetic',
+      strictGates: true,
+    });
+
+    // Auto-scaffold prerequisites up to phase 4
+    coordinator._autoScaffoldDetachedPrerequisites(4);
+
+    coordinator.saveArtifact('55_pre_implementation_visual_review.json', {
+      project_id: 'gate_c_test',
+      verdict: 'REJECTED',
+      status: 'REJECTED',
+      notes: 'Pre-implementation visual review rejected: layout composition lacks distinction from template',
+    });
+
+    let threwGateCError = false;
+    try {
+      await coordinator.executePhase4_SynthesisTesting({ skipCodeSynthesis: true });
+    } catch (err) {
+      console.error('ACTUAL ERROR IN GATE C TEST:', err);
+      threwGateCError = true;
+      assert(err instanceof GateFailureError, `Error should be GateFailureError, got: ${err.name}`);
+      assert.strictEqual(err.gateName, 'pre_implementation_visual_review_gate');
+      assert.strictEqual(err.phase, 4);
+    }
+    assert(threwGateCError, 'Coordinator must throw GateFailureError when Gate C fails');
+    assert.strictEqual(coordinator.status, 'HALTED');
+    Logger.info('  -> Gate C enforcement verified: unapproved pre-implementation visual review halts workflow.');
+  } finally {
+    cleanTestDir(gateCTestDir);
+  }
+
+  // Test Gate D failure stops pipeline when QA verdict has open defects
+  const gateDTestDir = createTestDir('gate_d_failure');
+  try {
+    const coordinator = new WorkflowCoordinator({
+      agencyDir,
+      rootDir,
+      artifactsDir: gateDTestDir,
+      executionMode: 'synthetic',
+      strictGates: true,
+    });
+
+    coordinator._autoScaffoldDetachedPrerequisites(5);
+
+    coordinator.saveArtifact('70_qa_comprehensive_verdict.json', {
+      project_id: 'gate_d_test',
+      overall_status: 'REJECTED',
+      total_defects_found: 2,
+      defects_by_severity: { p0: 1, p1: 1, p2: 0, p3: 0 },
+      defects: [
+        { defectId: 'DEF-1', severity: 'P0', description: 'Blocking accessibility failure' },
+        { defectId: 'DEF-2', severity: 'P1', description: 'Horizontal scroll blowout on 375px' },
+      ],
+    });
+
+    let threwGateDError = false;
+    try {
+      await coordinator.executePhase5_QualityAssurance({ runRealVerifier: false });
+    } catch (err) {
+      threwGateDError = true;
+      assert(err instanceof GateFailureError, `Error should be GateFailureError, got: ${err.name}`);
+      assert.strictEqual(err.gateName, 'post_implementation_independent_review_gate');
+      assert.strictEqual(err.phase, 5);
+    }
+    assert(threwGateDError, 'Coordinator must throw GateFailureError when Gate D fails');
+    assert.strictEqual(coordinator.status, 'HALTED');
+    Logger.info('  -> Gate D enforcement verified: unapproved QA status with open defects halts workflow.');
+  } finally {
+    cleanTestDir(gateDTestDir);
+  }
+
+  Logger.success('Gate A, B, C, & D enforcement verified with 100% artifact-driven halt compliance.');
 }
 
 // =====================================================================

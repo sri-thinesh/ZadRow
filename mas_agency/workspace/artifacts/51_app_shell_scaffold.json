@@ -1,8 +1,32 @@
 {
   "agentId": "A51",
-  "project_id": "proj_archiv_1792238842827",
+  "project_id": "proj_velox_1792521633292",
   "scaffold_version": "2.0.0",
   "layout_file": "src/app/layout.tsx",
   "globals_file": "src/app/globals.css",
-  "status": "SYNTHESIZED"
+  "status": "SYNTHESIZED",
+  "accessibility_features": {
+    "skip_link_implemented": true,
+    "landmarks_configured": [
+      "header",
+      "main",
+      "footer"
+    ],
+    "mobile_menu_focus_trap": true,
+    "escape_key_dismiss": true,
+    "focus_restoration": true,
+    "aria_expanded_tracked": true
+  },
+  "fonts_configured": [
+    {
+      "family": "Inter",
+      "variable": "--font-body",
+      "display": "swap"
+    },
+    {
+      "family": "Syne",
+      "variable": "--font-display",
+      "display": "swap"
+    }
+  ]
 }

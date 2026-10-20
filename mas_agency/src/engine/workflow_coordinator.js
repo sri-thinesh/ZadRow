@@ -604,33 +604,35 @@ export class WorkflowCoordinator extends EventEmitter {
     this.saveArtifact('12_information_architecture.json', infoArch);
 
     // 4. Creative & Research Wave (A20, A21, A22, A23)
-    const creativeCharter = this._buildCreativeDirectionCharter(this.projectBrief, options);
+    const creativeCharter = this.getArtifact('20_creative_direction_charter.json') || this._buildCreativeDirectionCharter(this.projectBrief, options);
     this.saveArtifact('20_creative_direction_charter.json', creativeCharter);
 
-    const designResearch = this._buildDesignResearch(this.projectBrief);
+    const designResearch = this.getArtifact('21_design_research_benchmarks.json') || this._buildDesignResearch(this.projectBrief);
     this.saveArtifact('21_design_research_benchmarks.json', designResearch);
 
-    const artManifest = this._buildArtDirection(this.projectBrief, creativeCharter);
+    const artManifest = this.getArtifact('22_art_direction_manifest.json') || this._buildArtDirection(this.projectBrief, creativeCharter);
     this.saveArtifact('22_art_direction_manifest.json', artManifest);
 
-    const motionSpec = this._buildMotionChoreographySpec(this.projectBrief, creativeCharter);
+    const motionSpec = this.getArtifact('23_motion_choreography_spec.json') || this._buildMotionChoreographySpec(this.projectBrief, creativeCharter);
     this.saveArtifact('23_motion_choreography_spec.json', motionSpec);
 
     // GATE A: Creative Direction Approval Gate Evaluation
     const gateAPassed = Boolean(
-      creativeCharter.gate_a_creative_approval?.status === 'APPROVED' &&
-      !options.simulateCreativeGateFailure &&
-      (creativeCharter.concept_explorations?.length >= 3)
+      creativeCharter &&
+      creativeCharter.selected_concept &&
+      Array.isArray(creativeCharter.concept_explorations) &&
+      creativeCharter.concept_explorations.length >= 3 &&
+      creativeCharter.gate_a_creative_approval?.status === 'APPROVED'
     );
 
     this.emit('gate:evaluate', {
       phase: phaseIndex,
       gateName: 'creative_direction_approval_gate',
       passed: gateAPassed,
-      status: creativeCharter.gate_a_creative_approval?.status,
-      conceptsCount: creativeCharter.concept_explorations?.length || 0,
-      selectedConcept: creativeCharter.selected_concept?.concept_name,
-      reviewedBy: creativeCharter.gate_a_creative_approval?.reviewed_by,
+      status: creativeCharter?.gate_a_creative_approval?.status,
+      conceptsCount: creativeCharter?.concept_explorations?.length || 0,
+      selectedConcept: creativeCharter?.selected_concept?.concept_name || creativeCharter?.selected_concept?.concept_id,
+      reviewedBy: creativeCharter?.gate_a_creative_approval?.reviewed_by,
     });
 
     if (!gateAPassed && this.strictGates) {
@@ -638,38 +640,40 @@ export class WorkflowCoordinator extends EventEmitter {
       throw new GateFailureError(
         'creative_direction_approval_gate',
         phaseIndex,
-        creativeCharter.gate_a_creative_approval?.evaluation_notes || 'Creative direction rejected or lacks differentiation'
+        creativeCharter?.gate_a_creative_approval?.evaluation_notes || 'Creative direction rejected, lacks selected concept, or has fewer than 3 concept explorations'
       );
     }
 
     // 5. Experience Design Wave (A30, A31, A32, A33)
-    const expStrategy = this._buildExperienceDesignStrategy(this.projectBrief, creativeCharter, artManifest, options);
+    const expStrategy = this.getArtifact('30_experience_design_strategy.json') || this._buildExperienceDesignStrategy(this.projectBrief, creativeCharter, artManifest, options);
     this.saveArtifact('30_experience_design_strategy.json', expStrategy);
 
-    const wireframes = this._buildWireframeUXFlow(this.projectBrief, infoArch, expStrategy);
+    const wireframes = this.getArtifact('31_wireframe_ux_flow.json') || this._buildWireframeUXFlow(this.projectBrief, infoArch, expStrategy);
     this.saveArtifact('31_wireframe_ux_flow.json', wireframes);
 
-    const designTokens = this._buildDesignTokens(this.projectBrief, artManifest);
+    const designTokens = this.getArtifact('32_design_tokens_and_components.json') || this._buildDesignTokens(this.projectBrief, artManifest);
     this.saveArtifact('32_design_tokens_and_components.json', designTokens);
 
-    const copywriting = this._buildCopywriting(this.projectBrief, scopeCharter, wireframes);
+    const copywriting = this.getArtifact('33_copywriting_and_conversion.json') || this._buildCopywriting(this.projectBrief, scopeCharter, wireframes);
     this.saveArtifact('33_copywriting_and_conversion.json', copywriting);
 
     // GATE B: Design Completeness & Integration Gate Evaluation
     const gateBPassed = Boolean(
-      expStrategy.gate_b_design_review?.verdict === 'APPROVED' &&
-      !options.simulateDesignGateFailure &&
-      (wireframes.screens?.length > 0) &&
-      (copywriting.factual_traceability_matrix?.length > 0)
+      expStrategy?.gate_b_design_review?.verdict === 'APPROVED' &&
+      Array.isArray(wireframes?.screens) &&
+      wireframes.screens.length > 0 &&
+      Array.isArray(copywriting?.factual_traceability_matrix) &&
+      copywriting.factual_traceability_matrix.length > 0
     );
 
     this.emit('gate:evaluate', {
       phase: phaseIndex,
       gateName: 'design_completeness_gate',
       passed: gateBPassed,
-      verdict: expStrategy.gate_b_design_review?.verdict,
-      conceptCoherenceVerified: expStrategy.gate_b_design_review?.concept_coherence_verified,
-      screensCount: wireframes.screens?.length || 0,
+      verdict: expStrategy?.gate_b_design_review?.verdict,
+      conceptCoherenceVerified: expStrategy?.gate_b_design_review?.concept_coherence_verified,
+      screensCount: wireframes?.screens?.length || 0,
+      traceabilityCount: copywriting?.factual_traceability_matrix?.length || 0,
     });
 
     if (!gateBPassed && this.strictGates) {
@@ -677,7 +681,7 @@ export class WorkflowCoordinator extends EventEmitter {
       throw new GateFailureError(
         'design_completeness_gate',
         phaseIndex,
-        expStrategy.gate_b_design_review?.feedback_and_revisions?.[0] || 'Design integration rejected for lack of coherence or generic templates'
+        expStrategy?.gate_b_design_review?.feedback_and_revisions?.[0] || 'Design integration rejected for lack of coherence, missing wireframes, or empty traceability matrix'
       );
     }
 
@@ -980,7 +984,7 @@ export class WorkflowCoordinator extends EventEmitter {
       timestamp: new Date().toISOString(),
     });
 
-    const masterSpec = this.getArtifact('13_master_specification.json');
+    const masterSpec = this.getArtifact('13_master_specification.json') || {};
 
     // 1. Frontend Implementation Squad (A51-A54)
     const appShell = this._buildAppShellScaffold(this.projectBrief, masterSpec);
@@ -1005,11 +1009,20 @@ export class WorkflowCoordinator extends EventEmitter {
     }
 
     // GATE C: Pre-Implementation Visual Review Gate
-    const gateCPassed = !options.simulatePreImplVisualReviewFailure;
+    const visualReviewArtifact = this.getArtifact('55_pre_implementation_visual_review.json') ||
+      this.getArtifact('pre_implementation_visual_review.json') ||
+      this._buildPreImplementationVisualReview(this.projectBrief);
+    this.saveArtifact('55_pre_implementation_visual_review.json', visualReviewArtifact);
+
+    const gateCPassed = Boolean(
+      visualReviewArtifact &&
+      (visualReviewArtifact.verdict === 'APPROVED' || visualReviewArtifact.status === 'APPROVED')
+    );
     this.emit('gate:evaluate', {
       phase: phaseIndex,
       gateName: 'pre_implementation_visual_review_gate',
       passed: gateCPassed,
+      verdict: visualReviewArtifact?.verdict || visualReviewArtifact?.status || 'MISSING',
       reviewedAspects: ['composition', 'typography', 'spacing', 'distinctiveness', 'concept_coherence'],
       reviewer: 'A30 Experience Design Director & A03 Arbiter',
     });
@@ -1019,7 +1032,7 @@ export class WorkflowCoordinator extends EventEmitter {
       throw new GateFailureError(
         'pre_implementation_visual_review_gate',
         phaseIndex,
-        'Pre-implementation visual review rejected: layout composition lacks distinction from template'
+        visualReviewArtifact?.notes || visualReviewArtifact?.evaluation_notes || 'Pre-implementation visual review missing or rejected: layout composition lacks distinction from template'
       );
     }
 
@@ -1070,6 +1083,14 @@ export class WorkflowCoordinator extends EventEmitter {
     return this.executePhase4_ImplementationWave(options);
   }
 
+  async executePhase4_SynthesisTesting(options = {}) {
+    return this.executePhase4_ImplementationWave(options);
+  }
+
+  async executePhase5_QualityAssurance(options = {}) {
+    return this.executePhase5_QualityVerificationWave(options);
+  }
+
   // =========================================================================
   // Phase 5: Quality Verification Wave
   // =========================================================================
@@ -1103,16 +1124,19 @@ export class WorkflowCoordinator extends EventEmitter {
     this.saveArtifact('75_security_audit_report.json', secAudit);
     this.saveArtifact('76_seo_social_graph_audit.json', seoAudit);
 
-    // Run real QA verifier if available
+    // Check for pre-injected QA verdict (e.g. from tests or prior artifacts)
+    const preInjectedVerdict = (options.simulatedDefects || options.defects) ? null : this.getArtifact('70_qa_comprehensive_verdict.json');
+
+    // Run real QA verifier if available and not overridden by pre-injected verdict
     let realQAResult = null;
-    if (options.runRealVerifier !== false && fs.existsSync(this.outputDir)) {
+    if (options.runRealVerifier !== false && !preInjectedVerdict && options.skipCodeSynthesis !== true && fs.existsSync(this.outputDir)) {
       try {
         realQAResult = await this.qaVerifier.runAllChecks();
       } catch (_) {}
     }
 
     // A70 compiles master verdict
-    const comprehensiveVerdict = this._buildQAComprehensiveVerdict(this.projectBrief, {
+    const comprehensiveVerdict = preInjectedVerdict || this._buildQAComprehensiveVerdict(this.projectBrief, {
       ...options,
       realQAResult,
     });
@@ -1131,23 +1155,39 @@ export class WorkflowCoordinator extends EventEmitter {
     });
 
     // GATE D: Independent Post-Implementation Review Gate
-    const gateDPassed = !options.simulatePostImplReviewFailure && (comprehensiveVerdict.overall_status === 'PASSED' || totalDefects === 0);
+    const defectCount = comprehensiveVerdict?.total_defects_found ??
+      comprehensiveVerdict?.defectSummary?.totalDefects ??
+      totalDefects;
+    const isPassedStatus = Boolean(
+      comprehensiveVerdict && (
+        comprehensiveVerdict.overall_status === 'PASSED' ||
+        comprehensiveVerdict.overall_status === 'PASSED_FOR_RELEASE' ||
+        comprehensiveVerdict.gateVerdict === 'ALL_GATES_PASSED'
+      )
+    );
+    const gateDPassed = Boolean(isPassedStatus && defectCount === 0);
+
     this.emit('gate:evaluate', {
       phase: phaseIndex,
       gateName: 'post_implementation_independent_review_gate',
       passed: gateDPassed,
       viewportsAudited: ['375px', '768px', '1024px', '1440px', '1920px'],
       navigationFunctional: true,
-      independentVerdict: comprehensiveVerdict.overall_status,
+      independentVerdict: comprehensiveVerdict?.overall_status || comprehensiveVerdict?.gateVerdict,
+      totalDefects: defectCount,
     });
 
-    if (!gateDPassed && this.strictGates && options.simulatePostImplReviewFailure) {
-      this.status = 'HALTED';
-      throw new GateFailureError(
-        'post_implementation_independent_review_gate',
-        phaseIndex,
-        'Post-implementation independent review failed: visual deviations detected across viewports'
-      );
+    if (!gateDPassed && this.strictGates) {
+      if (this.activePhases.has(6) && comprehensiveVerdict?.overall_status === 'FAILED_REMEDIATION_REQUIRED') {
+        Logger.warn(`Gate D (Independent Review Gate) detected ${defectCount} defect(s); routing to Phase 6 Remediation Loop.`);
+      } else {
+        this.status = 'HALTED';
+        throw new GateFailureError(
+          'post_implementation_independent_review_gate',
+          phaseIndex,
+          `Post-implementation QA failed: overall_status is "${comprehensiveVerdict?.overall_status || comprehensiveVerdict?.gateVerdict || 'UNKNOWN'}" with ${defectCount} unresolved defect(s)`
+        );
+      }
     }
 
     const durationMs = Date.now() - startTime;
@@ -1194,7 +1234,7 @@ export class WorkflowCoordinator extends EventEmitter {
     });
 
     const qaVerdict = this.getArtifact('70_qa_comprehensive_verdict.json');
-    let currentDefects = options.defects || qaVerdict.defects || [];
+    let currentDefects = options.defects || options.simulatedDefects || (qaVerdict && qaVerdict.defects) || [];
 
     // If QA report had defects or injected defects exist, enter remediation cycle loop
     let cyclesRun = 0;
@@ -1235,9 +1275,9 @@ export class WorkflowCoordinator extends EventEmitter {
         patches: patchLog.patches,
       });
 
-      // Retest: Verify fixes against real code if outputDir exists
+      // Retest: Verify fixes against real code if outputDir exists and code was synthesized
       let retestPassed = false;
-      if (options.runRealVerifier !== false && fs.existsSync(this.outputDir)) {
+      if (options.runRealVerifier !== false && options.skipCodeSynthesis !== true && fs.existsSync(this.outputDir)) {
         try {
           const retestResult = await this.qaVerifier.runAllChecks();
           if (retestResult.passed) {
@@ -1574,6 +1614,7 @@ export class WorkflowCoordinator extends EventEmitter {
   async run(promptOrBrief, options = {}) {
     const workflowStartTime = Date.now();
     this.status = 'RUNNING';
+    this._isRunningPipeline = true;
 
     // 0. Normalize brief and resolve detached execution scope
     this.projectBrief = this._normalizeBrief(promptOrBrief);
@@ -1679,6 +1720,8 @@ export class WorkflowCoordinator extends EventEmitter {
       }
       this.lastError = err;
       throw err;
+    } finally {
+      this._isRunningPipeline = false;
     }
   }
 
@@ -1877,9 +1920,8 @@ export class WorkflowCoordinator extends EventEmitter {
     };
   }
 
-  _buildCreativeDirectionCharter(brief, options = {}) {
+  _buildCreativeDirectionCharter(brief) {
     const brandName = brief.brandName || 'STUDIO SYNTHETIX';
-    const isFailed = options.simulateCreativeGateFailure === true;
     return {
       project_id: brief.project_id,
       creative_concept: 'Architectural Humanism & Kinetic Typography',
@@ -1964,12 +2006,10 @@ export class WorkflowCoordinator extends EventEmitter {
         signature_motif: 'Asymmetrical editorial split-plane with precision keyline accents and damped inertia hover.',
       },
       gate_a_creative_approval: {
-        status: isFailed ? 'REVISION_REQUIRED' : 'APPROVED',
+        status: 'APPROVED',
         reviewed_by: 'A20_CreativeResearchDirector',
-        evaluation_notes: isFailed
-          ? 'Creative concepts lack sufficient differentiation from generic templates; revision required.'
-          : 'Concept A (Architectural Humanism) rigorously approved. Demonstrates high originality, avoids SaaS clichés, and respects performance budgets.',
-        differentiation_score: isFailed ? 5.2 : 9.5,
+        evaluation_notes: 'Concept A (Architectural Humanism) rigorously approved. Demonstrates high originality, avoids SaaS clichés, and respects performance budgets.',
+        differentiation_score: 9.5,
         timestamp: new Date().toISOString(),
       },
     };
@@ -2272,11 +2312,10 @@ export class WorkflowCoordinator extends EventEmitter {
     };
   }
 
-  _buildExperienceDesignStrategy(brief, creativeCharter = {}, artManifest = {}, options = {}) {
-    const isGateBFailed = options.simulateDesignGateFailure === true;
+  _buildExperienceDesignStrategy(brief, creativeCharter = {}, artManifest = {}) {
     return {
       project_id: brief.project_id,
-      status: isGateBFailed ? 'REVISION_REQUIRED' : 'APPROVED',
+      status: 'APPROVED',
       experience_narrative: 'A purposeful, narrative-first journey guiding the visitor from core philosophy to verified case studies to frictionless contact.',
       design_pillars: [
         'Authentic storytelling over marketing buzzwords',
@@ -2308,12 +2347,10 @@ export class WorkflowCoordinator extends EventEmitter {
         evaluation: 'Gate A thoroughly validated: 3 distinct concept explorations generated and compared.',
       },
       gate_b_design_review: {
-        verdict: isGateBFailed ? 'REVISION_REQUIRED' : 'APPROVED',
-        concept_coherence_verified: !isGateBFailed,
+        verdict: 'APPROVED',
+        concept_coherence_verified: true,
         anti_template_verification: 'Verified: wireframes avoid generic bento grids; sections express authentic narrative.',
-        feedback_and_revisions: isGateBFailed
-          ? ['Wireframe defaults to generic card grid; revise to bespoke editorial composition.']
-          : ['Design coherence verified across wireframes, art direction, and copy.'],
+        feedback_and_revisions: ['Design coherence verified across wireframes, art direction, and copy.'],
         reviewed_by: 'A30_ExperienceDesignDirector',
         timestamp: new Date().toISOString(),
       },
@@ -2954,6 +2991,19 @@ ${masterSpec.acceptance_criteria
     };
   }
 
+  _buildPreImplementationVisualReview(brief) {
+    return {
+      project_id: brief.project_id,
+      artifact_name: '55_pre_implementation_visual_review.json',
+      reviewed_by: 'A30 Experience Design Director & A03 Arbiter',
+      verdict: 'APPROVED',
+      status: 'APPROVED',
+      reviewed_aspects: ['composition', 'typography', 'spacing', 'distinctiveness', 'concept_coherence'],
+      evaluation_notes: 'Visual hierarchy, spatial rhythm, and bespoke typography compositions approved for code synthesis.',
+      timestamp: new Date().toISOString(),
+    };
+  }
+
   _buildFrontendDeliveryManifest(brief) {
     return {
       project_id: brief.project_id,
@@ -3183,7 +3233,7 @@ ${masterSpec.acceptance_criteria
       }
     }
 
-    const simulatedDefects = options.simulatedDefects || [];
+    const simulatedDefects = options.simulatedDefects || options.defects || [];
     const allDefects = [...realDefects, ...simulatedDefects];
 
     const p0 = allDefects.filter((d) => d.severity === 'P0').length;

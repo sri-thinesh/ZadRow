@@ -1,11 +1,49 @@
 {
-  "project_id": "proj_archiv_1792238842827",
-  "status": "STANDBY_STATIC_ONLY",
-  "certification": "Static presentation / portfolio brief requires zero backend persistence or server runtime.",
-  "api_endpoints": [],
-  "data_models": [],
+  "project_id": "proj_velox_1792521633292",
+  "status": "ENABLED",
+  "api_endpoints": [
+    {
+      "route": "/api/waitlist",
+      "method": "POST",
+      "description": "Secure waitlist and lead capture registration",
+      "request_schema": {
+        "email": "string",
+        "name": "string",
+        "role": "string"
+      },
+      "response_schema": {
+        "status": "string",
+        "id": "string"
+      }
+    },
+    {
+      "route": "/api/inquiry",
+      "method": "POST",
+      "description": "Consultation booking submission handler",
+      "request_schema": {
+        "email": "string",
+        "mandateBudget": "string",
+        "message": "string"
+      },
+      "response_schema": {
+        "success": "boolean",
+        "ticketId": "string"
+      }
+    }
+  ],
+  "data_models": [
+    {
+      "table_name": "WaitlistEntry",
+      "columns": [
+        "id (UUID)",
+        "email (VARCHAR)",
+        "created_at (TIMESTAMP)"
+      ]
+    }
+  ],
   "security_measures": [
-    "Static CSP",
-    "Subresource Integrity"
+    "Rate limiting via memory token bucket",
+    "Zod input validation on all routes",
+    "Helmet security headers and CORS protection"
   ]
 }

@@ -1,0 +1,9 @@
+{
+  "agentId": "A61",
+  "project_id": "proj_velox_1792521633292",
+  "endpoints": [
+    "src/app/api/waitlist/route.ts",
+    "src/app/api/inquiry/route.ts"
+  ],
+  "status": "SYNTHESIZED"
+}

@@ -1,50 +1,131 @@
 {
-  "project_id": "proj_archiv_1792238842827",
-  "project_name": "ARCHIV",
+  "project_id": "proj_velox_1792521633292",
+  "project_name": "VELOX",
   "status": "COMPLETED",
-  "backend_architecture": "CERTIFIED_ZERO_BACKEND_STATIC",
+  "detached_mode": false,
+  "active_phases": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "detached_execution": {
+    "is_detached": false,
+    "active_phases": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "skipped_phases": []
+  },
+  "backend_architecture": "ACTIVE_SERVER_PERSISTENCE",
   "phases": [
     {
       "phase_id": "Phase-1",
       "phase_name": "Intake & Scope Strategy",
       "lead_director": "A00",
-      "gate_status": "APPROVED"
+      "gate_status": "APPROVED",
+      "status": "APPROVED"
     },
     {
       "phase_id": "Phase-2",
       "phase_name": "Master Specification Drafting & Verification Gate",
       "lead_director": "A13",
-      "gate_status": "APPROVED"
+      "gate_status": "APPROVED",
+      "status": "APPROVED"
     },
     {
       "phase_id": "Phase-3",
       "phase_name": "Technical Execution Planning & Backend Evaluation",
       "lead_director": "A40",
-      "gate_status": "APPROVED"
+      "gate_status": "APPROVED",
+      "status": "APPROVED"
     },
     {
       "phase_id": "Phase-4",
       "phase_name": "Implementation Wave",
       "lead_director": "A51",
-      "gate_status": "APPROVED"
+      "gate_status": "APPROVED",
+      "status": "APPROVED"
     },
     {
       "phase_id": "Phase-5",
       "phase_name": "Quality Verification Wave",
       "lead_director": "A70",
-      "gate_status": "APPROVED"
+      "gate_status": "APPROVED",
+      "status": "APPROVED"
     },
     {
       "phase_id": "Phase-6",
       "phase_name": "Remediation & Retesting Loop",
       "lead_director": "A80",
-      "gate_status": "APPROVED"
+      "gate_status": "APPROVED",
+      "status": "APPROVED"
     },
     {
       "phase_id": "Phase-7",
       "phase_name": "Release Readiness Audit & Delivery Package",
       "lead_director": "A83",
-      "gate_status": "APPROVED"
+      "gate_status": "APPROVED",
+      "status": "APPROVED"
+    }
+  ],
+  "lifecycle_phases": [
+    {
+      "phase_id": "Phase-1",
+      "phase_name": "Intake & Scope Strategy",
+      "lead_director": "A00",
+      "gate_status": "APPROVED",
+      "status": "APPROVED"
+    },
+    {
+      "phase_id": "Phase-2",
+      "phase_name": "Master Specification Drafting & Verification Gate",
+      "lead_director": "A13",
+      "gate_status": "APPROVED",
+      "status": "APPROVED"
+    },
+    {
+      "phase_id": "Phase-3",
+      "phase_name": "Technical Execution Planning & Backend Evaluation",
+      "lead_director": "A40",
+      "gate_status": "APPROVED",
+      "status": "APPROVED"
+    },
+    {
+      "phase_id": "Phase-4",
+      "phase_name": "Implementation Wave",
+      "lead_director": "A51",
+      "gate_status": "APPROVED",
+      "status": "APPROVED"
+    },
+    {
+      "phase_id": "Phase-5",
+      "phase_name": "Quality Verification Wave",
+      "lead_director": "A70",
+      "gate_status": "APPROVED",
+      "status": "APPROVED"
+    },
+    {
+      "phase_id": "Phase-6",
+      "phase_name": "Remediation & Retesting Loop",
+      "lead_director": "A80",
+      "gate_status": "APPROVED",
+      "status": "APPROVED"
+    },
+    {
+      "phase_id": "Phase-7",
+      "phase_name": "Release Readiness Audit & Delivery Package",
+      "lead_director": "A83",
+      "gate_status": "APPROVED",
+      "status": "APPROVED"
     }
   ],
   "department_status": {
@@ -54,7 +135,7 @@
     "experience_design": "APPROVED",
     "technical_architecture": "APPROVED",
     "frontend_engineering": "APPROVED",
-    "backend_engineering": "CLEANLY_SKIPPED",
+    "backend_engineering": "APPROVED",
     "quality_verification": "APPROVED",
     "release_remediation": "APPROVED"
   },

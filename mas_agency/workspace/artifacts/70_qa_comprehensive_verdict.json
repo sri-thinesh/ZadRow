@@ -1,9 +1,11 @@
 {
   "agentId": "A70_QA_ComprehensiveDirector",
-  "timestamp": "2026-10-20T17:55:43.372Z",
+  "timestamp": "2026-10-20T18:40:33.321Z",
   "targetDir": "C:\\Users\\ksrit\\OneDrive\\Documents\\multiagent system 2.0\\mas_agency\\output\\website",
   "passed": true,
+  "overall_status": "PASSED",
   "gateVerdict": "ALL_GATES_PASSED",
+  "total_defects_found": 0,
   "defectSummary": {
     "totalDefects": 0,
     "p0Count": 0,
@@ -108,7 +110,7 @@
     },
     "zeroPlaceholder": {
       "passed": true,
-      "scannedFilesCount": 22,
+      "scannedFilesCount": 25,
       "findingCount": 0
     },
     "syntaxAndBuild": {

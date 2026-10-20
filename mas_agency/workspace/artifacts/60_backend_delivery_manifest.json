@@ -1,8 +1,24 @@
 {
-  "project_id": "proj_archiv_1792238842827",
-  "status": "STANDBY_STATIC_COMPLETE",
-  "certification": "0-backend architecture certified. Clean skip executed without error.",
-  "endpoints_count": 0,
-  "database_connected": false,
-  "synthesized_handlers": []
+  "project_id": "proj_velox_1792521633292",
+  "status": "ACTIVE_DELIVERED",
+  "endpoints_count": 2,
+  "database_connected": true,
+  "synthesized_handlers": [
+    {
+      "route": "/api/waitlist",
+      "file_path": "src/app/api/waitlist/route.ts",
+      "methods": [
+        "POST"
+      ],
+      "validation_status": "VERIFIED"
+    },
+    {
+      "route": "/api/inquiry",
+      "file_path": "src/app/api/inquiry/route.ts",
+      "methods": [
+        "POST"
+      ],
+      "validation_status": "VERIFIED"
+    }
+  ]
 }

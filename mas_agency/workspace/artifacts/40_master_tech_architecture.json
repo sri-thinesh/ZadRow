@@ -1,5 +1,5 @@
 {
-  "project_id": "proj_studio_synthetix_1792518715536",
+  "project_id": "proj_velox_1792521633292",
   "framework": "Next.js 15 (App Router)",
   "target_runtime": "React 19 (Server + Client Components)",
   "status": "ARCHITECTED",
@@ -10,7 +10,7 @@
     "language": "TypeScript 5.x",
     "graphics": "HTML5 Canvas 2D / WebGL / Procedural SVG"
   },
-  "backend_status": "STANDBY_STATIC_ONLY",
+  "backend_status": "ENABLED",
   "performance_targets": {
     "targetFPS": 60,
     "lcpBudgetMs": 1200,

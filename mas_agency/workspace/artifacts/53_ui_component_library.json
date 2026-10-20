@@ -1,12 +1,61 @@
 {
   "agentId": "A53",
-  "project_id": "proj_archiv_1792238842827",
+  "project_id": "proj_velox_1792521633292",
   "components": [
-    "src/components/Navigation.tsx",
-    "src/components/HeroStage.tsx",
-    "src/components/FeatureBento.tsx",
-    "src/components/InteractiveShowcase.tsx",
-    "src/components/FooterConversion.tsx"
+    {
+      "name": "Navigation",
+      "file_path": "src/components/Navigation.tsx",
+      "semantic_element": "<nav> + <header>",
+      "interactive_states": [
+        "default",
+        "hover",
+        "focus_visible",
+        "active",
+        "touch"
+      ]
+    },
+    {
+      "name": "HeroStage",
+      "file_path": "src/components/HeroStage.tsx",
+      "semantic_element": "<section> + <header>",
+      "interactive_states": [
+        "default",
+        "hover",
+        "focus_visible",
+        "active",
+        "touch"
+      ]
+    },
+    {
+      "name": "InteractiveShowcase",
+      "file_path": "src/components/InteractiveShowcase.tsx",
+      "semantic_element": "<section> + <article>",
+      "interactive_states": [
+        "default",
+        "hover",
+        "focus_visible",
+        "touch"
+      ]
+    },
+    {
+      "name": "FooterConversion",
+      "file_path": "src/components/FooterConversion.tsx",
+      "semantic_element": "<footer> + <form>",
+      "interactive_states": [
+        "default",
+        "hover",
+        "focus_visible",
+        "active",
+        "disabled",
+        "touch"
+      ]
+    }
   ],
+  "accessibility_audit": {
+    "tested_elements_count": 4,
+    "keyboard_nav_verified": true,
+    "focus_visible_verified": true,
+    "findings_and_limitations": "Tested using keyboard tab sequence and focus styles; contrast audit delegated to A73."
+  },
   "status": "SYNTHESIZED"
 }

@@ -330,6 +330,7 @@ async function testCliPathResolver() {
 // =====================================================================
 async function testRealCliExecution() {
   Logger.info('Testing native Antigravity CLI execution pipeline...');
+  let cliPath;
   try {
     cliPath = AgentRunner.resolveCliPath();
   } catch {
@@ -337,8 +338,8 @@ async function testRealCliExecution() {
   }
 
   if (!cliPath || !fs.existsSync(cliPath)) {
-    Logger.warn(`CLI binary not found, skipping live CLI test.`);
-    return;
+    Logger.warn(`CLI binary not found. Live CLI test skipped (CANNOT VERIFY REAL MODEL EXECUTION).`);
+    return { skipped: true, reason: 'CLI binary not found on PATH or ANTIGRAVITY_CLI_PATH' };
   }
 
   const runner = new AgentRunner({
@@ -507,17 +508,32 @@ async function runAllTests() {
   console.log(`${Colors.bold}${Colors.brightCyan}   MAS 2.0 AGENT RUNNER & AI ENGINE TEST SUITE      ${Colors.reset}`);
   console.log(`${Colors.bold}${Colors.brightCyan}====================================================${Colors.reset}\n`);
 
-  try {
-    await testPersonaDiscoveryAndParsing();
-    await testDynamicSkillLoading();
-    await testPromptConstruction();
-    await testResponseSanitizer();
-    await testSyntheticFallback();
-    await testCliPathResolver();
-    await testDynamicConditionalDAGActivation();
-    await testRealCliExecution();
+  let passedCount = 0;
+  let skippedCount = 0;
 
-    console.log(`\n${Colors.brightGreen}${Colors.bold}>>> ALL 8 AGENT RUNNER TESTS PASSED (100% SUCCESS) <<<${Colors.reset}\n`);
+  try {
+    await testPersonaDiscoveryAndParsing(); passedCount++;
+    await testDynamicSkillLoading(); passedCount++;
+    await testPromptConstruction(); passedCount++;
+    await testResponseSanitizer(); passedCount++;
+    await testSyntheticFallback(); passedCount++;
+    await testCliPathResolver(); passedCount++;
+    await testDynamicConditionalDAGActivation(); passedCount++;
+
+    const cliResult = await testRealCliExecution();
+    if (cliResult?.skipped) {
+      skippedCount++;
+    } else {
+      passedCount++;
+    }
+
+    if (skippedCount > 0) {
+      console.log(`\n${Colors.brightYellow}${Colors.bold}>>> ${passedCount} PASSED, ${skippedCount} SKIPPED — NOT VERIFIED <<<${Colors.reset}\n`);
+      process.exit(1);
+    } else {
+      console.log(`\n${Colors.brightGreen}${Colors.bold}>>> ALL ${passedCount} AGENT RUNNER TESTS PASSED (100% SUCCESS) <<<${Colors.reset}\n`);
+      process.exit(0);
+    }
   } catch (err) {
     console.error(`\n${Colors.brightRed}${Colors.bold}TEST FAILURE:${Colors.reset}`, err);
     process.exit(1);

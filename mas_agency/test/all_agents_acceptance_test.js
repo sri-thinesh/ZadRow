@@ -315,6 +315,28 @@ function invokeAgent(agentId, spec) {
     proc.stdout.on('data', (d) => (stdout += d.toString()));
     proc.stderr.on('data', (d) => (stderr += d.toString()));
 
+    proc.on('error', (err) => {
+      const endTime = Date.now();
+      resolve({
+        agentId,
+        title: spec.title,
+        dept: spec.dept,
+        exitCode: 1,
+        durationMs: endTime - startTime,
+        startTime: new Date(startTime).toISOString(),
+        endTime: new Date(endTime).toISOString(),
+        conversationId: null,
+        status: 'SPAWN_ERROR',
+        tokens: null,
+        durationSeconds: (endTime - startTime) / 1000,
+        responseSnippet: '',
+        fullResponse: '',
+        roleVerified: false,
+        matchedKeywords: [],
+        parseError: err.message,
+      });
+    });
+
     proc.on('close', (code) => {
       const endTime = Date.now();
       let parsed = null;
@@ -433,4 +455,13 @@ async function runAllAgents(concurrency = 4) {
   return { passedCount, totalCount: results.length, results };
 }
 
-runAllAgents(4);
+runAllAgents(4).then(({ passedCount, totalCount }) => {
+  if (passedCount !== totalCount) {
+    process.exit(1);
+  } else {
+    process.exit(0);
+  }
+}).catch((err) => {
+  console.error(`Fatal error in all-agent test: ${err.message}`);
+  process.exit(1);
+});

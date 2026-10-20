@@ -1,99 +1,94 @@
 {
-  "project_id": "PRJ-LELEVAIN-PDX-001",
-  "project_name": "LE LEVAIN Artisanal Bakery",
-  "executive_summary": "Strategic scope charter for LE LEVAIN, an artisanal bakery flagship in Portland, Oregon. The digital experience centers on driving recurring sourdough subscription memberships, real-time daily bake board transparency, and local pickup pre-orders while preserving heritage culinary integrity.",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "project_id": "LL-PDX-2026",
+  "project_name": "LE LEVAIN Portland",
+  "executive_summary": "Strategic product charter for LE LEVAIN, an artisanal Portland sourdough bakery establishing a premier digital flagship. The product strategy anchors on hyper-transparent daily baking schedule tracking and a recurring sourdough loaf subscription engine, driving local pickup density and repeat community retention.",
   "value_pillars": [
     {
       "id": "VP-01",
-      "pillar_name": "Fermentation Integrity & Radical Provenance",
-      "strategic_rationale": "Positions LE LEVAIN above industrial retail bakeries by highlighting wild Portland microflora starters, regional heritage grain varietals, and uncompromising 36-hour slow fermentation practices."
+      "pillar_name": "Radical Craft & Fermentation Transparency",
+      "strategic_rationale": "Demystify heritage grain sourcing, 36-hour slow fermentation, and exact oven pull schedules to validate premium price point and elevate artisanal authority over commodity bakeries."
     },
     {
       "id": "VP-02",
-      "pillar_name": "Live Hearth Pulse & Real-Time Schedule",
-      "strategic_rationale": "Drives immediate daily foot traffic and web engagement through an operational live-state bake schedule displaying oven release times, batch numbers, and stock status."
+      "pillar_name": "Frictionless Hearth-to-Door Subscription Engine",
+      "strategic_rationale": "Convert sporadic walk-in customers into high-LTV weekly subscribers with flexible cadence choices (weekly/bi-weekly), automated batch reservation, and zero-churn pause/skip mechanics."
     },
     {
       "id": "VP-03",
-      "pillar_name": "Frictionless Bread Club Subscription",
-      "strategic_rationale": "Secures predictable recurring revenue and customer retention via custom weekly and bi-weekly sourdough share configurations with self-serve pickup scheduling."
+      "pillar_name": "Real-Time Hearth Availability & Micro-Scarcity",
+      "strategic_rationale": "Create authentic daily visit rituals via dynamic bake schedules (morning, mid-day baguettes, evening focaccia), driving pre-orders before loaves sell out."
     },
     {
       "id": "VP-04",
-      "pillar_name": "Locavore Community Anchor",
-      "strategic_rationale": "Reinforces Portland food-culture affinity through direct farmer mill partnerships, seasonal rotating crumb profiles, and educational sourdough maintenance stewardship."
+      "pillar_name": "Hyper-Local Portland Neighborhood Connection",
+      "strategic_rationale": "Position the bakery as a central community hub through localized pickup logistics, seasonal Pacific Northwest flour collaborations, and community events."
     }
   ],
   "target_personas": [
     {
       "persona_id": "PER-01",
-      "title": "The Discerning Culinary Enthusiast",
+      "title": "The Discerning Culinary Enthusiast (Local Foodie)",
       "pain_points": [
-        "Frustrated by mediocre grocery store bread masquerading as sourdough with commercial yeast additives",
-        "Disappointed by arriving at premier bakeries only to find signature boules already sold out",
-        "Wants reliable origin tracing of stone-ground regional grains and hydration levels"
+        "Frustrated by arriving at popular bakeries only to find signature sourdough sold out",
+        "Distrustful of industrial additive-laden sourdough sold in supermarket chains",
+        "Lacks time to bake slow-ferment sourdough at home on weekdays"
       ],
       "jobs_to_be_done": [
-        "Check daily bake status and exact fresh-from-the-oven batch timing before travelling to the bakery",
-        "Secure guaranteed weekly rations of naturally leavened country sourdough through a subscription tier",
-        "Discover grain profiles and fermentation details for each rotating specialty bake"
+        "Check daily baking schedule to time afternoon pickups perfectly",
+        "Set up automated weekly bread box deliveries/pickups for staple sourdough and seasonal specialty loaves"
       ]
     },
     {
       "persona_id": "PER-02",
-      "title": "The Neighborhood Daily Regular & Commuter",
+      "title": "The Neighborhood Daily Regular (Work-from-Home Neighbor)",
       "pain_points": [
-        "Short morning pickup window before commuting or school runs",
-        "Long physical lines causing unexpected delays during peak morning hours",
-        "Lacks visibility into which morning pastry or loaf batches have emerged from the hearth"
+        "Requires quick morning espresso and warm pastry before starting remote meetings",
+        "Dislikes cumbersome ordering apps with long checkout steps for small daily orders"
       ],
       "jobs_to_be_done": [
-        "Rapidly view the current morning oven roster in under 15 seconds",
-        "Reserve daily loaves or viennoiserie for same-day quick-pickup lockers/counter",
-        "Manage subscription pause/resume settings when traveling or out of town"
+        "Quickly view morning pastry drop times and today's bread schedule at a glance",
+        "Reserve daily baguette and loaf for evening dinner table without friction"
       ]
     },
     {
       "persona_id": "PER-03",
-      "title": "The Conscious Host & Gifting Member",
+      "title": "The Sustainable Household Caretaker",
       "pain_points": [
-        "Needs exceptional centerpiece loaves and seasonal bakery baskets for dinner gatherings",
-        "Unclear allergen or grain composition details for dining guests",
-        "Inconvenient ordering processes for specialty weekend bakes"
+        "Wants clean-ingredient, gut-friendly fermented breads for family meals",
+        "Needs predictable weekly budgeting and effortless subscription modification for travel/vacations"
       ],
       "jobs_to_be_done": [
-        "Schedule advanced bundle orders for weekend gatherings with allergen breakdown clarity",
-        "Gift curated sourdough club memberships to fellow Portland food lovers",
-        "Receive transparent notifications when limited seasonal loaves go live on the bake board"
+        "Subscribe to a multi-loaf family subscription with granular pause, skip, and flavor-swap controls",
+        "Access transparent allergen and heritage grain provenance information"
       ]
     }
   ],
   "in_scope_features": [
-    "Interactive Daily Bake Schedule displaying batch release times, loaf types, hydration/grain details, and live availability indicators (Fresh from Oven, Limited, Sold Out)",
-    "Bread Club Sourdough Subscription Configurator with customizable cadence (weekly, bi-weekly), loaf tier selection (Country Blonde, Heritage Spelt, Seeded Rye), and pickup time-slot allocation",
-    "Bakery Heritage & Provenance Narrative section documenting 36-hour wild-fermentation craft, Oregon mill partnerships, and starter lineage",
-    "Same-Day Pickup Reservation Flow allowing guests to claim fresh batches with real-time inventory countdown",
-    "Digital Bakery Counter FAQ covering storage, bread revival guide, slicing recommendations, and dietary/allergen specifications",
-    "Location, Hours, and Real-Time Hearth Status indicator (Oven Firing, Baking, Warm on Shelves, Closed for Prep)"
+    "Interactive Daily Baking Schedule board displaying batch drop times, batch status (Fermenting, In Oven, Freshly Pulled, Sold Out), and flour composition",
+    "Sourdough Loaf Recurring Subscription Builder (selection of loaf style, delivery/pickup cadence, add-on spreads/pastries, and checkout flow)",
+    "Hearth Availability & Pre-order reservation system for same-day scheduled store pickup",
+    "Artisanal Provenance & Heritage Grain Transparency Showcase detailing regional Pacific Northwest mill partnerships and fermentation methodology",
+    "Customer Account Hub for subscription frequency toggling, skip-week management, and pickup slot selection",
+    "Bakery Location, Neighborhood Pickup Logistics, and Operating Hours information module"
   ],
   "out_of_scope_features": [
-    "Nationwide or cross-state cold-chain shipping logistics",
-    "On-demand third-party delivery driver fleet dispatch (e.g. DoorDash, UberEats integrations)",
-    "B2B wholesale bakery invoicing and merchant distributor ordering portal",
-    "In-person Point of Sale (POS) hardware terminal management or kitchen printer integrations",
-    "Interactive sourdough starter home-baking mobile app or IoT thermometer sync"
+    "Nationwide or cross-state cold-chain shipping logistics (restricted exclusively to Portland metro area pickup and local delivery)",
+    "Real-time courier GPS route tracking or custom driver dispatch infrastructure",
+    "Complex multi-vendor marketplace or external culinary reseller portal",
+    "Catering quote builder and enterprise commercial B2B wholesale invoicing"
   ],
   "success_metrics": [
-    "Subscription conversion rate >= 4.2% among unique visitors landing on the Bread Club page",
-    "Bake Schedule bounce rate < 35%, with average time-on-page >= 1m 45s demonstrating strong utility",
-    "Pre-order pickup claim rate reaching > 85% of allocated daily digital stock before 10:00 AM PST",
-    "Subscriber retention rate exceeding 88% month-over-month on active recurring loaf memberships"
+    "Achieve >= 18% conversion rate from schedule viewers to pre-order or subscription actions",
+    "Maintain >= 65% active subscriber retention rate at 90 days post-onboarding",
+    "Reduce daily walk-in sell-out dissatisfaction by shifting >= 40% of morning sourdough allocations to digital reservations",
+    "Achieve < 45 seconds median user journey time from landing page visit to completed subscription checkout"
   ],
   "strategic_assumptions": [
-    "LE LEVAIN operates out of a single flagship retail bakery and hearth production space in Portland, Oregon with on-site customer pickup.",
-    "Bake schedule updates can be updated daily by bakery floor leads via a lightweight status interface or scheduled recurring bake cycle model.",
-    "Initial digital commerce capability focuses on customer pick-up allocation and recurring credit card billing without native long-distance shipping overhead.",
-    "Customer base prioritizes transparency in agricultural sourcing, organic whole grains, and sourdough health benefits over mass discounting."
+    "Target audience is centered within Portland metropolitan area with high demand for organic, naturally leavened artisan goods",
+    "The bakery operates a predictable daily bake cycle with 2-3 distinct oven pulls per day",
+    "Fulfillment model supports both scheduled store counter pickup and localized third-party bicycle/eco-courier delivery radius",
+    "Downstream design and engineering teams will operate in detached decoupled modes respecting strict tier contracts"
   ],
   "brandName": "LE LEVAIN in Portland"
 }

@@ -51,7 +51,7 @@ Unlike monolithic AI code generators that cram planning, design tokens, UI desig
                │                                 └────────────────┬────────────────┘
                └─────────────────────────────────┬────────────────┘
                                                  │
-                                  GATE 1: FOUNDATION & DESIGN GATE
+                               STAGE GATES 1 & 2: FOUNDATION & DESIGN GATES
                                                  │
                                  ┌───────────────▼───────────────┐
                                  │ Tier 2: Technical Arch        │
@@ -75,7 +75,7 @@ Unlike monolithic AI code generators that cram planning, design tokens, UI desig
                │                                                                   │
                └─────────────────────────────────┬─────────────────────────────────┘
                                                  │
-                                   GATE 2: CODE SYNTHESIS GATE
+                               STAGE GATE 3: CODE SYNTHESIS GATE
                                                  │
                                  ┌───────────────▼───────────────┐
                                  │ Tier 4: Quality Verification  │
@@ -88,7 +88,7 @@ Unlike monolithic AI code generators that cram planning, design tokens, UI desig
                                  │  A76 SEO & Social Graph       │
                                  └───────────────┬───────────────┘
                                                  │
-                                   GATE 3: REMEDIATION & RETEST
+                          STAGE GATE 4: REMEDIATION & RELEASE GATE
                                                  │
                                  ┌───────────────▼───────────────┐
                                  │ Tier 5: Release & Remediation │
@@ -152,25 +152,44 @@ Unlike monolithic AI code generators that cram planning, design tokens, UI desig
 
 ---
 
-## ⚡ The Four Governing Stage Gates
+## ⚡ The Four Governing Stage Gates & 11 Phase Verification Checkpoints
 
-Advancement through the ZadRow lifecycle is strictly regulated by sequential gates governed by **A03 Architecture & Quality Arbiter**:
+Advancement through the ZadRow lifecycle is strictly regulated by **Four Sequential Stage Gates** governed by **A03 Architecture & Quality Arbiter**, comprising **11 internal phase verification checkpoints** (including Gates A, B, C, and D) that evaluate concrete artifact deliverables:
 
-1. **Gate 1: Foundation Gate**  
-   *Prerequisites*: Scope Charter (`01`), Execution DAG (`02`), Master Spec (`13`), Doc Verification (`14`), and Master Tech Architecture (`40`).  
-   *Rule*: Implementation cannot begin until documentation reaches 100% completeness and zero architectural contradictions exist.
+### 1. Stage Gate 1: Foundation Gate
+- **Governed by**: `A03 Architecture & Quality Arbiter`
+- **Core Prerequisites**: Scope Charter (`01`), Execution DAG (`02`), Master Spec (`13`), Doc Verification (`14`), and Master Tech Architecture (`40`).
+- **Standard**: Implementation cannot commence until specifications reach 100% completeness and zero architectural contradictions exist.
+- **Internal Verification Checkpoints**:
+  - `scope_intake_gate` (Phase 1): Intake deconstruction, scope charter, DAG, and value pillars verified.
+  - `spec_verification_gate` (Phase 2): Master spec and `14_doc_verification_matrix.json` audited; halts immediately on contradictory or unmapped requirements.
+  - `tech_planning_gate` (Phase 3): Full-stack component hierarchy, boundary rules, and build platform specs verified.
 
-2. **Gate 2: Design & Experience Gate**  
-   *Prerequisites*: Art Direction (`22`), Motion Choreography (`23`), Wireframes (`31`), Design Tokens (`32`), and Copywriting (`33`).  
-   *Rule*: Tokens must mathematically satisfy WCAG AA/AAA contrast ratios, and copy must be 100% placeholder-free before code synthesis begins.
+### 2. Stage Gate 2: Design & Experience Gate
+- **Governed by**: `A03 Architecture & Quality Arbiter` & `A20 Creative & Research Director`
+- **Core Prerequisites**: Creative Charter (`20`), Art Direction (`22`), Motion Choreography (`23`), Wireframes (`31`), Design Tokens (`32`), and Production Copywriting (`33`).
+- **Standard**: Tokens must mathematically satisfy WCAG AA/AAA contrast ratios, and copy must be 100% placeholder-free before code synthesis begins.
+- **Internal Verification Checkpoints**:
+  - **Gate A (`creative_direction_approval_gate`)** (Phase 1): Evaluates `20_creative_direction_charter.json`. Halts workflow if no selected concept exists, fewer than 3 concept explorations are documented, or approval status !== `'APPROVED'`.
+  - **Gate B (`design_completeness_gate`)** (Phase 1): Evaluates `30_experience_design_strategy.json`, `31_wireframe_ux_flow.json`, and `33_copywriting_and_conversion.json`. Halts workflow if review verdict !== `'APPROVED'`, screen wireframes are empty, or factual traceability matrix is empty.
 
-3. **Gate 3: Code Synthesis & Integration Gate**  
-   *Prerequisites*: Frontend Manifest (`50`), App Shell (`51`), Page Assemblies (`52`), UI Components (`53`), Visual Assets (`54`).  
-   *Rule*: Code must compile with zero TypeScript errors, zero missing token references, and strict 60 FPS animation discipline.
+### 3. Stage Gate 3: Code Synthesis & Integration Gate
+- **Governed by**: `A50 Frontend Engineering Lead` & `A40 Chief Technical Architect`
+- **Core Prerequisites**: Frontend Delivery Manifest (`50`), App Shell (`51`), Page Assemblies (`52`), UI Components (`53`), Visual Assets (`54`), Server Endpoints (`61-63` if backend active).
+- **Standard**: Code must compile with zero TypeScript errors, zero missing token references, and strict 60 FPS animation discipline.
+- **Internal Verification Checkpoints**:
+  - **Gate C (`pre_implementation_visual_review_gate`)** (Phase 4): Evaluates `55_pre_implementation_visual_review.json`. Halts workflow before synthesis if visual review is missing or rejected for template similarity or lack of creative distinction.
+  - `implementation_verification_gate` (Phase 4): Verifies complete atomic component synthesis, layout scaffolding, and conditional backend endpoint generation.
 
-4. **Gate 4: Release & Verification Gate**  
-   *Prerequisites*: QA Verdict (`70`), Triage Matrix (`81`), Patch Log (`82`), Release Package (`83`).  
-   *Rule*: Exactly 0 P0/P1 defects, maximum 2 P3 defects, clean production build (`npm run build`), and deployment readiness certification.
+### 4. Stage Gate 4: Release & Verification Gate
+- **Governed by**: `A70 Independent QA Director`, `A80 Release Director`, and `A03 Arbiter`
+- **Core Prerequisites**: QA Comprehensive Verdict (`70`), Defect Triage Matrix (`81`), Remediation Patch Log (`82`), Release Package (`83`), Master Orchestration Manifest (`00`).
+- **Standard**: Exactly 0 P0/P1 defects, maximum 2 P3 defects, clean production build (`npm run build`), and deployment readiness certification.
+- **Internal Verification Checkpoints**:
+  - `qa_verification_gate` (Phase 5): Aggregates domain audit reports (`71-76`) into composite quality score.
+  - **Gate D (`post_implementation_independent_review_gate`)** (Phase 5): Independent verification across 5 standard viewports (375px to 1920px); halts workflow if QA status !== `'PASSED'` or unhandled critical defects exist.
+  - `remediation_release_gate` (Phase 6): Triages defects, routes tickets to implementation owners, generates patches, and re-tests; halts if unresolved defects remain after maximum cycles.
+  - `production_signoff_gate` (Phase 7): Final release packaging verification, production build sign-off, and master orchestration manifest issuance.
 
 ---
 

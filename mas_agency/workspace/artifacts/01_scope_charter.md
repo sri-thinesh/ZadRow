@@ -1,42 +1,19 @@
-# Project Charter: LE LEVAIN Artisanal Bakery (Portland)
+# Strategic Scope Charter: LE LEVAIN (Portland, OR)
 
-## Strategic Scope & Ingestion Summary
-**Project ID**: `PRJ-LELEVAIN-PDX-001`  
-**Author**: `A01 Requirements & Scope Director`  
-**Target Domain**: Artisanal Food & Beverage / Direct-to-Consumer Digital Experience  
+## Executive Summary
+This document establishes the strategic, market-facing scope charter for LE LEVAIN's digital presence in Portland, Oregon. Anchored around a transparent daily baking schedule and a recurring sourdough subscription engine, the platform transforms traditional artisanal bakery operations into an intentional, high-retention direct-to-consumer digital experience.
 
----
+## Strategic Value Pillars
+1. **Radical Craft & Fermentation Transparency**: Direct verification of heritage flours, hydration ratios, and fermentation timeframes to anchor premium craft positioning.
+2. **Frictionless Hearth-to-Door Subscription Engine**: Flexible recurring bread subscriptions driving high customer lifetime value and consistent operational bake planning.
+3. **Real-Time Hearth Availability & Micro-Scarcity**: Live baking timeline giving consumers reliable insight into fresh oven pulls and preventing out-of-stock dropouts.
+4. **Hyper-Local Portland Neighborhood Connection**: Grounded in Pacific Northwest community rituals, regional agriculture partnerships, and frictionless pickup points.
 
-### Executive Overview
-LE LEVAIN is a premier artisanal bakery based in Portland, Oregon, renowned for long-fermentation naturally leavened country sourdough, heritage Pacific Northwest grains, and master hearth baking. This project establishes LE LEVAIN's authoritative digital experience, designed to convert casual foot traffic and local food lovers into committed, recurring sourdough subscribers while solving daily inventory visibility via a real-time Hearth Bake Schedule.
+## Target Personas & Jobs-to-be-Done
+- **Discerning Culinary Enthusiast (Per-01)**: Values uncompromised quality; requires automated weekly allocations of signature sourdough loaves.
+- **Neighborhood Daily Regular (Per-02)**: Seeks frictionless morning bakery schedule access and quick afternoon bread reservations.
+- **Sustainable Household Caretaker (Per-03)**: Prioritizes clean, gut-friendly nutrition for the household with customizable delivery/pickup intervals.
 
----
-
-### Core Value Pillars
-1. **Fermentation Integrity & Radical Provenance**: Wild starter lineage, 36-hour slow cold fermentation, stone-ground regional grains.
-2. **Live Hearth Pulse & Real-Time Schedule**: Dynamic daily batch timeline showing exact oven pulls and stock availability.
-3. **Frictionless Bread Club Subscription**: Recurring weekly/bi-weekly sourdough rations with automated pickup reservations.
-4. **Locavore Community Anchor**: Regional grain sovereignty, sustainability, and transparency in craft baking.
-
----
-
-### Target Audience & Core Personas
-- **The Discerning Culinary Enthusiast**: Seeks authentic, additive-free artisanal sourdough, deep grain provenance, and guaranteed loaf reservations.
-- **The Neighborhood Daily Regular & Commuter**: Demands zero-friction morning pickup, fast availability checks, and manageable subscription pauses.
-- **The Conscious Host & Gifting Member**: Requires weekend entertaining loaves, transparent allergen indices, and sourdough club gift options.
-
----
-
-### Scope Boundaries
-#### In-Scope MVP
-- Dynamic Daily Baking Schedule & Live Hearth Status board.
-- Sourdough Subscription Configurator (Bread Club) with flexible cadences.
-- Direct Same-Day Batch Pickup pre-order reservation.
-- Provenance & Fermentation Philosophy storytelling.
-- Storage, Re-crisping, and Allergen FAQ knowledge base.
-
-#### Strictly Out-of-Scope
-- Long-distance cross-country cold-chain shipping logistics.
-- On-demand courier delivery integrations (DoorDash/UberEats).
-- B2B wholesale portal and commercial merchant distributor ordering.
-- POS terminal and kitchen printer hardware synchronization.
+## Boundary Controls
+- **In-Scope**: Daily baking schedule board, subscription builder, same-day pickup reservations, grain provenance storytelling, subscriber account controls.
+- **Out-of-Scope**: Nationwide cold-chain delivery, third-party courier dispatch infrastructure, wholesale B2B portals, catering quotation suites.
