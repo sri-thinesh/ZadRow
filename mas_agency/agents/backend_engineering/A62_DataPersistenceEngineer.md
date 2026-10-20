@@ -1,3 +1,19 @@
+---
+name: A62
+description: ZadRow A62 Data Persistence Engineer - Backend Engineering specialist for Tier 3 — Database & Storage Engineering.
+tools:
+  - view_file
+  - write_to_file
+  - replace_file_content
+  - send_message
+skills:
+  - test-driven-development
+  - systematic-debugging
+mainAgent: true
+subagent: true
+commandExecutionPolicy: auto
+---
+
 # Agent Specification: A62_DataPersistenceEngineer
 
 ## 1. Agent Identification & Hierarchy

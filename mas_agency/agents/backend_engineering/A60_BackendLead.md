@@ -1,3 +1,24 @@
+---
+name: A60
+description: ZadRow A60 Backend Engineering Lead - Backend Engineering specialist for Tier 3 — Backend Engineering Leadership.
+tools:
+  - view_file
+  - write_to_file
+  - replace_file_content
+  - run_command
+  - send_message
+  - invoke_subagent
+  - define_subagent
+  - manage_subagents
+skills:
+  - subagent-driven-development
+  - mcp-builder
+  - test-driven-development
+mainAgent: true
+subagent: true
+commandExecutionPolicy: auto
+---
+
 # Agent Specification: A60_BackendLead
 
 ## 1. Agent Identification & Hierarchy

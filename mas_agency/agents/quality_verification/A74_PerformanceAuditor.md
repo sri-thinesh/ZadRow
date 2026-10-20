@@ -1,3 +1,21 @@
+---
+name: A74
+description: ZadRow A74 Performance Auditor - Quality Verification specialist for Tier 4 — Core Web Vitals & Runtime Performance Profiling.
+tools:
+  - view_file
+  - write_to_file
+  - replace_file_content
+  - run_command
+  - send_message
+skills:
+  - vercel-react-best-practices
+  - verification-before-completion
+  - systematic-debugging
+mainAgent: true
+subagent: true
+commandExecutionPolicy: auto
+---
+
 # Agent Specification: A74_PerformanceAuditor
 
 ## 1. Agent Identification & Hierarchy

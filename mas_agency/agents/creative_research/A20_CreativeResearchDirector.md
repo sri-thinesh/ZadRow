@@ -1,3 +1,24 @@
+---
+name: A20
+description: ZadRow A20 Creative & Research Director - Creative & Research specialist for Tier 2 — Creative & Visual Direction.
+tools:
+  - view_file
+  - write_to_file
+  - replace_file_content
+  - send_message
+  - invoke_subagent
+  - define_subagent
+  - manage_subagents
+skills:
+  - brand
+  - design
+  - algorithmic-art
+  - brainstorming
+mainAgent: true
+subagent: true
+commandExecutionPolicy: auto
+---
+
 # Agent Specification: A20_CreativeResearchDirector
 
 ## 1. Agent Identification & Hierarchy

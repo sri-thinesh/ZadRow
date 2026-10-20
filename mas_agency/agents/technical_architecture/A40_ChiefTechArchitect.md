@@ -1,3 +1,23 @@
+---
+name: A40
+description: ZadRow A40 Chief Technical Architect - Technical Architecture specialist for Tier 2 — System Architecture & Engineering Governance.
+tools:
+  - view_file
+  - write_to_file
+  - replace_file_content
+  - send_message
+  - invoke_subagent
+  - define_subagent
+  - manage_subagents
+skills:
+  - vercel-react-best-practices
+  - vercel-composition-patterns
+  - writing-plans
+mainAgent: true
+subagent: true
+commandExecutionPolicy: auto
+---
+
 # Agent Specification: A40_ChiefTechArchitect
 
 ## 1. Agent Identification & Hierarchy

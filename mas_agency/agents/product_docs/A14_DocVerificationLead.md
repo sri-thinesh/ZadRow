@@ -1,3 +1,20 @@
+---
+name: A14
+description: ZadRow A14 Documentation Verification Lead - Product & Documentation specialist for Tier 1 — Documentation QA & Consistency Audit.
+tools:
+  - view_file
+  - write_to_file
+  - replace_file_content
+  - send_message
+skills:
+  - verification-before-completion
+  - doc-coauthoring
+  - systematic-debugging
+mainAgent: true
+subagent: true
+commandExecutionPolicy: auto
+---
+
 # Agent Specification: A14_DocVerificationLead
 
 ## 1. Agent Identification & Hierarchy

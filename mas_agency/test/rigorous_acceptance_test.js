@@ -151,8 +151,13 @@ async function testDimension1_AgentDiscoveryAndDelegation() {
 async function testDimension2_RealAIInvocation() {
   Logger.tier('DIM 2', 'Real AI Invocation (cli_windows_x64.exe) Evidence & Task Reconciliation');
 
-  const cliPath = process.env.ANTIGRAVITY_CLI_PATH || 'C:\\Users\\ksrit\\Downloads\\cli_windows_x64.exe';
-  const hasBinary = fs.existsSync(cliPath);
+  let cliPath;
+  try {
+    cliPath = AgentRunner.resolveCliPath();
+  } catch {
+    cliPath = null;
+  }
+  const hasBinary = Boolean(cliPath && fs.existsSync(cliPath));
 
   if (!hasBinary) {
     recordTest(2, 'Antigravity CLI binary availability', false, { error: `Binary missing at ${cliPath}` });
@@ -856,7 +861,7 @@ async function testDimension9_QualityChecks() {
 async function testDimension10_ReleaseGates() {
   Logger.tier('DIM 10', 'Release Gate Enforcement (P0/P1 Defects Block Signoff)');
 
-  const coordinator = new WorkflowCoordinator({ agencyDir, strictGates: false });
+  const coordinator = new WorkflowCoordinator({ agencyDir, strictGates: false, executionMode: 'synthetic' });
 
   // Triage matrix with unresolved P0 defect
   const blockingMatrix = coordinator._buildDefectTriageMatrix([

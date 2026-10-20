@@ -5,8 +5,10 @@ tools:
   - view_file
   - write_to_file
   - replace_file_content
+  - run_command
   - send_message
   - invoke_subagent
+  - define_subagent
   - manage_subagents
 skills:
   - systematic-debugging

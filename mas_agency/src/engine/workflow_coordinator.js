@@ -178,11 +178,15 @@ export class WorkflowCoordinator extends EventEmitter {
     this.docsDir = options.docsDir || path.join(this.agencyDir, 'docs');
     this.outputDir = options.outputDir || path.join(this.agencyDir, 'output', 'website');
 
+    this.allowFallback = options.allowFallback === true;
+    this.executionMode = options.executionMode || (this.allowFallback ? 'synthetic' : 'auto');
+
     this.agentRunner = options.agentRunner || new AgentRunner({
       agencyDir: this.agencyDir,
       rootDir: this.rootDir,
       artifactsDir: this.artifactsDir,
-      executionMode: options.executionMode || 'synthetic',
+      executionMode: this.executionMode,
+      allowFallback: this.allowFallback,
     });
 
     this.codeSynthesizer = options.codeSynthesizer || new CodeSynthesizer({

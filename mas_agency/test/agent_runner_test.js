@@ -330,14 +330,10 @@ async function testCliPathResolver() {
 // =====================================================================
 async function testRealCliExecution() {
   Logger.info('Testing native Antigravity CLI execution pipeline...');
-  let cliPath;
   try {
     cliPath = AgentRunner.resolveCliPath();
   } catch {
-    if (fs.existsSync('C:\\Users\\ksrit\\Downloads\\cli_windows_x64.exe')) {
-      process.env.ANTIGRAVITY_CLI_PATH = 'C:\\Users\\ksrit\\Downloads\\cli_windows_x64.exe';
-      cliPath = AgentRunner.resolveCliPath();
-    }
+    cliPath = null;
   }
 
   if (!cliPath || !fs.existsSync(cliPath)) {

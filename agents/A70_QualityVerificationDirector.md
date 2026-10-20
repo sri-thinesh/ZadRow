@@ -8,6 +8,7 @@ tools:
   - run_command
   - send_message
   - invoke_subagent
+  - define_subagent
   - manage_subagents
 skills:
   - verification-before-completion

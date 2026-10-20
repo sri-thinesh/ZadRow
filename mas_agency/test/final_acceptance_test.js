@@ -249,6 +249,7 @@ async function testPhaseDependencyEnforcement() {
       rootDir,
       artifactsDir,
       outputDir,
+      executionMode: 'synthetic',
       strictGates: true,
     });
 

@@ -1,3 +1,20 @@
+---
+name: A73
+description: ZadRow A73 Accessibility Auditor - Quality Verification specialist for Tier 4 — Accessibility & WCAG 2.2 AAA Audit.
+tools:
+  - view_file
+  - write_to_file
+  - replace_file_content
+  - send_message
+skills:
+  - wcag-contrast-auditor
+  - web-design-guidelines
+  - verification-before-completion
+mainAgent: true
+subagent: true
+commandExecutionPolicy: auto
+---
+
 # Agent Specification: A73_AccessibilityAuditor
 
 ## 1. Agent Identification & Hierarchy

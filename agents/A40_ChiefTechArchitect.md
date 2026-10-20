@@ -7,6 +7,7 @@ tools:
   - replace_file_content
   - send_message
   - invoke_subagent
+  - define_subagent
   - manage_subagents
 skills:
   - vercel-react-best-practices

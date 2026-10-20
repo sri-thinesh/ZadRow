@@ -1,3 +1,20 @@
+---
+name: A76
+description: ZadRow A76 SEO & Social Graph Auditor - Quality Verification specialist for Tier 4 — SEO, Structured Data & Social Graph Verification.
+tools:
+  - view_file
+  - write_to_file
+  - replace_file_content
+  - send_message
+skills:
+  - web-design-guidelines
+  - writing-guidelines
+  - verification-before-completion
+mainAgent: true
+subagent: true
+commandExecutionPolicy: auto
+---
+
 # Agent Specification: A76_SEOAuditor
 
 ## 1. Agent Identification & Hierarchy

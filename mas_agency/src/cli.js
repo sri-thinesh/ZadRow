@@ -32,6 +32,7 @@ let scope = null;
 let phases = null;
 let departments = null;
 let skipPhases = null;
+let allowFallback = false;
 
 for (let i = 0; i < args.length; i++) {
   const arg = args[i];
@@ -39,6 +40,8 @@ for (let i = 0; i < args.length; i++) {
     prompt = args[++i];
   } else if (arg === '--concurrency' || arg === '-c') {
     concurrency = parseInt(args[++i], 10) || 6;
+  } else if (arg === '--allow-fallback') {
+    allowFallback = true;
   } else if (arg === '--skip-qa') {
     skipQA = true;
   } else if (arg === '--build-only') {
@@ -80,6 +83,7 @@ ${Colors.bold}OPTIONS:${Colors.reset}
   -d, --departments <list>    Specific departments to execute (e.g. "creative_research,experience_design")
       --skip-phases <list>    Specific phases to cleanly skip (e.g. "5,6")
       --skip-qa               Skip post-synthesis automated verification
+      --allow-fallback        Allow synthetic fallback when Antigravity CLI is unavailable
       --build-only            Assemble website directly from existing artifacts
       --validate-only         Execute QA verification suite on existing website
   -h, --help                  Show this help message
@@ -159,6 +163,7 @@ async function main() {
       agencyDir,
       concurrency,
       skipQA,
+      allowFallback,
     });
 
     let currentTier = -1;
@@ -220,7 +225,7 @@ async function main() {
   } else {
     console.log(`\n${Colors.dim}Initializing AURA Multi-Agent 7-Phase Workflow Pipeline (42 Agents across 9 Departments)${Colors.reset}\n`);
 
-    const coordinator = new WorkflowCoordinator({ agencyDir });
+    const coordinator = new WorkflowCoordinator({ agencyDir, allowFallback });
 
     coordinator.on('phase:start', (data) => {
       Logger.tier(`Phase ${data.phase}`, `${data.name} [${data.agents.join(', ')}]`);
@@ -239,7 +244,7 @@ async function main() {
       Logger.warn(`Remediation Cycle ${data.cycle}/${data.maxCycles}: Triaging ${data.defectsCount} defect(s) to implementation owners`);
     });
 
-    await coordinator.run(prompt, { skipQA, scope, phases, departments, skipPhases });
+    await coordinator.run(prompt, { skipQA, scope, phases, departments, skipPhases, allowFallback });
     const brandName = coordinator.projectBrief?.brandName || 'STUDIO SYNTHETIX';
 
     // In detached mode, only run standalone QA audit if QA phase was active or website was synthesized

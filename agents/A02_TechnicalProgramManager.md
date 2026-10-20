@@ -6,6 +6,9 @@ tools:
   - write_to_file
   - replace_file_content
   - send_message
+  - invoke_subagent
+  - define_subagent
+  - manage_subagents
 skills:
   - writing-plans
   - dispatching-parallel-agents

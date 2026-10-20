@@ -47,8 +47,13 @@ export async function runOrchestration(prompt, options = {}) {
   const agencyDir = options.agencyDir || path.resolve(__dirname, '..');
   const maxConcurrency = options.concurrency || 6;
   const skipQA = options.skipQA || false;
+  const allowFallback = options.allowFallback === true;
 
-  const agentRunner = new AgentRunner({ agencyDir });
+  const agentRunner = options.agentRunner || new AgentRunner({
+    agencyDir,
+    allowFallback,
+    executionMode: options.executionMode || (allowFallback ? 'synthetic' : 'auto'),
+  });
   const dag = new DAGRunner({ maxConcurrency });
 
   // 1. Build DAG Nodes for the 18 Agency Operatives

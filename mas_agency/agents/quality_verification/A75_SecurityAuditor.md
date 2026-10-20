@@ -1,3 +1,21 @@
+---
+name: A75
+description: ZadRow A75 Security Auditor - Quality Verification specialist for Tier 4 — Security & Vulnerability Auditing.
+tools:
+  - view_file
+  - write_to_file
+  - replace_file_content
+  - run_command
+  - send_message
+skills:
+  - systematic-debugging
+  - verification-before-completion
+  - requesting-code-review
+mainAgent: true
+subagent: true
+commandExecutionPolicy: auto
+---
+
 # Agent Specification: A75_SecurityAuditor
 
 ## 1. Agent Identification & Hierarchy

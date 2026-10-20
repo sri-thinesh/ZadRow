@@ -404,15 +404,19 @@ export class AgentRunner {
     this.maxRetries = options.maxRetries ?? 2;
     this.effort = options.effort || process.env.ANTIGRAVITY_EFFORT || 'low';
     this.executionMode = options.executionMode || 'auto'; // 'auto' | 'cli' | 'synthetic'
-    this.allowFallback = options.allowFallback !== false;
+    this.allowFallback = options.allowFallback === true;
 
     // Resolve CLI binary path according to strict priority order:
     // 1. options.cliPath -> 2. process.env.ANTIGRAVITY_CLI_PATH -> 3. 'agy' on PATH -> 4. throw naming ANTIGRAVITY_CLI_PATH
-    if (this.executionMode === 'synthetic') {
+    if (this.executionMode === 'synthetic' || this.allowFallback) {
       try {
         this.cliPath = resolveCliPath(options);
-      } catch {
-        this.cliPath = null;
+      } catch (err) {
+        if (this.allowFallback || this.executionMode === 'synthetic') {
+          this.cliPath = null;
+        } else {
+          throw err;
+        }
       }
     } else {
       this.cliPath = resolveCliPath(options);
@@ -539,8 +543,22 @@ export class AgentRunner {
         skills = this.skillLoader.extractSkillsFromMarkdown(content);
       }
 
+      let frontmatterName = null;
+      if (ext === '.md') {
+        const fmMatch = content.match(/^---\s*[\r\n]+([\s\S]*?)[\r\n]+---/);
+        if (fmMatch) {
+          const nameMatch = fmMatch[1].match(/^name:\s*([^\r\n]+)/m);
+          if (nameMatch) {
+            frontmatterName = nameMatch[1].trim();
+          }
+        }
+      }
+
+      const canonicalId = frontmatterName || id;
       const personaObj = {
         id,
+        canonicalId,
+        frontmatterName: canonicalId,
         title,
         tier,
         reportsTo,
@@ -563,6 +581,11 @@ export class AgentRunner {
       const fileBase = filename.replace(ext, '');
       if (fileBase && fileBase !== id) {
         this.personas.set(fileBase, personaObj);
+      }
+
+      // Also register under canonicalId / frontmatterName if different
+      if (canonicalId && canonicalId !== id && canonicalId !== fileBase) {
+        this.personas.set(canonicalId, personaObj);
       }
 
       // Legacy MAS 1.0 agent mapping to MAS 2.0 agent specifications
@@ -589,10 +612,13 @@ export class AgentRunner {
         'A80': ['REL_ReleaseValidator', 'ReleaseRemediationDirector'],
       };
 
-      const aliases = legacyAliasMap[id] || [];
+      const aliases = [
+        ...(legacyAliasMap[id] || []),
+        ...(canonicalId !== id ? (legacyAliasMap[canonicalId] || []) : []),
+      ];
       for (const alias of aliases) {
         if (!this.personas.has(alias)) {
-          this.personas.set(alias, { ...personaObj, id: alias, canonicalId: id });
+          this.personas.set(alias, { ...personaObj, id: alias, canonicalId, frontmatterName: canonicalId });
         }
       }
     } catch (_) {}
@@ -802,17 +828,21 @@ export class AgentRunner {
 
     let lastError = null;
 
+    const targetAgentId = (persona?.frontmatterName || persona?.canonicalId || persona?.id || agentId || '').trim();
+
     for (let attempt = 1; attempt <= this.maxRetries + 1; attempt++) {
       try {
         if (progressCallback) {
-          progressCallback(25 * attempt, `Invoking Antigravity CLI for ${agentId} (attempt ${attempt}/${this.maxRetries + 1})...`);
+          progressCallback(25 * attempt, `Invoking Antigravity CLI for ${targetAgentId} (attempt ${attempt}/${this.maxRetries + 1})...`);
         }
 
         const currentPrompt = attempt === 1
           ? basePrompt
           : `${basePrompt}\n\nCRITICAL RETRY CORRECTION (Attempt ${attempt}): Your previous output failed JSON parsing: "${lastError?.message}". You MUST return ONLY a raw JSON object matching the required schema with zero markdown framing and zero introductory text.`;
 
-        const cliResult = await this._invokeCliProcess(currentPrompt);
+        const cliResult = await this._invokeCliProcess(currentPrompt, {
+          agentId: targetAgentId,
+        });
         const extracted = ResponseSanitizer.extractJsonFromText(cliResult.responseText);
         const sanitized = ResponseSanitizer.sanitizeAgentOutput(extracted, agentId, {
           brandName,
@@ -846,6 +876,7 @@ export class AgentRunner {
   async _invokeCliProcess(prompt, options = {}) {
     const cliPath = options.cliPath || this.cliPath;
     const timeoutMs = options.timeoutMs || this.cliTimeoutMs;
+    const agentId = (options.agentId || options.agent || '').trim();
 
     if (!fs.existsSync(cliPath)) {
       throw new Error(`Antigravity CLI binary not found at: ${cliPath}`);
@@ -858,13 +889,17 @@ export class AgentRunner {
         finalPrompt = finalPrompt.slice(0, 30000);
       }
       const effort = options.effort || this.effort || 'low';
-      const args = [
+      const args = [];
+      if (agentId) {
+        args.push('--agent', agentId);
+      }
+      args.push(
         '--output-format', 'json',
         '--dangerously-skip-permissions',
         '--effort', effort,
         '--disable-slash-commands',
         '--print', finalPrompt,
-      ];
+      );
 
       const proc = spawn(cliPath, args, {
         stdio: ['ignore', 'pipe', 'pipe'],
@@ -912,21 +947,36 @@ export class AgentRunner {
           clearTimeout(timer);
 
           if (code !== 0) {
+            try {
+              const envelope = JSON.parse(stdout);
+              if (envelope && envelope.status && envelope.status !== 'SUCCESS') {
+                reject(new Error(`Antigravity CLI returned ${envelope.status}: ${envelope.error || envelope.message || 'Unknown CLI error'}`));
+                return;
+              }
+            } catch (_) {}
             const outMsg = stderr.trim() || stdout.trim() || 'none';
             reject(new Error(`Antigravity CLI exited with code ${code}. Output: ${outMsg}`));
             return;
           }
 
           try {
-            const wrapper = JSON.parse(stdout);
+            const envelope = JSON.parse(stdout);
+            if (envelope && envelope.status && envelope.status !== 'SUCCESS') {
+              reject(new Error(`Antigravity CLI returned ${envelope.status}: ${envelope.error || envelope.message || 'Unknown CLI error'}`));
+              return;
+            }
             resolve({
               rawStdout: stdout,
-              wrapper,
-              responseText: wrapper.response || wrapper.text || stdout,
-              durationSeconds: wrapper.duration_seconds || null,
-              usage: wrapper.usage || null,
+              wrapper: envelope,
+              responseText: envelope.response || envelope.text || stdout,
+              durationSeconds: envelope.duration_seconds || null,
+              usage: envelope.usage || null,
             });
-          } catch (_) {
+          } catch (err) {
+            if (err.message && err.message.startsWith('Antigravity CLI returned')) {
+              reject(err);
+              return;
+            }
             resolve({
               rawStdout: stdout,
               wrapper: null,
@@ -971,6 +1021,7 @@ export class AgentRunner {
    * Flagged explicitly with `executionMode: "synthetic_fallback"`
    */
   async _generateSyntheticFallback(agentId, prompt, upstream = {}, skills = {}) {
+    console.warn(`\n!! SYNTHETIC FALLBACK for ${agentId} — output is NOT model-generated\n`);
     const normalizedPrompt = (prompt || '').trim();
     const brandName = this._extractBrandName(normalizedPrompt);
 

@@ -1,3 +1,20 @@
+---
+name: A82
+description: ZadRow A82 Remediation Coordinator - Release & Remediation specialist for Tier 5 — Patch Dispatch & Regression Verification.
+tools:
+  - view_file
+  - write_to_file
+  - replace_file_content
+  - send_message
+skills:
+  - subagent-driven-development
+  - systematic-debugging
+  - verification-before-completion
+mainAgent: true
+subagent: true
+commandExecutionPolicy: auto
+---
+
 # Agent Specification: A82_RemediationCoordinator
 
 ## 1. Agent Identification & Hierarchy

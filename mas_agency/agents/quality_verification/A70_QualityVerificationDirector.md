@@ -1,3 +1,24 @@
+---
+name: A70
+description: ZadRow A70 Independent QA & Reliability Director - Quality Verification specialist for Tier 4 — Independent Quality Assurance Leadership.
+tools:
+  - view_file
+  - write_to_file
+  - replace_file_content
+  - run_command
+  - send_message
+  - invoke_subagent
+  - define_subagent
+  - manage_subagents
+skills:
+  - verification-before-completion
+  - webapp-testing
+  - test-driven-development
+mainAgent: true
+subagent: true
+commandExecutionPolicy: auto
+---
+
 # Agent Specification: A70_QualityVerificationDirector
 
 ## 1. Agent Identification & Hierarchy

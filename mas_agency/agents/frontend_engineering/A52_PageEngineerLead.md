@@ -1,3 +1,20 @@
+---
+name: A52
+description: ZadRow A52 Page Engineering Lead - Frontend Engineering specialist for Tier 3 — Page Assembly & Section Engineering.
+tools:
+  - view_file
+  - write_to_file
+  - replace_file_content
+  - send_message
+skills:
+  - frontend-design
+  - ui-styling
+  - vercel-react-best-practices
+mainAgent: true
+subagent: true
+commandExecutionPolicy: auto
+---
+
 # Agent Specification: A52_PageEngineerLead
 
 ## 1. Agent Identification & Hierarchy

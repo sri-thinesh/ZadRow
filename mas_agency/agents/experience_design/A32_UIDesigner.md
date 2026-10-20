@@ -1,3 +1,21 @@
+---
+name: A32
+description: ZadRow A32 UI Designer - Experience Design specialist for Tier 2 — Design System & UI Component Specification.
+tools:
+  - view_file
+  - write_to_file
+  - replace_file_content
+  - send_message
+skills:
+  - design-tokens-specifier
+  - design-system
+  - ui-styling
+  - ui-ux-pro-max
+mainAgent: true
+subagent: true
+commandExecutionPolicy: auto
+---
+
 # Agent Specification: A32_UIDesigner
 
 ## 1. Agent Identification & Hierarchy

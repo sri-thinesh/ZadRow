@@ -1,3 +1,24 @@
+---
+name: A50
+description: ZadRow A50 Frontend Engineering Lead - Frontend Engineering specialist for Tier 3 — Frontend Engineering Leadership.
+tools:
+  - view_file
+  - write_to_file
+  - replace_file_content
+  - run_command
+  - send_message
+  - invoke_subagent
+  - define_subagent
+  - manage_subagents
+skills:
+  - subagent-driven-development
+  - vercel-react-best-practices
+  - frontend-design
+mainAgent: true
+subagent: true
+commandExecutionPolicy: auto
+---
+
 # Agent Specification: A50_FrontendLead
 
 ## 1. Agent Identification & Hierarchy

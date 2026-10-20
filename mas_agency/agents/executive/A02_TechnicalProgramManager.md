@@ -1,3 +1,23 @@
+---
+name: A02
+description: ZadRow A02 Technical Program Manager - Executive Command specialist for Tier 0 — Program Scheduling & Execution Flow.
+tools:
+  - view_file
+  - write_to_file
+  - replace_file_content
+  - send_message
+  - invoke_subagent
+  - define_subagent
+  - manage_subagents
+skills:
+  - writing-plans
+  - dispatching-parallel-agents
+  - verification-before-completion
+mainAgent: true
+subagent: true
+commandExecutionPolicy: auto
+---
+
 # Agent Specification: A02_TechnicalProgramManager
 
 ## 1. Agent Identification & Hierarchy

@@ -1,3 +1,20 @@
+---
+name: A53
+description: ZadRow A53 Component Engineering Lead - Frontend Engineering specialist for Tier 3 — Interactive UI Components & Widgets.
+tools:
+  - view_file
+  - write_to_file
+  - replace_file_content
+  - send_message
+skills:
+  - design-system
+  - vercel-react-best-practices
+  - ui-styling
+mainAgent: true
+subagent: true
+commandExecutionPolicy: auto
+---
+
 # Agent Specification: A53_ComponentLead
 
 ## 1. Agent Identification & Hierarchy

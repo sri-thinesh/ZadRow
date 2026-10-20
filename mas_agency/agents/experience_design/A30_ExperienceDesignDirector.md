@@ -1,3 +1,23 @@
+---
+name: A30
+description: ZadRow A30 Experience Design Director - Experience Design specialist for Tier 2 — Experience & Design Systems Leadership.
+tools:
+  - view_file
+  - write_to_file
+  - replace_file_content
+  - send_message
+  - invoke_subagent
+  - define_subagent
+  - manage_subagents
+skills:
+  - design-system
+  - ui-ux-pro-max
+  - web-design-guidelines
+mainAgent: true
+subagent: true
+commandExecutionPolicy: auto
+---
+
 # Agent Specification: A30_ExperienceDesignDirector
 
 ## 1. Agent Identification & Hierarchy

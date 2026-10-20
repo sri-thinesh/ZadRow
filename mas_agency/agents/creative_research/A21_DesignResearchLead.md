@@ -1,3 +1,20 @@
+---
+name: A21
+description: ZadRow A21 Design Research Lead - Creative & Research specialist for Tier 2 — Design Intelligence & Benchmarking.
+tools:
+  - view_file
+  - write_to_file
+  - replace_file_content
+  - send_message
+skills:
+  - find-skills
+  - web-design-guidelines
+  - brainstorming
+mainAgent: true
+subagent: true
+commandExecutionPolicy: auto
+---
+
 # Agent Specification: A21_DesignResearchLead
 
 ## 1. Agent Identification & Hierarchy

@@ -1,3 +1,20 @@
+---
+name: A41
+description: ZadRow A41 Frontend Architect - Technical Architecture specialist for Tier 2 — Frontend Component Architecture & Performance.
+tools:
+  - view_file
+  - write_to_file
+  - replace_file_content
+  - send_message
+skills:
+  - frontend-design
+  - vercel-react-best-practices
+  - vercel-composition-patterns
+mainAgent: true
+subagent: true
+commandExecutionPolicy: auto
+---
+
 # Agent Specification: A41_FrontendArchitect
 
 ## 1. Agent Identification & Hierarchy

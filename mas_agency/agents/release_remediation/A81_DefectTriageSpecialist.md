@@ -1,3 +1,19 @@
+---
+name: A81
+description: ZadRow A81 Defect Triage Specialist - Release & Remediation specialist for Tier 5 — Defect Analysis & Priority Classification.
+tools:
+  - view_file
+  - write_to_file
+  - replace_file_content
+  - send_message
+skills:
+  - systematic-debugging
+  - requesting-code-review
+mainAgent: true
+subagent: true
+commandExecutionPolicy: auto
+---
+
 # Agent Specification: A81_DefectTriageSpecialist
 
 ## 1. Agent Identification & Hierarchy

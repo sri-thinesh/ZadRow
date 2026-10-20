@@ -18,6 +18,8 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 
+import { AgentRunner } from '../src/engine/agent_runner.js';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const agencyDir = path.resolve(__dirname, '..');
@@ -29,7 +31,13 @@ for (const d of [resultsDir, logsDir]) {
   if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true });
 }
 
-const cliPath = process.env.ANTIGRAVITY_CLI_PATH || 'C:\\Users\\ksrit\\Downloads\\cli_windows_x64.exe';
+let cliPath;
+try {
+  cliPath = AgentRunner.resolveCliPath();
+} catch (err) {
+  console.error(`Cannot run all-agent acceptance test: ${err.message}`);
+  process.exit(1);
+}
 
 const AGENT_SPECS = {
   'A00': {

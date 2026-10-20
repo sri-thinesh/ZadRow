@@ -1,3 +1,20 @@
+---
+name: A83
+description: ZadRow A83 Release Readiness Auditor - Release & Remediation specialist for Tier 5 — Final Packaging, Build Verification & Release Sign-Off.
+tools:
+  - view_file
+  - write_to_file
+  - replace_file_content
+  - run_command
+  - send_message
+skills:
+  - verification-before-completion
+  - writing-plans
+mainAgent: true
+subagent: true
+commandExecutionPolicy: auto
+---
+
 # Agent Specification: A83_ReleaseReadinessAuditor
 
 ## 1. Agent Identification & Hierarchy

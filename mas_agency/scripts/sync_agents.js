@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
+import assert from 'assert';
 
 const PLUGIN_ID = 'multiagent-system-2-0';
 const pluginRoot = path.join(os.homedir(), '.gemini', 'config', 'plugins', PLUGIN_ID);
@@ -50,75 +51,25 @@ if (syncLegacy && !fs.existsSync(legacyAgentsDir)) {
   fs.mkdirSync(legacyAgentsDir, { recursive: true });
 }
 
-// Role-based tool permissions mapping conforming to Antigravity runtime tool schema
-function getToolsForAgent(id, agent) {
-  // A00 Chief Orchestrator: Full supervisory and system capabilities
-  if (id === 'A00') {
-    return [
-      'view_file',
-      'write_to_file',
-      'replace_file_content',
-      'run_command',
-      'send_message',
-      'invoke_subagent',
-      'define_subagent',
-      'manage_subagents',
-    ];
+// Explicit tool overrides map: only applied if an explicit entry is present
+const TOOL_OVERRIDES = {};
+
+/**
+ * Extracts YAML frontmatter, markdown body, and tools block from file content
+ */
+function parseFrontmatterAndBody(fileContent) {
+  const match = fileContent.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
+  if (!match) {
+    return { frontmatterRaw: null, body: fileContent, toolsBlock: null };
   }
+  const frontmatterRaw = match[1];
+  const body = match[2];
 
-  // Departmental Directors & Squad Leads: Supervisory delegation + file authoring
-  const squadLeads = ['A10', 'A20', 'A30', 'A40', 'A50', 'A60', 'A70', 'A80'];
-  if (squadLeads.includes(id)) {
-    // Technical, Frontend, Backend, QA Leads also require run_command for toolchains/tests
-    if (['A50', 'A60', 'A70'].includes(id)) {
-      return [
-        'view_file',
-        'write_to_file',
-        'replace_file_content',
-        'run_command',
-        'send_message',
-        'invoke_subagent',
-        'manage_subagents',
-      ];
-    }
-    return [
-      'view_file',
-      'write_to_file',
-      'replace_file_content',
-      'send_message',
-      'invoke_subagent',
-      'manage_subagents',
-    ];
-  }
+  // Extract tools block verbatim from frontmatter
+  const toolsMatch = frontmatterRaw.match(/^tools:\r?\n((?:[ \t]+-[^\r\n]*\r?\n?)*)/m);
+  const toolsBlock = toolsMatch ? toolsMatch[0].trimEnd() : null;
 
-  // Technical specialists requiring terminal commands (builds, testing, audits)
-  const technicalCommandSpecialists = [
-    'A43', // Platform & Build Architect (build toolchains, dependencies)
-    'A71', // Functional Test Lead (executes test suites)
-    'A72', // Visual & Responsive QA (browser audits, viewport checks)
-    'A74', // Performance Auditor (CWV, lighthouse, profiling)
-    'A75', // Security Auditor (dependency scans, security audits)
-    'A83', // Release Readiness Auditor (production build compilation verification)
-  ];
-
-  if (technicalCommandSpecialists.includes(id)) {
-    return [
-      'view_file',
-      'write_to_file',
-      'replace_file_content',
-      'run_command',
-      'send_message',
-    ];
-  }
-
-  // Pure design, analysis, copywriting, architecture, and code authoring specialists:
-  // Strictly restricted from executing arbitrary shell commands according to security boundaries
-  return [
-    'view_file',
-    'write_to_file',
-    'replace_file_content',
-    'send_message',
-  ];
+  return { frontmatterRaw, body, toolsBlock };
 }
 
 let count = 0;
@@ -128,36 +79,77 @@ for (const [id, agent] of Object.entries(registry.agents)) {
     console.error('Source file not found:', srcPath);
     continue;
   }
-  const body = fs.readFileSync(srcPath, 'utf8');
+  const rawSrcContent = fs.readFileSync(srcPath, 'utf8');
+  const { frontmatterRaw, body, toolsBlock: srcToolsBlock } = parseFrontmatterAndBody(rawSrcContent);
 
-  const tools = getToolsForAgent(id, agent);
-  const toolsYaml = tools.map((t) => `  - ${t}`).join('\n');
+  if (!srcToolsBlock) {
+    throw new Error(`Source manifest for ${id} (${srcPath}) does not declare a "tools:" list in YAML frontmatter!`);
+  }
 
-  const skillsYaml = Array.isArray(agent.skills) && agent.skills.length > 0
-    ? `\nskills:\n${agent.skills.map((s) => `  - ${s}`).join('\n')}`
-    : '';
+  let finalToolsBlock = srcToolsBlock;
+  let isOverridden = false;
 
-  const frontmatter = `---
+  if (TOOL_OVERRIDES[id]) {
+    isOverridden = true;
+    const overrideYaml = 'tools:\n' + TOOL_OVERRIDES[id].map((t) => `  - ${t}`).join('\n');
+    console.log(`[OVERRIDE] Overriding tools for ${id}: ${TOOL_OVERRIDES[id].join(', ')}`);
+    finalToolsBlock = overrideYaml;
+  }
+
+  // Construct synchronized file content preserving frontmatter and tools verbatim
+  let fullContent;
+  if (frontmatterRaw) {
+    let syncedFrontmatter = frontmatterRaw;
+    if (isOverridden) {
+      syncedFrontmatter = frontmatterRaw.replace(/^tools:\r?\n((?:[ \t]+-[^\r\n]*\r?\n?)*)/m, finalToolsBlock + '\n');
+    }
+    fullContent = `---\n${syncedFrontmatter.trim()}\n---\n\n${body.trimStart()}`;
+  } else {
+    const skillsYaml = Array.isArray(agent.skills) && agent.skills.length > 0
+      ? `\nskills:\n${agent.skills.map((s) => `  - ${s}`).join('\n')}`
+      : '';
+    fullContent = `---
 name: ${id}
 description: ZadRow ${id} ${agent.title} - ${agent.department} specialist for ${agent.tier}.
-tools:
-${toolsYaml}${skillsYaml}
+${finalToolsBlock}${skillsYaml}
 mainAgent: true
 subagent: true
 commandExecutionPolicy: auto
 ---
 
-`;
+${body.trimStart()}`;
+  }
 
-  const fullContent = frontmatter + body;
   const targetFileName = `${id}_${agent.slug}.md`;
+  const pluginFilePath = path.join(pluginAgentsDir, targetFileName);
+  const workspaceFilePath = path.join(workspaceAgentsDir, targetFileName);
 
-  fs.writeFileSync(path.join(pluginAgentsDir, targetFileName), fullContent, 'utf8');
-  fs.writeFileSync(path.join(workspaceAgentsDir, targetFileName), fullContent, 'utf8');
+  fs.writeFileSync(pluginFilePath, fullContent, 'utf8');
+  fs.writeFileSync(workspaceFilePath, fullContent, 'utf8');
   if (syncLegacy) {
     fs.writeFileSync(path.join(legacyAgentsDir, targetFileName), fullContent, 'utf8');
   }
   count++;
+
+  // Verify byte-identical tools block in written output
+  const writtenContent = fs.readFileSync(pluginFilePath, 'utf8');
+  const { toolsBlock: writtenToolsBlock } = parseFrontmatterAndBody(writtenContent);
+
+  if (!isOverridden) {
+    assert.strictEqual(
+      writtenToolsBlock,
+      srcToolsBlock,
+      `Agent ${id}: Written tools block is not byte-identical to source manifest!`
+    );
+  }
+
+  // Assert A01, A02, A03 contain invoke_subagent
+  if (['A01', 'A02', 'A03'].includes(id)) {
+    assert(
+      writtenToolsBlock.includes('invoke_subagent'),
+      `Agent ${id} must contain "invoke_subagent" in its tools list!`
+    );
+  }
 }
 
 // Synchronize multiagent-system.md and zadrow.md orchestrator entrypoints
