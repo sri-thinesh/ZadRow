@@ -77,7 +77,7 @@ export const PHASE_DEFINITIONS = [
     phase: 1,
     name: 'Intake & Scope Strategy',
     description: 'Strategic intake, brief deconstruction, boundary locking, creative concept exploration, and design systems architecture',
-    agents: ['A00', 'A01', 'A02', 'A11', 'A12', 'A20', 'A21', 'A22', 'A23', 'A30', 'A31', 'A32', 'A33', 'A40'],
+    agents: ['A00', 'A01', 'A02', 'A11', 'A12', 'A20', 'A21', 'A22', 'A23', 'A30', 'A31', 'A32', 'A33'],
     primaryArtifacts: [
       '01_scope_charter.json',
       '02_program_execution_dag.json',
@@ -91,7 +91,6 @@ export const PHASE_DEFINITIONS = [
       '31_wireframe_ux_flow.json',
       '32_design_tokens_and_components.json',
       '33_copywriting_and_conversion.json',
-      '40_master_tech_architecture.json',
     ],
   },
   {
@@ -219,7 +218,63 @@ export class WorkflowCoordinator extends EventEmitter {
     this.activePhases = new Set([1, 2, 3, 4, 5, 6, 7]);
     this.skippedPhases = new Set();
 
+    // Agent registry deliverable index
+    this.registryPath = path.join(this.agencyDir, 'agents', 'agent_registry.json');
+    this.agentRegistry = null;
+    if (fs.existsSync(this.registryPath)) {
+      try {
+        this.agentRegistry = JSON.parse(fs.readFileSync(this.registryPath, 'utf8'));
+      } catch (_) {}
+    }
+
     this._ensureDirectories();
+  }
+
+  getAgentDeliverableName(agentId) {
+    const raw = this.agentRegistry?.agents?.[agentId]?.primary_deliverable;
+    if (raw) return path.basename(raw);
+    const fallbacks = {
+      A00: '00_master_orchestration_manifest.json',
+      A01: '01_scope_charter.json',
+      A02: '02_program_execution_dag.json',
+      A11: '11_product_analysis.json',
+      A12: '12_information_architecture.json',
+      A13: '13_master_specification.json',
+      A14: '14_doc_verification_matrix.json',
+      A20: '20_creative_direction_charter.json',
+      A21: '21_design_research_benchmarks.json',
+      A22: '22_art_direction_manifest.json',
+      A23: '23_motion_choreography_spec.json',
+      A30: '30_experience_design_strategy.json',
+      A31: '31_wireframe_ux_flow.json',
+      A32: '32_design_tokens_and_components.json',
+      A33: '33_copywriting_and_conversion.json',
+      A40: '40_master_tech_architecture.json',
+      A41: '41_frontend_architecture.json',
+      A42: '42_backend_architecture.json',
+      A43: '43_build_platform_spec.json',
+      A50: '50_frontend_delivery_manifest.json',
+      A51: '51_app_shell_scaffold.json',
+      A52: '52_page_assemblies.json',
+      A53: '53_ui_component_library.json',
+      A54: '54_visual_experience_assets.json',
+      A60: '60_backend_delivery_manifest.json',
+      A61: '61_server_endpoints.json',
+      A62: '62_data_persistence_spec.json',
+      A63: '63_integration_services.json',
+      A70: '70_qa_comprehensive_verdict.json',
+      A71: '71_functional_test_report.json',
+      A72: '72_visual_responsive_audit.json',
+      A73: '73_accessibility_wcag_audit.json',
+      A74: '74_performance_webvitals_audit.json',
+      A75: '75_security_audit_report.json',
+      A76: '76_seo_social_graph_audit.json',
+      A80: '80_remediation_release_manifest.json',
+      A81: '81_defect_triage_matrix.json',
+      A82: '82_remediation_patch_log.json',
+      A83: '83_production_release_package.json',
+    };
+    return fallbacks[agentId] || `${agentId.toLowerCase()}.json`;
   }
 
   _ensureDirectories() {
@@ -589,12 +644,46 @@ export class WorkflowCoordinator extends EventEmitter {
     });
 
     // 1. Author 01_scope_charter.json (A01 Requirements & Scope Director)
-    const scopeCharter = this._buildScopeCharter(this.projectBrief);
-    this.saveArtifact('01_scope_charter.json', scopeCharter);
+    let scopeCharter = this.getArtifact('01_scope_charter.json');
+    if (!scopeCharter) {
+      if (this.agentRunner) {
+        const deliverableName = this.getAgentDeliverableName('A01');
+        const taskBrief = `Synthesize strategic scope charter for project: ${this.projectBrief.prompt || this.projectBrief.project_name}\nPrimary Deliverable: ${deliverableName}`;
+        const delegation = await this.agentRunner.delegateTask('A00', 'A01', taskBrief, {
+          upstreamPrompt: this.projectBrief.prompt,
+          projectBrief: this.projectBrief,
+        });
+        scopeCharter = delegation.result?.artifacts?.[deliverableName] || delegation.result?.data;
+      }
+      if (!scopeCharter) {
+        throw new Error('Failed to generate 01_scope_charter.json via A00 -> A01 delegation');
+      }
+      this.saveArtifact('01_scope_charter.json', scopeCharter);
+    }
 
     // 2. Author 02_program_execution_dag.json (A02 Technical Program Manager)
-    const dagArtifact = this._buildProgramExecutionDag(this.projectBrief, options);
-    this.saveArtifact('02_program_execution_dag.json', dagArtifact);
+    let dagArtifact = this.getArtifact('02_program_execution_dag.json');
+    if (!dagArtifact) {
+      if (this.agentRunner) {
+        const deliverableName = this.getAgentDeliverableName('A02');
+        const taskBrief = `Construct Directed Acyclic Graph (DAG) dependency execution schedule for project: ${this.projectBrief.prompt || this.projectBrief.project_name}\nPrimary Deliverable: ${deliverableName}`;
+        const delegation = await this.agentRunner.delegateTask('A00', 'A02', taskBrief, {
+          upstreamPrompt: this.projectBrief.prompt,
+          projectBrief: this.projectBrief,
+          upstreamArtifacts: {
+            '01_scope_charter.json': scopeCharter,
+          },
+          upstreamSummary: {
+            scopeCharter,
+          },
+        });
+        dagArtifact = delegation.result?.artifacts?.[deliverableName] || delegation.result?.data;
+      }
+      if (!dagArtifact) {
+        throw new Error('Failed to generate 02_program_execution_dag.json via A00 -> A02 delegation');
+      }
+      this.saveArtifact('02_program_execution_dag.json', dagArtifact);
+    }
 
     // 3. Product & IA artifacts
     const productAnalysis = this._buildProductAnalysis(this.projectBrief);
@@ -685,19 +774,17 @@ export class WorkflowCoordinator extends EventEmitter {
       );
     }
 
-    // 6. Master Tech Architecture (A40)
-    const masterTech = this._buildMasterTechArchitecture(this.projectBrief, false, creativeCharter);
-    this.saveArtifact('40_master_tech_architecture.json', masterTech);
-
     // Markdown summaries
-    const charterMd = `# Scope Charter: ${scopeCharter.project_name}\n\n${scopeCharter.executive_summary}\n\n## Value Pillars\n${scopeCharter.value_pillars.map((v) => `- **${v.pillar_name}**: ${v.strategic_rationale}`).join('\n')}\n\n## In-Scope MVP Features\n${scopeCharter.in_scope_features.map((f) => `- ${f}`).join('\n')}`;
+    const charterMd = `# Scope Charter: ${scopeCharter.project_name}\n\n${scopeCharter.executive_summary}\n\n## Value Pillars\n${(scopeCharter.value_pillars || []).map((v) => `- **${v.pillar_name || v.name || v}**: ${v.strategic_rationale || v.rationale || ''}`).join('\n')}\n\n## In-Scope MVP Features\n${(scopeCharter.in_scope_features || []).map((f) => `- ${f}`).join('\n')}`;
     this.saveArtifact('01_scope_charter.md', charterMd);
 
     const creativeMd = `# Creative Direction Charter: ${creativeCharter.creative_concept}\n\nTheme: ${creativeCharter.aesthetic_theme}\nSelected Concept: ${creativeCharter.selected_concept?.concept_name}\nGate A Status: ${creativeCharter.gate_a_creative_approval?.status}\n`;
     this.saveArtifact('20_creative_direction_charter.md', creativeMd);
 
+    const dagTotalNodes = dagArtifact.total_nodes || (Array.isArray(dagArtifact.execution_waves) ? dagArtifact.execution_waves.reduce((sum, w) => sum + (w.agents?.length || 0), 0) : 42);
+
     // Gate 1 verification: ensure both artifacts are non-empty and present
-    const passed = Boolean(scopeCharter.in_scope_features?.length > 0 && dagArtifact.total_nodes > 0 && gateAPassed && gateBPassed);
+    const passed = Boolean(scopeCharter.in_scope_features?.length > 0 && dagTotalNodes > 0 && gateAPassed && gateBPassed);
 
     this.emit('gate:evaluate', {
       phase: phaseIndex,
@@ -706,7 +793,7 @@ export class WorkflowCoordinator extends EventEmitter {
       criteria: {
         hasScopeCharter: true,
         hasExecutionDag: true,
-        inScopeFeatureCount: scopeCharter.in_scope_features.length,
+        inScopeFeatureCount: (scopeCharter.in_scope_features || []).length,
         gateAApproved: gateAPassed,
         gateBApproved: gateBPassed,
       },
@@ -736,7 +823,6 @@ export class WorkflowCoordinator extends EventEmitter {
         '31_wireframe_ux_flow.json',
         '32_design_tokens_and_components.json',
         '33_copywriting_and_conversion.json',
-        '40_master_tech_architecture.json',
       ],
       scopeCharter,
       dag: dagArtifact,

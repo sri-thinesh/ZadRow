@@ -37,7 +37,11 @@ const rootDir = path.resolve(agencyDir, '..');
 // =====================================================================
 async function testPersonaDiscoveryAndParsing() {
   Logger.info('Testing persona discovery and markdown specification parsing...');
-  const runner = new AgentRunner({ agencyDir, rootDir, executionMode: 'synthetic' });
+  const runner = new AgentRunner({
+    agencyDir,
+    rootDir,
+    cliPath: process.env.ANTIGRAVITY_CLI_PATH || (process.platform === 'win32' ? process.env.COMSPEC || 'cmd.exe' : '/bin/sh'),
+  });
 
   assert(runner.personas.size >= 18, `Expected at least 18 personas loaded, got ${runner.personas.size}`);
 
@@ -105,7 +109,11 @@ This agent draws on capabilities documented in:
 // =====================================================================
 async function testPromptConstruction() {
   Logger.info('Testing structured prompt construction pipeline...');
-  const runner = new AgentRunner({ agencyDir, rootDir, executionMode: 'synthetic' });
+  const runner = new AgentRunner({
+    agencyDir,
+    rootDir,
+    cliPath: process.env.ANTIGRAVITY_CLI_PATH || (process.platform === 'win32' ? process.env.COMSPEC || 'cmd.exe' : '/bin/sh'),
+  });
   const persona = runner.getPersona('DS_TokenSpecifier');
   const skills = runner.loadSkills(['web-design-guidelines', 'vercel-composition-patterns']);
 
@@ -217,31 +225,30 @@ I will assemble the pillars and North Star.
 }
 
 // =====================================================================
-// Test 5: Synthetic Fallback Execution & Flagging
+// Test 5: Missing Antigravity CLI Throws Error (Zero Fallback)
 // =====================================================================
-async function testSyntheticFallback() {
-  Logger.info('Testing synthetic fallback execution and transparent flagging...');
-  const runner = new AgentRunner({
-    agencyDir,
-    rootDir,
-    executionMode: 'synthetic',
-  });
+async function testMissingCliThrows() {
+  Logger.info('Testing missing CLI throws clear error naming ANTIGRAVITY_CLI_PATH...');
 
-  const testPrompt = 'Create an avant-garde experience for brand QuantumLeap featuring kinetic typography';
-  const result = await runner.executeAgent('E01_BriefAnalyst', testPrompt, {});
+  let threwExpected = false;
+  try {
+    const runner = new AgentRunner({
+      agencyDir,
+      rootDir,
+      cliPath: '/nonexistent/path/to/cli_binary_never_exists_12345',
+    });
+    await runner.executeAgent('E01_BriefAnalyst', 'Create test brand', {});
+  } catch (err) {
+    threwExpected = true;
+    assert(
+      err.message.includes('Antigravity CLI binary not found') ||
+      err.message.includes('ANTIGRAVITY_CLI_PATH'),
+      `Error message must name CLI or ANTIGRAVITY_CLI_PATH, got: ${err.message}`
+    );
+  }
 
-  assert.strictEqual(result.status, 'COMPLETED');
-  assert.strictEqual(result.executionMode, 'synthetic_fallback', 'Execution mode must be explicitly synthetic_fallback');
-  assert.strictEqual(result.synthetic, true, 'synthetic flag must be true');
-  assert(result.data.brandName.toUpperCase().includes('QUANTUMLEAP'), 'Brand name should be extracted');
-
-  // Verify artifact written to disk
-  const briefPath = path.join(agencyDir, 'workspace', 'artifacts', '00_executive_brief.json');
-  assert(fs.existsSync(briefPath), 'Artifact file must exist on disk');
-  const diskContent = JSON.parse(fs.readFileSync(briefPath, 'utf8'));
-  assert(diskContent.brandName.toUpperCase().includes('QUANTUMLEAP'), 'Artifact file must contain extracted brand name');
-
-  Logger.success('Synthetic fallback execution and explicit flagging verified.');
+  assert.strictEqual(threwExpected, true, 'AgentRunner MUST throw when CLI is missing or unavailable');
+  Logger.success('Missing CLI throws clear error (synthetic fallback completely eliminated).');
 }
 
 // =====================================================================
@@ -516,7 +523,7 @@ async function runAllTests() {
     await testDynamicSkillLoading(); passedCount++;
     await testPromptConstruction(); passedCount++;
     await testResponseSanitizer(); passedCount++;
-    await testSyntheticFallback(); passedCount++;
+    await testMissingCliThrows(); passedCount++;
     await testCliPathResolver(); passedCount++;
     await testDynamicConditionalDAGActivation(); passedCount++;
 

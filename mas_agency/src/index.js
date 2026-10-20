@@ -47,12 +47,9 @@ export async function runOrchestration(prompt, options = {}) {
   const agencyDir = options.agencyDir || path.resolve(__dirname, '..');
   const maxConcurrency = options.concurrency || 6;
   const skipQA = options.skipQA || false;
-  const allowFallback = options.allowFallback === true;
-
   const agentRunner = options.agentRunner || new AgentRunner({
     agencyDir,
-    allowFallback,
-    executionMode: options.executionMode || (allowFallback ? 'synthetic' : 'auto'),
+    executionMode: options.executionMode || 'cli',
   });
   const dag = new DAGRunner({ maxConcurrency });
 

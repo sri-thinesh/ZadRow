@@ -1,74 +1,141 @@
 {
-  "project_id": "proj_velox_1792521934614",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "project_id": "proj_synapse_core_1792523883813",
+  "project_name": "SYNAPSE CORE",
   "total_nodes": 42,
-  "total_waves": 7,
+  "total_waves": 6,
+  "concurrency_budget": 8,
   "execution_waves": [
     {
-      "wave_index": 1,
-      "wave_name": "Strategic Intake & Scope Charter",
+      "wave_index": 0,
+      "wave_name": "Wave 0: Executive Intake & Scope Governance",
+      "gatekeeper": "A00",
+      "prerequisites": [],
       "agents": [
         "A00",
         "A01",
         "A02",
-        "A11",
-        "A12",
-        "A21",
-        "A22",
-        "A40"
+        "A03"
       ],
-      "prerequisites": [],
-      "gatekeeper": "A00 Chief Orchestrator"
+      "deliverables": [
+        "mas_agency/workspace/artifacts/00_master_orchestration_manifest.json",
+        "mas_agency/workspace/artifacts/01_scope_charter.json",
+        "mas_agency/workspace/artifacts/02_program_execution_dag.json",
+        "mas_agency/workspace/artifacts/03_quality_arbitration_verdict.json"
+      ],
+      "verification_gate": "Gate 0: Ingestion & Dependency Certification"
     },
     {
-      "wave_index": 2,
-      "wave_name": "Master Specification Authoring & Verification Gate",
+      "wave_index": 1,
+      "wave_name": "Wave 1: Strategy, Taxonomy & Master Specification",
+      "gatekeeper": "A10",
+      "prerequisites": [
+        "mas_agency/workspace/artifacts/01_scope_charter.json",
+        "mas_agency/workspace/artifacts/02_program_execution_dag.json"
+      ],
       "agents": [
+        "A10",
+        "A11",
+        "A12",
         "A13",
         "A14"
       ],
-      "prerequisites": [
-        "01_scope_charter.json"
+      "deliverables": [
+        "mas_agency/workspace/artifacts/10_product_documentation_plan.json",
+        "mas_agency/workspace/artifacts/11_product_analysis.json",
+        "mas_agency/workspace/artifacts/12_information_architecture.json",
+        "mas_agency/workspace/artifacts/13_master_specification.json",
+        "mas_agency/workspace/artifacts/14_doc_verification_matrix.json"
       ],
-      "gatekeeper": "A14 Documentation Verification Lead"
+      "verification_gate": "Gate 1: Foundation Gate (Documentation Completeness)"
     },
     {
-      "wave_index": 3,
-      "wave_name": "Technical Architecture & Conditional Backend Planning",
+      "wave_index": 2,
+      "wave_name": "Wave 2: Creative Concept, Experience Design & Technical Architecture",
+      "gatekeeper": "A03",
+      "prerequisites": [
+        "mas_agency/workspace/artifacts/13_master_specification.json",
+        "mas_agency/workspace/artifacts/14_doc_verification_matrix.json"
+      ],
       "agents": [
+        "A20",
+        "A21",
+        "A22",
+        "A23",
+        "A30",
+        "A31",
+        "A32",
+        "A33",
         "A40",
         "A41",
         "A42",
         "A43",
-        "A50",
-        "A60"
+        "A44"
       ],
-      "prerequisites": [
-        "13_master_specification.json",
-        "14_doc_verification_matrix.json"
+      "deliverables": [
+        "mas_agency/workspace/artifacts/20_creative_direction_charter.json",
+        "mas_agency/workspace/artifacts/21_design_research_benchmarks.json",
+        "mas_agency/workspace/artifacts/22_art_direction_manifest.json",
+        "mas_agency/workspace/artifacts/23_motion_choreography_spec.json",
+        "mas_agency/workspace/artifacts/30_experience_design_strategy.json",
+        "mas_agency/workspace/artifacts/31_wireframe_ux_flow.json",
+        "mas_agency/workspace/artifacts/32_design_tokens_and_components.json",
+        "mas_agency/workspace/artifacts/33_copywriting_and_conversion.json",
+        "mas_agency/workspace/artifacts/40_master_tech_architecture.json",
+        "mas_agency/workspace/artifacts/41_frontend_architecture.json",
+        "mas_agency/workspace/artifacts/42_backend_architecture.json",
+        "mas_agency/workspace/artifacts/43_build_platform_spec.json",
+        "mas_agency/workspace/artifacts/44_tech_risk_assessment.json"
       ],
-      "gatekeeper": "A40 Chief Technical Architect"
+      "verification_gate": "Gate 2: Design & Experience Gate"
     },
     {
-      "wave_index": 4,
-      "wave_name": "Implementation Wave (Frontend & Backend Squads)",
+      "wave_index": 3,
+      "wave_name": "Wave 3: Engineering Implementation (Frontend & Backend Synthesis)",
+      "gatekeeper": "A50",
+      "prerequisites": [
+        "mas_agency/workspace/artifacts/22_art_direction_manifest.json",
+        "mas_agency/workspace/artifacts/23_motion_choreography_spec.json",
+        "mas_agency/workspace/artifacts/31_wireframe_ux_flow.json",
+        "mas_agency/workspace/artifacts/32_design_tokens_and_components.json",
+        "mas_agency/workspace/artifacts/33_copywriting_and_conversion.json",
+        "mas_agency/workspace/artifacts/40_master_tech_architecture.json",
+        "mas_agency/workspace/artifacts/41_frontend_architecture.json",
+        "mas_agency/workspace/artifacts/42_backend_architecture.json",
+        "mas_agency/workspace/artifacts/43_build_platform_spec.json"
+      ],
       "agents": [
+        "A50",
         "A51",
         "A52",
         "A53",
         "A54",
+        "A60",
         "A61",
         "A62",
         "A63"
       ],
-      "prerequisites": [
-        "41_frontend_architecture.json",
-        "50_frontend_delivery_manifest.json"
+      "deliverables": [
+        "mas_agency/workspace/artifacts/50_frontend_delivery_manifest.json",
+        "mas_agency/workspace/artifacts/51_app_shell_scaffold.json",
+        "mas_agency/workspace/artifacts/52_page_assemblies.json",
+        "mas_agency/workspace/artifacts/53_ui_component_library.json",
+        "mas_agency/workspace/artifacts/54_visual_experience_assets.json",
+        "mas_agency/workspace/artifacts/60_backend_delivery_manifest.json",
+        "mas_agency/workspace/artifacts/61_server_endpoints.json",
+        "mas_agency/workspace/artifacts/62_data_persistence_spec.json",
+        "mas_agency/workspace/artifacts/63_integration_services.json"
       ],
-      "gatekeeper": "A50 Frontend Engineering Lead"
+      "verification_gate": "Gate 3: Code Synthesis & Integration Gate"
     },
     {
-      "wave_index": 5,
-      "wave_name": "Comprehensive Quality Verification",
+      "wave_index": 4,
+      "wave_name": "Wave 4: Independent Quality Verification & Multi-Vector Audit",
+      "gatekeeper": "A70",
+      "prerequisites": [
+        "mas_agency/workspace/artifacts/50_frontend_delivery_manifest.json",
+        "mas_agency/workspace/artifacts/60_backend_delivery_manifest.json"
+      ],
       "agents": [
         "A70",
         "A71",
@@ -78,46 +145,97 @@
         "A75",
         "A76"
       ],
-      "prerequisites": [
-        "51_app_shell_scaffold.json",
-        "52_page_assemblies.json"
+      "deliverables": [
+        "mas_agency/workspace/artifacts/70_qa_comprehensive_verdict.json",
+        "mas_agency/workspace/artifacts/71_functional_test_report.json",
+        "mas_agency/workspace/artifacts/72_visual_responsive_audit.json",
+        "mas_agency/workspace/artifacts/73_accessibility_wcag_audit.json",
+        "mas_agency/workspace/artifacts/74_performance_webvitals_audit.json",
+        "mas_agency/workspace/artifacts/75_security_audit_report.json",
+        "mas_agency/workspace/artifacts/76_seo_social_graph_audit.json"
       ],
-      "gatekeeper": "A70 Quality Verification Director"
+      "verification_gate": "Gate 4: Pre-Release Quality Audit Gate"
     },
     {
-      "wave_index": 6,
-      "wave_name": "Remediation Loop & Regression Testing",
+      "wave_index": 5,
+      "wave_name": "Wave 5: Defect Remediation, Build Certification & Production Release",
+      "gatekeeper": "A80",
+      "prerequisites": [
+        "mas_agency/workspace/artifacts/70_qa_comprehensive_verdict.json"
+      ],
       "agents": [
         "A80",
         "A81",
-        "A82"
+        "A82",
+        "A83"
       ],
-      "prerequisites": [
-        "70_qa_comprehensive_verdict.json"
+      "deliverables": [
+        "mas_agency/workspace/artifacts/80_remediation_release_manifest.json",
+        "mas_agency/workspace/artifacts/81_defect_triage_matrix.json",
+        "mas_agency/workspace/artifacts/82_remediation_patch_log.json",
+        "mas_agency/workspace/artifacts/83_production_release_package.json"
       ],
-      "gatekeeper": "A80 Release & Remediation Director"
-    },
-    {
-      "wave_index": 7,
-      "wave_name": "Production Packaging & Master Release Sign-Off",
-      "agents": [
-        "A83",
-        "A00"
-      ],
-      "prerequisites": [
-        "80_remediation_release_manifest.json"
-      ],
-      "gatekeeper": "A83 Release Readiness Auditor"
+      "verification_gate": "Gate 5: Release & Verification Gate (Final Stage Gate)"
     }
   ],
   "critical_path": [
     "A01",
+    "A02",
+    "A10",
     "A13",
     "A14",
     "A40",
-    "A51",
+    "A41",
+    "A32",
+    "A50",
+    "A52",
     "A70",
+    "A71",
     "A80",
     "A83"
-  ]
+  ],
+  "dependency_matrix": {
+    "A00": { "dependencies": [], "artifact": "00_master_orchestration_manifest.json" },
+    "A01": { "dependencies": ["A00"], "artifact": "01_scope_charter.json" },
+    "A02": { "dependencies": ["A01"], "artifact": "02_program_execution_dag.json" },
+    "A03": { "dependencies": ["A01", "A02"], "artifact": "03_quality_arbitration_verdict.json" },
+    "A10": { "dependencies": ["A01", "A02"], "artifact": "10_product_documentation_plan.json" },
+    "A11": { "dependencies": ["A10"], "artifact": "11_product_analysis.json" },
+    "A12": { "dependencies": ["A10", "A11"], "artifact": "12_information_architecture.json" },
+    "A13": { "dependencies": ["A10", "A11", "A12"], "artifact": "13_master_specification.json" },
+    "A14": { "dependencies": ["A13"], "artifact": "14_doc_verification_matrix.json" },
+    "A20": { "dependencies": ["A13", "A14"], "artifact": "20_creative_direction_charter.json" },
+    "A21": { "dependencies": ["A20"], "artifact": "21_design_research_benchmarks.json" },
+    "A22": { "dependencies": ["A20", "A21"], "artifact": "22_art_direction_manifest.json" },
+    "A23": { "dependencies": ["A20", "A22"], "artifact": "23_motion_choreography_spec.json" },
+    "A30": { "dependencies": ["A13", "A14"], "artifact": "30_experience_design_strategy.json" },
+    "A31": { "dependencies": ["A30", "A12"], "artifact": "31_wireframe_ux_flow.json" },
+    "A32": { "dependencies": ["A30", "A22", "A31"], "artifact": "32_design_tokens_and_components.json" },
+    "A33": { "dependencies": ["A30", "A31"], "artifact": "33_copywriting_and_conversion.json" },
+    "A40": { "dependencies": ["A13", "A14"], "artifact": "40_master_tech_architecture.json" },
+    "A41": { "dependencies": ["A40"], "artifact": "41_frontend_architecture.json" },
+    "A42": { "dependencies": ["A40"], "artifact": "42_backend_architecture.json" },
+    "A43": { "dependencies": ["A40"], "artifact": "43_build_platform_spec.json" },
+    "A44": { "dependencies": ["A40", "A41", "A42", "A43"], "artifact": "44_tech_risk_assessment.json" },
+    "A50": { "dependencies": ["A41", "A32", "A33", "A23"], "artifact": "50_frontend_delivery_manifest.json" },
+    "A51": { "dependencies": ["A50", "A43", "A32"], "artifact": "51_app_shell_scaffold.json" },
+    "A52": { "dependencies": ["A50", "A51", "A31", "A33"], "artifact": "52_page_assemblies.json" },
+    "A53": { "dependencies": ["A50", "A32"], "artifact": "53_ui_component_library.json" },
+    "A54": { "dependencies": ["A50", "A23", "A41"], "artifact": "54_visual_experience_assets.json" },
+    "A60": { "dependencies": ["A42", "A40"], "artifact": "60_backend_delivery_manifest.json" },
+    "A61": { "dependencies": ["A60"], "artifact": "61_server_endpoints.json" },
+    "A62": { "dependencies": ["A60"], "artifact": "62_data_persistence_spec.json" },
+    "A63": { "dependencies": ["A60"], "artifact": "63_integration_services.json" },
+    "A70": { "dependencies": ["A50", "A60", "A52", "A53", "A54"], "artifact": "70_qa_comprehensive_verdict.json" },
+    "A71": { "dependencies": ["A70"], "artifact": "71_functional_test_report.json" },
+    "A72": { "dependencies": ["A70"], "artifact": "72_visual_responsive_audit.json" },
+    "A73": { "dependencies": ["A70"], "artifact": "73_accessibility_wcag_audit.json" },
+    "A74": { "dependencies": ["A70"], "artifact": "74_performance_webvitals_audit.json" },
+    "A75": { "dependencies": ["A70"], "artifact": "75_security_audit_report.json" },
+    "A76": { "dependencies": ["A70"], "artifact": "76_seo_social_graph_audit.json" },
+    "A80": { "dependencies": ["A70"], "artifact": "80_remediation_release_manifest.json" },
+    "A81": { "dependencies": ["A80"], "artifact": "81_defect_triage_matrix.json" },
+    "A82": { "dependencies": ["A80", "A81"], "artifact": "82_remediation_patch_log.json" },
+    "A83": { "dependencies": ["A80", "A82"], "artifact": "83_production_release_package.json" }
+  }
 }

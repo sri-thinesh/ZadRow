@@ -1,94 +1,100 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "project_id": "LL-PDX-2026",
-  "project_name": "LE LEVAIN Portland",
-  "executive_summary": "Strategic product charter for LE LEVAIN, an artisanal Portland sourdough bakery establishing a premier digital flagship. The product strategy anchors on hyper-transparent daily baking schedule tracking and a recurring sourdough loaf subscription engine, driving local pickup density and repeat community retention.",
+  "project_id": "proj_synapse_core_1792523883813",
+  "project_name": "SYNAPSE CORE",
+  "executive_summary": "SYNAPSE CORE is an autonomous neurotechnology health platform engineered to bridge direct neural telemetry with actionable cognitive enhancement. The platform ingests, processes, and visualizes multi-channel EEG signal streams, translating microvolt-level electrical brainwave activity into real-time cognitive metrics—focus index, mental fatigue, stress load, and neuroplastic recovery states—delivering clinical-grade clarity through an ultra-responsive digital interface.",
   "value_pillars": [
     {
       "id": "VP-01",
-      "pillar_name": "Radical Craft & Fermentation Transparency",
-      "strategic_rationale": "Demystify heritage grain sourcing, 36-hour slow fermentation, and exact oven pull schedules to validate premium price point and elevate artisanal authority over commodity bakeries."
+      "pillar_name": "Sub-Second Neural Telemetry",
+      "strategic_rationale": "High-fidelity, low-latency streaming of multi-band EEG wave dynamics (Alpha, Beta, Theta, Delta, Gamma) providing users with uncompromised real-time temporal resolution into cognitive workload."
     },
     {
       "id": "VP-02",
-      "pillar_name": "Frictionless Hearth-to-Door Subscription Engine",
-      "strategic_rationale": "Convert sporadic walk-in customers into high-LTV weekly subscribers with flexible cadence choices (weekly/bi-weekly), automated batch reservation, and zero-churn pause/skip mechanics."
+      "pillar_name": "Autonomous Cognitive State Synthesis",
+      "strategic_rationale": "Intelligent edge processing and algorithmic pattern recognition that autonomously converts raw neural biometrics into calibrated mental state diagnostics without manual calibration friction."
     },
     {
       "id": "VP-03",
-      "pillar_name": "Real-Time Hearth Availability & Micro-Scarcity",
-      "strategic_rationale": "Create authentic daily visit rituals via dynamic bake schedules (morning, mid-day baguettes, evening focaccia), driving pre-orders before loaves sell out."
+      "pillar_name": "Clinical Precision with Consumer Ergonomics",
+      "strategic_rationale": "Democratizing neuro-analytical data through intuitive executive visualizations, bridging medical neuro-monitoring standards with seamless digital wellness UX."
     },
     {
       "id": "VP-04",
-      "pillar_name": "Hyper-Local Portland Neighborhood Connection",
-      "strategic_rationale": "Position the bakery as a central community hub through localized pickup logistics, seasonal Pacific Northwest flour collaborations, and community events."
+      "pillar_name": "Proactive Neuro-Adaptive Optimization",
+      "strategic_rationale": "Dynamic sensory feedback loops and bio-feedback entrainment triggers designed to mitigate cognitive burnout and optimize sustained performance regimes."
     }
   ],
   "target_personas": [
     {
       "persona_id": "PER-01",
-      "title": "The Discerning Culinary Enthusiast (Local Foodie)",
+      "title": "Elite Cognitive Operator (Knowledge Professionals & Founders)",
       "pain_points": [
-        "Frustrated by arriving at popular bakeries only to find signature sourdough sold out",
-        "Distrustful of industrial additive-laden sourdough sold in supermarket chains",
-        "Lacks time to bake slow-ferment sourdough at home on weekdays"
+        "Unpredictable afternoon mental fatigue and attention degradation",
+        "Lack of objective, quantifiable metrics for deep-work cognitive states",
+        "Subjective guesswork in optimizing daily intellectual output and recovery"
       ],
       "jobs_to_be_done": [
-        "Check daily baking schedule to time afternoon pickups perfectly",
-        "Set up automated weekly bread box deliveries/pickups for staple sourdough and seasonal specialty loaves"
+        "Monitor continuous cognitive focus and flow state durations in real time",
+        "Receive preemptive bio-telemetric alerts before entering acute cognitive exhaustion",
+        "Review empirical post-session neuro-performance audits to optimize focus blocks"
       ]
     },
     {
       "persona_id": "PER-02",
-      "title": "The Neighborhood Daily Regular (Work-from-Home Neighbor)",
+      "title": "Neuro-Wellness Seeker & Biohacker",
       "pain_points": [
-        "Requires quick morning espresso and warm pastry before starting remote meetings",
-        "Dislikes cumbersome ordering apps with long checkout steps for small daily orders"
+        "Reliance on lagging biological indicators (heart rate variability, sleep stages) rather than direct cortical activity",
+        "Disjointed consumer EEG interfaces that lack clinical signal interpretability",
+        "Difficulty correlating stress interventions (breathwork, meditation) with direct neural relaxation"
       ],
       "jobs_to_be_done": [
-        "Quickly view morning pastry drop times and today's bread schedule at a glance",
-        "Reserve daily baguette and loaf for evening dinner table without friction"
+        "Observe immediate Alpha/Theta band shifts during active meditation and stress-recovery sessions",
+        "Track longitudinal cognitive baseline trends and neural reserve recovery over 30/90 days",
+        "Verify neuro-modulation effectiveness through empirical brainwave telemetry logs"
       ]
     },
     {
       "persona_id": "PER-03",
-      "title": "The Sustainable Household Caretaker",
+      "title": "Performance Health Clinician & Neuro-Coach",
       "pain_points": [
-        "Wants clean-ingredient, gut-friendly fermented breads for family meals",
-        "Needs predictable weekly budgeting and effortless subscription modification for travel/vacations"
+        "High barrier to accessing continuous out-of-clinic patient neural monitoring",
+        "Overwhelming raw EEG signal data without synthesized executive summary metrics",
+        "Absence of client compliance tracking for prescribed neuro-entrainment protocols"
       ],
       "jobs_to_be_done": [
-        "Subscribe to a multi-loaf family subscription with granular pause, skip, and flavor-swap controls",
-        "Access transparent allergen and heritage grain provenance information"
+        "Audit aggregated client cognitive strain indices across designated time windows",
+        "Export standardized clinical-grade telemetry summaries for diagnostic and coaching review",
+        "Establish baseline variance thresholds for cognitive decline and recovery rates"
       ]
     }
   ],
   "in_scope_features": [
-    "Interactive Daily Baking Schedule board displaying batch drop times, batch status (Fermenting, In Oven, Freshly Pulled, Sold Out), and flour composition",
-    "Sourdough Loaf Recurring Subscription Builder (selection of loaf style, delivery/pickup cadence, add-on spreads/pastries, and checkout flow)",
-    "Hearth Availability & Pre-order reservation system for same-day scheduled store pickup",
-    "Artisanal Provenance & Heritage Grain Transparency Showcase detailing regional Pacific Northwest mill partnerships and fermentation methodology",
-    "Customer Account Hub for subscription frequency toggling, skip-week management, and pickup slot selection",
-    "Bakery Location, Neighborhood Pickup Logistics, and Operating Hours information module"
+    "Real-time streaming neural telemetry visualization dashboard with multi-band EEG wave monitors (Delta, Theta, Alpha, Beta, Gamma)",
+    "Autonomous cognitive state classification engine (Focus, Flow, Stress, Fatigue, Recovery Indices)",
+    "Interactive neural topography / hemispheric activation telemetry widget",
+    "Session-based neuro-biometric recording, playback, and temporal scrub controls",
+    "Preemptive cognitive exhaustion alerting module with threshold triggers",
+    "Neuro-feedback entrainment session launcher with closed-loop pacing recommendations",
+    "Device connectivity & signal quality integrity indicator (electrode impedance monitoring simulator)",
+    "Exportable neural performance audit summaries and session analytical exports"
   ],
   "out_of_scope_features": [
-    "Nationwide or cross-state cold-chain shipping logistics (restricted exclusively to Portland metro area pickup and local delivery)",
-    "Real-time courier GPS route tracking or custom driver dispatch infrastructure",
-    "Complex multi-vendor marketplace or external culinary reseller portal",
-    "Catering quote builder and enterprise commercial B2B wholesale invoicing"
+    "Invasive Brain-Computer Interface (BCI) surgical hardware integration protocols",
+    "Direct trans-cranial electrical stimulation (tDCS/tACS) hardware control firmware",
+    "HIPAA-governed diagnostic medical billing and electronic health record (EHR) integrations",
+    "Full native mobile application builds (iOS/Android native binaries outside responsive web)",
+    "Third-party enterprise multi-tenant clinic billing management portals"
   ],
   "success_metrics": [
-    "Achieve >= 18% conversion rate from schedule viewers to pre-order or subscription actions",
-    "Maintain >= 65% active subscriber retention rate at 90 days post-onboarding",
-    "Reduce daily walk-in sell-out dissatisfaction by shifting >= 40% of morning sourdough allocations to digital reservations",
-    "Achieve < 45 seconds median user journey time from landing page visit to completed subscription checkout"
+    "Sub-50ms perceptual latency for real-time EEG waveform streaming render updates",
+    "Minimum 85% algorithmic confidence in cognitive state classification synthesis",
+    "Zero-drop telemetry buffer stability across continuous 60-minute active sessions",
+    "100% WCAG 2.2 AA accessibility compliance on all critical analytical readouts",
+    "Sub-1.2s Largest Contentful Paint (LCP) performance score for the web telemetry application"
   ],
   "strategic_assumptions": [
-    "Target audience is centered within Portland metropolitan area with high demand for organic, naturally leavened artisan goods",
-    "The bakery operates a predictable daily bake cycle with 2-3 distinct oven pulls per day",
-    "Fulfillment model supports both scheduled store counter pickup and localized third-party bicycle/eco-courier delivery radius",
-    "Downstream design and engineering teams will operate in detached decoupled modes respecting strict tier contracts"
-  ],
-  "brandName": "LE LEVAIN in Portland"
+    "The initial product MVP operates on a high-fidelity synthetic / WebRTC / WebSocket streaming simulator mirroring 16-channel dry-sensor EEG headsets",
+    "Target user base possesses modern desktop and mobile browsers supporting WebGL / HTML5 Canvas hardware acceleration for 60FPS biometric rendering",
+    "The core deployment model focuses on a high-conversion, interactive web platform demonstrating live streaming biometric capabilities prior to proprietary SDK hardware locks"
+  ]
 }
