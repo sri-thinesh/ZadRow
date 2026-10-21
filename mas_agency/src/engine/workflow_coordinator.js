@@ -183,12 +183,20 @@ export class WorkflowCoordinator extends EventEmitter {
     this.allowFallback = options.allowFallback === true;
     this.executionMode = options.executionMode || (this.allowFallback ? 'synthetic' : 'auto');
 
+    // Unattended orchestration needs the CLI to run without stopping to ask for
+    // permission, but that is a decision the operator makes explicitly — pass
+    // `skipPermissions: true` or set ANTIGRAVITY_SKIP_PERMISSIONS=1. It is never
+    // silently enabled on the operator's behalf.
+    this.skipPermissions =
+      options.skipPermissions === true || process.env.ANTIGRAVITY_SKIP_PERMISSIONS === '1';
+
     this.agentRunner = options.agentRunner || new AgentRunner({
       agencyDir: this.agencyDir,
       rootDir: this.rootDir,
       artifactsDir: this.artifactsDir,
       executionMode: this.executionMode,
       allowFallback: this.allowFallback,
+      skipPermissions: this.skipPermissions,
       // Deterministic offline backend. Only consulted when the AgentRunner is in
       // explicit mock mode; the real CLI path never reaches it.
       mockArtifactFactory: (agentId, prompt, context) => this._buildMockArtifact(agentId, prompt, context),

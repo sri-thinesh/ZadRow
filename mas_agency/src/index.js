@@ -56,6 +56,9 @@ export async function runOrchestration(prompt, options = {}) {
     executionMode: options.executionMode || 'cli',
     allowMissingCli: options.allowMissingCli,
     mockArtifactFactory: options.mockArtifactFactory,
+    // Never defaulted on: the operator opts in per run or via the environment.
+    skipPermissions:
+      options.skipPermissions === true || process.env.ANTIGRAVITY_SKIP_PERMISSIONS === '1',
   });
 
   const registryPath = path.join(agencyDir, 'agents', 'agent_registry.json');

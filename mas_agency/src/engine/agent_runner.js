@@ -385,6 +385,17 @@ export function resolveCliPath(options = {}) {
 }
 
 /**
+ * Prompts are handed to the CLI as a command-line argument, so they are bounded by
+ * the operating system's argument limit rather than by anything we control: Windows
+ * caps the *entire* command line at 32,767 characters, while POSIX systems cap a
+ * single argument at roughly 128 KB (and lower it further via ARG_MAX minus the
+ * environment). The previous implementation silently sliced anything longer than
+ * 30,000 characters, which cut an agent's instructions in half mid-sentence and let
+ * the agent answer a question nobody asked. The limit is now enforced loudly.
+ */
+const DEFAULT_MAX_PROMPT_CHARS = process.platform === 'win32' ? 30000 : 120000;
+
+/**
  * AgentRunner: Executes agent tasks via Antigravity CLI or synthetic fallback
  */
 export class AgentRunner {
@@ -407,6 +418,21 @@ export class AgentRunner {
     this.maxRetries = options.maxRetries ?? 2;
     this.effort = options.effort || process.env.ANTIGRAVITY_EFFORT || 'medium';
     this.executionMode = options.executionMode || 'cli';
+
+    // Prompts are passed as a command-line argument. A prompt that exceeds the
+    // platform's argument budget is a hard error naming the remedy, never a silent
+    // truncation that corrupts the agent's instructions.
+    const envMaxPrompt = Number(process.env.ANTIGRAVITY_MAX_PROMPT_CHARS);
+    this.maxPromptChars =
+      options.maxPromptChars ||
+      (Number.isFinite(envMaxPrompt) && envMaxPrompt > 0 ? envMaxPrompt : DEFAULT_MAX_PROMPT_CHARS);
+
+    // Skipping the CLI's permission prompts is an explicit operator decision, never
+    // a default: it grants every agent write access to anything the process can
+    // reach. Opt in per run (options.skipPermissions) or per environment
+    // (ANTIGRAVITY_SKIP_PERMISSIONS=1).
+    this.skipPermissions =
+      options.skipPermissions === true || process.env.ANTIGRAVITY_SKIP_PERMISSIONS === '1';
 
     // Offline/mock execution is an explicit, opt-in mode. It is never a silent
     // fallback: every result from `_executeMock` is labelled `executionMode: 'mock'`
@@ -913,35 +939,51 @@ export class AgentRunner {
   }
 
   /**
-   * Low-level process spawner with stdin piping and timeout protection
+   * Low-level process spawner with timeout protection.
+   *
+   * The prompt is passed to the CLI as the value of `--print`, i.e. as an argv
+   * entry; stdin is deliberately closed. That is the transport the CLI contract
+   * specifies, and it is why `maxPromptChars` is enforced rather than ignored.
    */
   async _invokeCliProcess(prompt, options = {}) {
     const cliPath = options.cliPath || this.cliPath;
     const timeoutMs = options.timeoutMs || this.cliTimeoutMs;
     const agentId = (options.agentId || options.agent || '').trim();
+    const maxPromptChars = options.maxPromptChars || this.maxPromptChars;
 
     if (!fs.existsSync(cliPath)) {
       throw new Error(`Antigravity CLI binary not found at: ${cliPath}`);
     }
 
+    const finalPrompt = prompt;
+    const promptChars = String(finalPrompt).length;
+    if (promptChars > maxPromptChars) {
+      throw new Error(
+        `Prompt for agent "${agentId || 'unknown'}" is ${promptChars} characters, which exceeds the ` +
+          `${maxPromptChars}-character limit. The prompt is passed as a command-line argument, so ` +
+          `truncating it would silently corrupt the agent's instructions. Raise the limit ` +
+          `(options.maxPromptChars or ANTIGRAVITY_MAX_PROMPT_CHARS) if the platform allows a larger ` +
+          `argument, or reduce the upstream context supplied to this agent.`
+      );
+    }
+
     return new Promise((resolve, reject) => {
       let isSettled = false;
-      let finalPrompt = prompt;
-      if (finalPrompt.length > 30000) {
-        finalPrompt = finalPrompt.slice(0, 30000);
-      }
       const effort = options.effort || this.effort || 'low';
+      const skipPermissions = options.skipPermissions ?? this.skipPermissions;
       const args = [];
       if (agentId) {
         args.push('--agent', agentId);
       }
       args.push(
         '--output-format', 'json',
-        '--dangerously-skip-permissions',
         '--effort', effort,
         '--disable-slash-commands',
         '--print', finalPrompt,
       );
+      if (skipPermissions) {
+        args.push('--dangerously-skip-permissions');
+      }
 
       const proc = spawn(cliPath, args, {
         stdio: ['ignore', 'pipe', 'pipe'],
@@ -1013,6 +1055,9 @@ export class AgentRunner {
               responseText: envelope.response || envelope.text || stdout,
               durationSeconds: envelope.duration_seconds || null,
               usage: envelope.usage || null,
+              promptChars,
+              promptTransport: 'argv',
+              permissionsSkipped: skipPermissions,
             });
           } catch (err) {
             if (err.message && err.message.startsWith('Antigravity CLI returned')) {
@@ -1025,6 +1070,9 @@ export class AgentRunner {
               responseText: stdout,
               durationSeconds: null,
               usage: null,
+              promptChars,
+              promptTransport: 'argv',
+              permissionsSkipped: skipPermissions,
             });
           }
         }

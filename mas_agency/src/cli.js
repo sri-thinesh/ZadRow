@@ -33,6 +33,7 @@ let phases = null;
 let departments = null;
 let skipPhases = null;
 let allowFallback = false;
+let skipPermissions = false;
 
 for (let i = 0; i < args.length; i++) {
   const arg = args[i];
@@ -42,6 +43,8 @@ for (let i = 0; i < args.length; i++) {
     concurrency = parseInt(args[++i], 10) || 6;
   } else if (arg === '--allow-fallback') {
     allowFallback = true;
+  } else if (arg === '--skip-permissions') {
+    skipPermissions = true;
   } else if (arg === '--skip-qa') {
     skipQA = true;
   } else if (arg === '--build-only') {
@@ -84,6 +87,10 @@ ${Colors.bold}OPTIONS:${Colors.reset}
       --skip-phases <list>    Specific phases to cleanly skip (e.g. "5,6")
       --skip-qa               Skip post-synthesis automated verification
       --allow-fallback        Allow synthetic fallback when Antigravity CLI is unavailable
+      --skip-permissions      Run agents with the CLI's permission prompts disabled.
+                              Off by default: it grants every agent write access to
+                              anything this process can reach. Equivalent to setting
+                              ANTIGRAVITY_SKIP_PERMISSIONS=1.
       --build-only            Assemble website directly from existing artifacts
       --validate-only         Execute QA verification suite on existing website
   -h, --help                  Show this help message
@@ -159,11 +166,16 @@ async function main() {
     console.log(`\n${Colors.dim}Initializing ZadRow Multi-Agent DAG Orchestrator with concurrency limit: ${concurrency}${Colors.reset}\n`);
 
     // Initialize Orchestration
+    if (skipPermissions) {
+      Logger.warn('Permission prompts are disabled for this run (--skip-permissions): every agent can write anywhere this process can reach.');
+    }
+
     const { dag, agentRunner } = await runOrchestration(prompt, {
       agencyDir,
       concurrency,
       skipQA,
       allowFallback,
+      skipPermissions,
     });
 
     let currentTier = -1;
@@ -225,7 +237,11 @@ async function main() {
   } else {
     console.log(`\n${Colors.dim}Initializing AURA Multi-Agent 7-Phase Workflow Pipeline (42 Agents across 9 Departments)${Colors.reset}\n`);
 
-    const coordinator = new WorkflowCoordinator({ agencyDir, allowFallback });
+    if (skipPermissions) {
+      Logger.warn('Permission prompts are disabled for this run (--skip-permissions): every agent can write anywhere this process can reach.');
+    }
+
+    const coordinator = new WorkflowCoordinator({ agencyDir, allowFallback, skipPermissions });
 
     coordinator.on('phase:start', (data) => {
       Logger.tier(`Phase ${data.phase}`, `${data.name} [${data.agents.join(', ')}]`);
