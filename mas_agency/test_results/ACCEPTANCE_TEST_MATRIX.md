@@ -41,7 +41,7 @@
 
 ### Dimension 2: Real AI Invocation (`cli_windows_x64.exe`) & Reconciliation
 - **Requirement 2.1**: Live AI execution via `cli_windows_x64.exe` completed with model-generated response.
-  - *Result*: **PASS**. Binary executed at `C:\Users\ksrit\Downloads\cli_windows_x64.exe` for agent `A01` on brief: *"LE LEVAIN — Artisanal Sourdough & Viennoiserie"*.
+  - *Result*: **PASS**. Binary executed at `<HOME>\Downloads\cli_windows_x64.exe` for agent `A01` on brief: *"LE LEVAIN — Artisanal Sourdough & Viennoiserie"*.
   - *Metrics*: Total wall-clock time: **28.25s**. Binary CLI reported computation time: **14.767s**. Output parsed and saved to `mas_agency/test_results/logs/live_ai_trace_A01.json`.
 - **Requirement 2.2**: Reconciliation of killed `task-1087` documented with root-cause proof.
   - *Result*: **PASS**. Reconciliation analysis saved to `mas_agency/test_results/logs/cli_task_reconciliation.json`.

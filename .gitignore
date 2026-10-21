@@ -41,3 +41,15 @@ mas_agency/scratch/
 mas_agency/workspace/sandboxes/
 mas_agency/workspace/test_*/
 *.tmp
+
+# Pipeline run output — regenerated on every execution, never committed.
+# Committing these caused routine test runs to dirty the working tree.
+mas_agency/workspace/artifacts/
+mas_agency/workspace/docs/
+mas_agency/output/
+
+# Raw agent traces (large, machine-generated, may embed local absolute paths)
+mas_agency/test_results/logs/
+
+# Generated from A13 master specification on every run
+mas_agency/docs/MASTER_SPECIFICATION.md

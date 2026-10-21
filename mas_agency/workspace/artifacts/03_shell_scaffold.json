@@ -1,7 +1,0 @@
-{
-  "files": [
-    "layout.tsx",
-    "globals.css",
-    "tailwind.config.ts"
-  ]
-}

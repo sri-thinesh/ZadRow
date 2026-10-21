@@ -1,5 +1,0 @@
-{
-  "incident": "Killed CLI task-1087 vs 15.5s Successful CLI task-1075",
-  "explanation": "Task-1075 ran `testRealCliExecution()` in `agent_runner_test.js` which invoked `cli_windows_x64.exe --print ...` directly and returned successfully in 15.526s. Task-1087 ran `node src/cli.js --brief ...`. At the time, `cli.js` only checked `--prompt` and `-p`, leaving `prompt = null`, so it paused on interactive `readline.question` waiting for stdin. When cancelled via `manage_task kill`, the stdin wait terminated. After `--brief` was added to `cli.js`, the process executed end-to-end without pausing.",
-  "verified": true
-}

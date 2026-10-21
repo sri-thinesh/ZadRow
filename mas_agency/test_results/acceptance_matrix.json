@@ -254,7 +254,7 @@
       "passed": true,
       "skipped": false,
       "details": {
-        "path": "C:\\Users\\ksrit\\OneDrive\\Documents\\multiagent system 2.0\\mas_agency\\test_results\\screenshots\\desktop_1440x900.png"
+        "path": "<PROJECT_ROOT>\\mas_agency\\test_results\\screenshots\\desktop_1440x900.png"
       },
       "timestamp": "2026-10-20T18:53:04.973Z"
     },
@@ -264,7 +264,7 @@
       "passed": true,
       "skipped": false,
       "details": {
-        "path": "C:\\Users\\ksrit\\OneDrive\\Documents\\multiagent system 2.0\\mas_agency\\test_results\\screenshots\\tablet_768x1024.png"
+        "path": "<PROJECT_ROOT>\\mas_agency\\test_results\\screenshots\\tablet_768x1024.png"
       },
       "timestamp": "2026-10-20T18:53:06.734Z"
     },
@@ -290,7 +290,7 @@
       "passed": true,
       "skipped": false,
       "details": {
-        "path": "C:\\Users\\ksrit\\OneDrive\\Documents\\multiagent system 2.0\\mas_agency\\test_results\\screenshots\\mobile_375x812.png"
+        "path": "<PROJECT_ROOT>\\mas_agency\\test_results\\screenshots\\mobile_375x812.png"
       },
       "timestamp": "2026-10-20T18:53:08.785Z"
     },

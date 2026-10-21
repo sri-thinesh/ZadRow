@@ -209,6 +209,11 @@ export class WorkflowCoordinator extends EventEmitter {
     this.maxRemediationCycles = options.maxRemediationCycles ?? 3;
     this.strictGates = options.strictGates !== false;
 
+    // Every time an assembly site cannot use the agent-authored artifact and
+    // falls back to the offline builder, the reason is recorded here. The
+    // fallback is never silent.
+    this.artifactFallbacks = [];
+
     // Runtime state
     this.currentPhase = 0;
     this.status = 'IDLE'; // IDLE | RUNNING | HALTED | COMPLETED | FAILED
@@ -445,6 +450,91 @@ export class WorkflowCoordinator extends EventEmitter {
   }
 
   /**
+   * Upstream artifacts an agent in `phaseIndex` is entitled to see.
+   *
+   * Handing the full artifact set to every delegation grows without bound as
+   * the pipeline progresses and multiplies prompt cost by the agent count.
+   * An agent only needs the artifacts its own phase and the phases before it
+   * declared as inputs, so the snapshot is scoped to those. Same-phase
+   * artifacts appear as the roster loop produces them.
+   */
+  _artifactSnapshotFor(phaseIndex) {
+    const snapshot = {};
+    for (const phaseDef of PHASE_DEFINITIONS) {
+      if (phaseDef.phase > phaseIndex) break;
+      for (const name of phaseDef.primaryArtifacts || []) {
+        const value = this.getArtifact(name);
+        if (value !== undefined) snapshot[name] = value;
+      }
+    }
+    return snapshot;
+  }
+
+  /**
+   * Resolve an artifact for assembly, preferring the agent's own work.
+   *
+   * The `_build*` methods are the offline backend: they exist so the pipeline
+   * can run without a CLI. They must never overwrite what a real agent
+   * produced, so every assembly site resolves through here. Agent output wins
+   * whenever it is present and carries the keys downstream code dereferences;
+   * otherwise the builder runs and the reason is recorded.
+   */
+  _resolveArtifact(artifactFile, offlineBuilder, requiredKeys = []) {
+    const existing = this.getArtifact(artifactFile);
+    if (existing && typeof existing === 'object' && existing._mock !== true) {
+      const missing = requiredKeys.filter(
+        (key) => existing[key] === undefined || existing[key] === null
+      );
+      if (missing.length === 0) return existing;
+      this._recordArtifactFallback(
+        artifactFile,
+        `agent artifact missing required key(s): ${missing.join(', ')}`
+      );
+    } else if (existing && typeof existing === 'object') {
+      // A `_mock` artifact is offline builder output, not a real agent
+      // deliverable. Preferring it would let a stub overwrite the coordinator's
+      // computed state, which is exactly the clobbering this helper exists to
+      // prevent.
+      this._recordArtifactFallback(
+        artifactFile,
+        'artifact is offline/mock output, not a real agent deliverable'
+      );
+    } else {
+      this._recordArtifactFallback(artifactFile, 'no agent artifact present');
+    }
+    return offlineBuilder();
+  }
+
+  _recordArtifactFallback(artifactFile, reason) {
+    this.artifactFallbacks.push({
+      artifact: artifactFile,
+      reason,
+      phase: this.currentPhase,
+      timestamp: new Date().toISOString(),
+    });
+    this.emit('artifact:fallback', { artifact: artifactFile, reason, phase: this.currentPhase });
+  }
+
+  /**
+   * True when `obj` is an object exposing a non-null value at the dotted `path`.
+   * Used by gates so they assert on artifact *content* rather than on the mere
+   * existence of a file, and so an agent-authored artifact with a richer shape
+   * than the offline builder still satisfies the check.
+   */
+  _hasPath(obj, path) {
+    if (!obj || typeof obj !== 'object') return false;
+    const value = path
+      .split('.')
+      .reduce((acc, key) => (acc && typeof acc === 'object' ? acc[key] : undefined), obj);
+    return value !== undefined && value !== null;
+  }
+
+  /** True when any of the dotted `paths` resolves on `obj`. */
+  _hasAnyPath(obj, paths) {
+    return paths.some((path) => this._hasPath(obj, path));
+  }
+
+  /**
    * The single production path for artifact generation.
    *
    * Delegates every agent in the phase roster to the real Antigravity CLI and
@@ -504,7 +594,7 @@ export class WorkflowCoordinator extends EventEmitter {
         ...context,
         projectBrief: this.projectBrief,
         upstreamPrompt: this.projectBrief?.prompt,
-        upstreamArtifacts: this._artifactSnapshot(),
+        upstreamArtifacts: this._artifactSnapshotFor(phaseIndex),
       });
 
       const produced = delegation?.result?.artifacts?.[deliverableName] || delegation?.result?.data;
@@ -941,23 +1031,41 @@ export class WorkflowCoordinator extends EventEmitter {
     }
 
     // 3. Product & IA artifacts
-    const productAnalysis = this._buildProductAnalysis(this.projectBrief);
+    const productAnalysis = this._resolveArtifact(
+      '11_product_analysis.json',
+      () => this._buildProductAnalysis(this.projectBrief)
+    );
     this.saveArtifact('11_product_analysis.json', productAnalysis);
 
-    const infoArch = this._buildInfoArchitecture(this.projectBrief);
+    const infoArch = this._resolveArtifact(
+      '12_information_architecture.json',
+      () => this._buildInfoArchitecture(this.projectBrief)
+    );
     this.saveArtifact('12_information_architecture.json', infoArch);
 
     // 4. Creative & Research Wave (A20, A21, A22, A23)
-    const creativeCharter = this.getArtifact('20_creative_direction_charter.json') || this._buildCreativeDirectionCharter(this.projectBrief, options);
+    const creativeCharter = this._resolveArtifact(
+      '20_creative_direction_charter.json',
+      () => this._buildCreativeDirectionCharter(this.projectBrief, options)
+    );
     this.saveArtifact('20_creative_direction_charter.json', creativeCharter);
 
-    const designResearch = this.getArtifact('21_design_research_benchmarks.json') || this._buildDesignResearch(this.projectBrief);
+    const designResearch = this._resolveArtifact(
+      '21_design_research_benchmarks.json',
+      () => this._buildDesignResearch(this.projectBrief)
+    );
     this.saveArtifact('21_design_research_benchmarks.json', designResearch);
 
-    const artManifest = this.getArtifact('22_art_direction_manifest.json') || this._buildArtDirection(this.projectBrief, creativeCharter);
+    const artManifest = this._resolveArtifact(
+      '22_art_direction_manifest.json',
+      () => this._buildArtDirection(this.projectBrief, creativeCharter)
+    );
     this.saveArtifact('22_art_direction_manifest.json', artManifest);
 
-    const motionSpec = this.getArtifact('23_motion_choreography_spec.json') || this._buildMotionChoreographySpec(this.projectBrief, creativeCharter);
+    const motionSpec = this._resolveArtifact(
+      '23_motion_choreography_spec.json',
+      () => this._buildMotionChoreographySpec(this.projectBrief, creativeCharter)
+    );
     this.saveArtifact('23_motion_choreography_spec.json', motionSpec);
 
     // GATE A: Creative Direction Approval Gate Evaluation
@@ -989,16 +1097,28 @@ export class WorkflowCoordinator extends EventEmitter {
     }
 
     // 5. Experience Design Wave (A30, A31, A32, A33)
-    const expStrategy = this.getArtifact('30_experience_design_strategy.json') || this._buildExperienceDesignStrategy(this.projectBrief, creativeCharter, artManifest, options);
+    const expStrategy = this._resolveArtifact(
+      '30_experience_design_strategy.json',
+      () => this._buildExperienceDesignStrategy(this.projectBrief, creativeCharter, artManifest, options)
+    );
     this.saveArtifact('30_experience_design_strategy.json', expStrategy);
 
-    const wireframes = this.getArtifact('31_wireframe_ux_flow.json') || this._buildWireframeUXFlow(this.projectBrief, infoArch, expStrategy);
+    const wireframes = this._resolveArtifact(
+      '31_wireframe_ux_flow.json',
+      () => this._buildWireframeUXFlow(this.projectBrief, infoArch, expStrategy)
+    );
     this.saveArtifact('31_wireframe_ux_flow.json', wireframes);
 
-    const designTokens = this.getArtifact('32_design_tokens_and_components.json') || this._buildDesignTokens(this.projectBrief, artManifest);
+    const designTokens = this._resolveArtifact(
+      '32_design_tokens_and_components.json',
+      () => this._buildDesignTokens(this.projectBrief, artManifest)
+    );
     this.saveArtifact('32_design_tokens_and_components.json', designTokens);
 
-    const copywriting = this.getArtifact('33_copywriting_and_conversion.json') || this._buildCopywriting(this.projectBrief, scopeCharter, wireframes);
+    const copywriting = this._resolveArtifact(
+      '33_copywriting_and_conversion.json',
+      () => this._buildCopywriting(this.projectBrief, scopeCharter, wireframes)
+    );
     this.saveArtifact('33_copywriting_and_conversion.json', copywriting);
 
     // GATE B: Design Completeness & Integration Gate Evaluation
@@ -1114,7 +1234,10 @@ export class WorkflowCoordinator extends EventEmitter {
     const charter = this.getArtifact('01_scope_charter.json');
 
     // 1. A13 Master Specification Architect authoring
-    const masterSpec = this._buildMasterSpecification(this.projectBrief, charter);
+    const masterSpec = this._resolveArtifact(
+      '13_master_specification.json',
+      () => this._buildMasterSpecification(this.projectBrief, charter)
+    );
     this.saveArtifact('13_master_specification.json', masterSpec);
 
     // Author companion docs/MASTER_SPECIFICATION.md
@@ -1127,8 +1250,18 @@ export class WorkflowCoordinator extends EventEmitter {
     fs.writeFileSync(physicalDocPath, specMarkdown, 'utf8');
 
     // 2. A14 Documentation Verification Lead Independent Audit
-    // Supports simulating a spec defect to test gate enforcement
-    const docMatrix = this._buildDocVerificationMatrix(masterSpec, charter, options);
+    // Supports simulating a spec defect to test gate enforcement. An injected
+    // defect deliberately overrides the agent's own verdict; otherwise the
+    // agent-authored matrix is authoritative.
+    const simulateSpecDefect =
+      options.simulateSpecDefect === true || options.simulateContradiction === true;
+    const docMatrix = simulateSpecDefect
+      ? this._buildDocVerificationMatrix(masterSpec, charter, options)
+      : this._resolveArtifact(
+          '14_doc_verification_matrix.json',
+          () => this._buildDocVerificationMatrix(masterSpec, charter, options),
+          ['verification_verdict', 'contradictions_found']
+        );
     this.saveArtifact('14_doc_verification_matrix.json', docMatrix);
 
     const docMatrixMd = `# Documentation Verification Matrix: Audit ${docMatrix.audit_id}\n\n- Verdict: **${docMatrix.verification_verdict}**\n- Coverage: **${docMatrix.coverage_percentage}%**\n- Total Requirements: **${docMatrix.total_requirements}**\n- Contradictions Found: **${docMatrix.contradictions_found.length}**\n`;
@@ -1227,10 +1360,22 @@ export class WorkflowCoordinator extends EventEmitter {
     const masterSpec = this.getArtifact('13_master_specification.json');
 
     // 1. A40 & A41 Frontend Architecture
-    const masterTech = this._buildMasterTechArchitecture(this.projectBrief, this.backendRequired);
-    const frontendArch = this._buildFrontendArchitecture(this.projectBrief, masterSpec);
-    const buildPlatformSpec = this._buildBuildPlatformSpec(this.projectBrief);
-    const frontendDeliveryManifest = this._buildFrontendDeliveryManifest(this.projectBrief);
+    const masterTech = this._resolveArtifact(
+      '40_master_tech_architecture.json',
+      () => this._buildMasterTechArchitecture(this.projectBrief, this.backendRequired)
+    );
+    const frontendArch = this._resolveArtifact(
+      '41_frontend_architecture.json',
+      () => this._buildFrontendArchitecture(this.projectBrief, masterSpec)
+    );
+    const buildPlatformSpec = this._resolveArtifact(
+      '43_build_platform_spec.json',
+      () => this._buildBuildPlatformSpec(this.projectBrief)
+    );
+    const frontendDeliveryManifest = this._resolveArtifact(
+      '50_frontend_delivery_manifest.json',
+      () => this._buildFrontendDeliveryManifest(this.projectBrief)
+    );
 
     this.saveArtifact('40_master_tech_architecture.json', masterTech);
     this.saveArtifact('41_frontend_architecture.json', frontendArch);
@@ -1242,12 +1387,19 @@ export class WorkflowCoordinator extends EventEmitter {
     let backendDelivery = null;
 
     if (this.backendRequired) {
-      backendArch = this._buildBackendArchitecture(this.projectBrief, masterSpec, true);
-      backendDelivery = this._buildBackendDeliveryManifest(this.projectBrief, true);
-      const serverEndpoints = this._buildServerEndpoints(this.projectBrief, masterSpec);
+      backendArch = this._resolveArtifact(
+        '42_backend_architecture.json',
+        () => this._buildBackendArchitecture(this.projectBrief, masterSpec, true)
+      );
+      backendDelivery = this._resolveArtifact(
+        '60_backend_delivery_manifest.json',
+        () => this._buildBackendDeliveryManifest(this.projectBrief, true)
+      );
       this.saveArtifact('42_backend_architecture.json', backendArch);
       this.saveArtifact('60_backend_delivery_manifest.json', backendDelivery);
-      this.saveArtifact('61_server_endpoints.json', serverEndpoints);
+      // NOTE: 61_server_endpoints.json is deliberately NOT written here. It is
+      // A61's deliverable in Phase 4; authoring it during Phase 3 would pre-empt
+      // the agent and cause the roster delegation to skip it entirely.
     } else {
       // 0-Backend Certification: explicitly records that backend is not needed and cleanly skipped
       backendArch = {
@@ -1270,13 +1422,55 @@ export class WorkflowCoordinator extends EventEmitter {
       this.saveArtifact('60_backend_delivery_manifest.json', backendDelivery);
     }
 
+    // Derived gate: passes only when every tech-planning deliverable carries real
+    // content, and when the backend disposition is coherent with the brief.
+    const techPlanningChecks = {
+      master_tech_architecture: this._hasAnyPath(masterTech, [
+        'core_stack.framework',
+        'framework',
+        'tech_stack',
+      ]),
+      frontend_architecture: this._hasAnyPath(frontendArch, [
+        'component_hierarchy.root',
+        'architecture_type',
+        'components',
+      ]),
+      build_platform_spec: this._hasAnyPath(buildPlatformSpec, [
+        'scripts.build',
+        'package_manager',
+        'node_version',
+      ]),
+      frontend_delivery_manifest: this._hasAnyPath(frontendDeliveryManifest, [
+        'delivery_plan.scaffolding',
+        'verification_evidence',
+        'deliverables',
+      ]),
+      backend_disposition: this.backendRequired
+        ? Array.isArray(backendArch?.api_endpoints) && backendArch.api_endpoints.length > 0
+        : backendArch?.status === 'STANDBY_STATIC_ONLY',
+    };
+    const techPlanningPassed = Object.values(techPlanningChecks).every(Boolean);
+
     this.emit('gate:evaluate', {
       phase: phaseIndex,
       gateName: 'tech_planning_gate',
-      passed: true,
+      passed: techPlanningPassed,
+      checks: techPlanningChecks,
       backendRequired: this.backendRequired,
       backendStatus: backendArch.status,
     });
+
+    if (!techPlanningPassed) {
+      const failed = Object.entries(techPlanningChecks)
+        .filter(([, ok]) => !ok)
+        .map(([name]) => name);
+      this.status = 'HALTED';
+      throw new GateFailureError(
+        'tech_planning_gate',
+        phaseIndex,
+        `Tech planning deliverables incomplete or incoherent: ${failed.join(', ')}`
+      );
+    }
 
     const durationMs = Date.now() - startTime;
     const artifactsList = [
@@ -1287,10 +1481,6 @@ export class WorkflowCoordinator extends EventEmitter {
       '42_backend_architecture.json',
       '60_backend_delivery_manifest.json',
     ];
-
-    if (this.backendRequired) {
-      artifactsList.push('61_server_endpoints.json');
-    }
 
     const result = {
       phase: phaseIndex,
@@ -1338,10 +1528,22 @@ export class WorkflowCoordinator extends EventEmitter {
     const masterSpec = this.getArtifact('13_master_specification.json') || {};
 
     // 1. Frontend Implementation Squad (A51-A54)
-    const appShell = this._buildAppShellScaffold(this.projectBrief, masterSpec);
-    const pageAssemblies = this._buildPageAssemblies(this.projectBrief, masterSpec);
-    const componentLib = this._buildUiComponentLibrary(this.projectBrief, masterSpec);
-    const visualAssets = this._buildVisualExperienceAssets(this.projectBrief);
+    const appShell = this._resolveArtifact(
+      '51_app_shell_scaffold.json',
+      () => this._buildAppShellScaffold(this.projectBrief, masterSpec)
+    );
+    const pageAssemblies = this._resolveArtifact(
+      '52_page_assemblies.json',
+      () => this._buildPageAssemblies(this.projectBrief, masterSpec)
+    );
+    const componentLib = this._resolveArtifact(
+      '53_ui_component_library.json',
+      () => this._buildUiComponentLibrary(this.projectBrief, masterSpec)
+    );
+    const visualAssets = this._resolveArtifact(
+      '54_visual_experience_assets.json',
+      () => this._buildVisualExperienceAssets(this.projectBrief)
+    );
 
     this.saveArtifact('51_app_shell_scaffold.json', appShell);
     this.saveArtifact('52_page_assemblies.json', pageAssemblies);
@@ -1349,20 +1551,32 @@ export class WorkflowCoordinator extends EventEmitter {
     this.saveArtifact('54_visual_experience_assets.json', visualAssets);
 
     // 2. Backend Squad (A61-A63) if activated
+    let backendEndpoints = null;
+    let backendPersistence = null;
+    let backendIntegrations = null;
     if (this.backendRequired) {
-      const endpoints = this._buildServerEndpoints(this.projectBrief, masterSpec);
-      const dataPersistence = this._buildDataPersistenceSpec(this.projectBrief, masterSpec);
-      const integrations = this._buildIntegrationServices(this.projectBrief);
+      backendEndpoints = this._resolveArtifact(
+        '61_server_endpoints.json',
+        () => this._buildServerEndpoints(this.projectBrief, masterSpec)
+      );
+      backendPersistence = this._resolveArtifact(
+        '62_data_persistence_spec.json',
+        () => this._buildDataPersistenceSpec(this.projectBrief, masterSpec)
+      );
+      backendIntegrations = this._resolveArtifact(
+        '63_integration_services.json',
+        () => this._buildIntegrationServices(this.projectBrief)
+      );
 
-      this.saveArtifact('61_server_endpoints.json', endpoints);
-      this.saveArtifact('62_data_persistence_spec.json', dataPersistence);
-      this.saveArtifact('63_integration_services.json', integrations);
+      this.saveArtifact('61_server_endpoints.json', backendEndpoints);
+      this.saveArtifact('62_data_persistence_spec.json', backendPersistence);
+      this.saveArtifact('63_integration_services.json', backendIntegrations);
     }
 
     // GATE C: Pre-Implementation Visual Review Gate
     const visualReviewArtifact = await this._authorArtifact(
       '55_pre_implementation_visual_review.json',
-      { upstreamArtifacts: this._artifactSnapshot() },
+      { upstreamArtifacts: this._artifactSnapshotFor(phaseIndex) },
       () => this._buildPreImplementationVisualReview(this.projectBrief),
       'A30'
     );
@@ -1398,13 +1612,56 @@ export class WorkflowCoordinator extends EventEmitter {
       }
     }
 
+    // Derived gate: the frontend and (when required) backend implementation
+    // deliverables must exist with real content before the build is accepted.
+    const implementationChecks = {
+      app_shell_scaffold: this._hasAnyPath(appShell, [
+        'layout_file',
+        'scaffold_version',
+        'entry_files',
+        'status',
+      ]),
+      page_assemblies: this._hasAnyPath(pageAssemblies, ['pages', 'assemblies', 'routes']),
+      ui_component_library:
+        Array.isArray(componentLib?.components) && componentLib.components.length > 0,
+      visual_experience_assets: this._hasAnyPath(visualAssets, [
+        'frame_budget_target',
+        'motion_library',
+        'assets',
+        'status',
+      ]),
+      backend_endpoints: this.backendRequired
+        ? Array.isArray(backendEndpoints?.endpoints) && backendEndpoints.endpoints.length > 0
+        : true,
+      backend_persistence: this.backendRequired
+        ? this._hasAnyPath(backendPersistence, ['persistence_adapter', 'data_models', 'status'])
+        : true,
+      backend_integrations: this.backendRequired
+        ? this._hasAnyPath(backendIntegrations, ['integrations', 'services', 'status'])
+        : true,
+    };
+    const implementationPassed = Object.values(implementationChecks).every(Boolean);
+
     this.emit('gate:evaluate', {
       phase: phaseIndex,
       gateName: 'implementation_verification_gate',
-      passed: true,
+      passed: implementationPassed,
+      checks: implementationChecks,
       frontendComponentsCount: componentLib.components?.length || 0,
       backendActive: this.backendRequired,
     });
+
+    if (!implementationPassed) {
+      const failed = Object.entries(implementationChecks)
+        .filter(([, ok]) => !ok)
+        .map(([name]) => name);
+      this.status = 'HALTED';
+      throw new GateFailureError(
+        'implementation_verification_gate',
+        phaseIndex,
+        `Implementation deliverables incomplete: ${failed.join(', ')}`
+      );
+    }
 
     const durationMs = Date.now() - startTime;
     const artifactsList = [
@@ -1466,12 +1723,30 @@ export class WorkflowCoordinator extends EventEmitter {
     });
 
     // Run domain audit specs (A71-A76)
-    const funcTest = this._buildFunctionalTestReport(this.projectBrief);
-    const visAudit = this._buildVisualResponsiveAudit(this.projectBrief);
-    const wcagAudit = this._buildAccessibilityAudit(this.projectBrief);
-    const perfAudit = this._buildPerformanceAudit(this.projectBrief);
-    const secAudit = this._buildSecurityAudit(this.projectBrief);
-    const seoAudit = this._buildSeoAudit(this.projectBrief);
+    const funcTest = this._resolveArtifact(
+      '71_functional_test_report.json',
+      () => this._buildFunctionalTestReport(this.projectBrief)
+    );
+    const visAudit = this._resolveArtifact(
+      '72_visual_responsive_audit.json',
+      () => this._buildVisualResponsiveAudit(this.projectBrief)
+    );
+    const wcagAudit = this._resolveArtifact(
+      '73_accessibility_wcag_audit.json',
+      () => this._buildAccessibilityAudit(this.projectBrief)
+    );
+    const perfAudit = this._resolveArtifact(
+      '74_performance_webvitals_audit.json',
+      () => this._buildPerformanceAudit(this.projectBrief)
+    );
+    const secAudit = this._resolveArtifact(
+      '75_security_audit_report.json',
+      () => this._buildSecurityAudit(this.projectBrief)
+    );
+    const seoAudit = this._resolveArtifact(
+      '76_seo_social_graph_audit.json',
+      () => this._buildSeoAudit(this.projectBrief)
+    );
 
     this.saveArtifact('71_functional_test_report.json', funcTest);
     this.saveArtifact('72_visual_responsive_audit.json', visAudit);
@@ -1480,22 +1755,26 @@ export class WorkflowCoordinator extends EventEmitter {
     this.saveArtifact('75_security_audit_report.json', secAudit);
     this.saveArtifact('76_seo_social_graph_audit.json', seoAudit);
 
-    // Check for pre-injected QA verdict (e.g. from tests or prior artifacts)
-    const preInjectedVerdict = (options.simulatedDefects || options.defects) ? null : this.getArtifact('70_qa_comprehensive_verdict.json');
+    // Injected defects deliberately override the agent verdict so gate
+    // enforcement can be exercised; otherwise the agent's own verdict wins.
+    const simulateDefects = Boolean(options.simulatedDefects || options.defects);
 
     // Run real QA verifier if available and not overridden by pre-injected verdict
     let realQAResult = null;
-    if (options.runRealVerifier !== false && !preInjectedVerdict && options.skipCodeSynthesis !== true && fs.existsSync(this.outputDir)) {
+    if (options.runRealVerifier !== false && !simulateDefects && options.skipCodeSynthesis !== true && fs.existsSync(this.outputDir)) {
       try {
         realQAResult = await this.qaVerifier.runAllChecks();
       } catch (_) {}
     }
 
     // A70 compiles master verdict
-    const comprehensiveVerdict = preInjectedVerdict || this._buildQAComprehensiveVerdict(this.projectBrief, {
-      ...options,
-      realQAResult,
-    });
+    const buildVerdict = () =>
+      this._buildQAComprehensiveVerdict(this.projectBrief, { ...options, realQAResult });
+    const comprehensiveVerdict = simulateDefects
+      ? buildVerdict()
+      : this._resolveArtifact('70_qa_comprehensive_verdict.json', buildVerdict, [
+          'total_defects_found',
+        ]);
     this.saveArtifact('70_qa_comprehensive_verdict.json', comprehensiveVerdict);
 
     const totalDefects = comprehensiveVerdict.total_defects_found || 0;
@@ -1597,10 +1876,17 @@ export class WorkflowCoordinator extends EventEmitter {
 
     // If QA report had defects or injected defects exist, enter remediation cycle loop
     let cyclesRun = 0;
-    let triageMatrix = this._buildDefectTriageMatrix(currentDefects);
+    let triageMatrix = this._resolveArtifact(
+      '81_defect_triage_matrix.json',
+      () => this._buildDefectTriageMatrix(currentDefects)
+    );
     this.saveArtifact('81_defect_triage_matrix.json', triageMatrix);
 
-    let patchLog = this._buildRemediationPatchLog(triageMatrix, 0);
+    let patchLog = this._resolveArtifact(
+      '82_remediation_patch_log.json',
+      () => this._buildRemediationPatchLog(triageMatrix, 0),
+      ['tickets_resolved']
+    );
     this.saveArtifact('82_remediation_patch_log.json', patchLog);
 
     while (currentDefects.length > 0 && cyclesRun < this.maxRemediationCycles) {
@@ -1668,15 +1954,37 @@ export class WorkflowCoordinator extends EventEmitter {
     }
 
     // A80: Remediation Director final release manifest
-    const remediationManifest = this._buildRemediationReleaseManifest(
-      triageMatrix,
-      patchLog,
-      cyclesRun,
-      currentDefects.length === 0
+    const remediationManifest = this._resolveArtifact(
+      '80_remediation_release_manifest.json',
+      () =>
+        this._buildRemediationReleaseManifest(
+          triageMatrix,
+          patchLog,
+          cyclesRun,
+          currentDefects.length === 0
+        ),
+      ['resolved_defects_count', 'open_defects_count']
     );
     this.saveArtifact('80_remediation_release_manifest.json', remediationManifest);
 
     const passed = currentDefects.length === 0;
+
+    // Honest post-remediation state: Phase 5 legitimately failed when QA found
+    // defects. Once the remediation loop closes every ticket, that phase's
+    // recorded outcome must reflect the re-verified result rather than staying
+    // FAILED while the workflow reports success.
+    if (passed) {
+      const qaPhaseResult = this.phaseResults.get(5);
+      if (qaPhaseResult && qaPhaseResult.passed === false) {
+        this.phaseResults.set(5, {
+          ...qaPhaseResult,
+          passed: true,
+          initialGateFailed: true,
+          remediatedInPhase: phaseIndex,
+          remediationCycles: cyclesRun,
+        });
+      }
+    }
 
     this.emit('gate:evaluate', {
       phase: phaseIndex,
@@ -1747,10 +2055,14 @@ export class WorkflowCoordinator extends EventEmitter {
     const remediationManifest = this.getArtifact('80_remediation_release_manifest.json');
 
     // 1. A83 Release Readiness Auditor generates production package
-    const releasePackage = this._buildProductionReleasePackage(
-      this.projectBrief,
-      qaVerdict,
-      remediationManifest
+    const releasePackage = this._resolveArtifact(
+      '83_production_release_package.json',
+      () =>
+        this._buildProductionReleasePackage(
+          this.projectBrief,
+          qaVerdict,
+          remediationManifest
+        )
     );
     this.saveArtifact('83_production_release_package.json', releasePackage);
 
@@ -1779,13 +2091,50 @@ export class WorkflowCoordinator extends EventEmitter {
     const manifestMd = `# Production Release Manifest: ${this.projectBrief.project_name}\n\n- Status: **${masterManifest.status}**\n- Version: **${releasePackage.package_version}**\n- Quality Score: **${masterManifest.quality_certification.overall_score}/100**\n- Backend Enabled: **${this.backendRequired}**\n\n## Deployment Commands\n${releasePackage.deployment_instructions.local_run_commands.map((c) => `- \`${c}\``).join('\n')}\n`;
     this.saveArtifact('00_master_orchestration_manifest.md', manifestMd);
 
+    // Derived gate: the release package must be certified, the build must have
+    // succeeded, and no defect may remain open from the remediation loop.
+    const productionChecks = {
+      release_package_present: this._hasAnyPath(releasePackage, [
+        'release_signoff.status',
+        'build_status',
+      ]),
+      build_succeeded: String(releasePackage?.build_status || '')
+        .toUpperCase()
+        .includes('SUCCESS'),
+      release_certified: String(releasePackage?.release_signoff?.status || '')
+        .toUpperCase()
+        .includes('CERTIFIED'),
+      qa_verdict_present: this._hasPath(qaVerdict, 'total_defects_found'),
+      remediation_closed: Number(remediationManifest?.open_defects_count ?? 0) === 0,
+      master_manifest_approved:
+        Array.isArray(masterManifest?.phases) &&
+        masterManifest.phases.length > 0 &&
+        masterManifest.phases.every((p) =>
+          ['APPROVED', 'CLEANLY_SKIPPED', 'CLEANLY_SKIPPED_DETACHED'].includes(p.gate_status)
+        ),
+    };
+    const productionPassed = Object.values(productionChecks).every(Boolean);
+
     this.emit('gate:evaluate', {
       phase: phaseIndex,
       gateName: 'production_signoff_gate',
-      passed: true,
+      passed: productionPassed,
+      checks: productionChecks,
       certifiedBy: releasePackage.release_signoff.certified_by,
       buildStatus: releasePackage.build_status,
     });
+
+    if (!productionPassed) {
+      const failed = Object.entries(productionChecks)
+        .filter(([, ok]) => !ok)
+        .map(([name]) => name);
+      this.status = 'HALTED';
+      throw new GateFailureError(
+        'production_signoff_gate',
+        phaseIndex,
+        `Production sign-off refused: ${failed.join(', ')}`
+      );
+    }
 
     this.status = 'COMPLETED';
     const durationMs = Date.now() - startTime;
@@ -3946,7 +4295,10 @@ ${masterSpec.acceptance_criteria
   }
 
   _buildRemediationPatchLog(triageMatrix, cycle) {
-    const patches = triageMatrix.tickets.map((t) => ({
+    // The offline registry invokes this with a null triage matrix (no defects
+    // found yet), so it must degrade to an empty patch log rather than throw.
+    const tickets = Array.isArray(triageMatrix?.tickets) ? triageMatrix.tickets : [];
+    const patches = tickets.map((t) => ({
       ticket_ref: t.ticket_id,
       assigned_agent: t.assigned_agent,
       file_modified: t.target_file,
@@ -3955,9 +4307,9 @@ ${masterSpec.acceptance_criteria
     }));
 
     return {
-      project_id: triageMatrix.project_id,
+      project_id: triageMatrix?.project_id || this.projectBrief?.project_id || 'PROJ',
       cycle,
-      tickets_dispatched: triageMatrix.total_tickets,
+      tickets_dispatched: triageMatrix?.total_tickets ?? tickets.length,
       tickets_resolved: patches.length,
       regression_testing_passed: true,
       patches,

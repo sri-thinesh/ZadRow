@@ -1,9 +1,0 @@
-{
-  "agentId": "A63",
-  "project_id": "proj_velox_1792521633292",
-  "integrations": [
-    "WebhookNotifier",
-    "EmailDispatcher"
-  ],
-  "status": "SYNTHESIZED"
-}

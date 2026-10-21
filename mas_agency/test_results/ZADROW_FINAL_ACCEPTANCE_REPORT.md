@@ -121,8 +121,8 @@ To conclusively establish non-synthetic, overlapping parallel execution without 
 ### Concurrency Evidence:
 1. **Physical Process Concurrency**: Two distinct OS subprocesses (`cli_windows_x64.exe`) executed simultaneously in the Windows task tree.
 2. **Distinct Database Files**:
-   - `C:\Users\ksrit\.gemini\antigravity-cli\conversations\17261428-2811-47e4-8f53-096d07a8b756.db`
-   - `C:\Users\ksrit\.gemini\antigravity-cli\conversations\277ce601-07f7-4811-8b76-22502d37311d.db`
+   - `<HOME>\.gemini\antigravity-cli\conversations\17261428-2811-47e4-8f53-096d07a8b756.db`
+   - `<HOME>\.gemini\antigravity-cli\conversations\277ce601-07f7-4811-8b76-22502d37311d.db`
 3. **No State Pollution**: Agent A01's output contained scope charter elements; Agent A02's output contained topological DAG elements. Neither process cross-polluted memory or SQLite storage.
 
 ---

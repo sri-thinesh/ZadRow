@@ -13,7 +13,7 @@
 This independent verification was conducted to determine whether Multi-Agent System 2.0 (AURA Digital Studio) genuinely functions as an autonomous, hierarchical, production-grade AI website development organization—not merely whether its configuration files exist or synthetic tests pass.
 
 The test suite executed real, live tools:
-1. **Local Antigravity Binary Execution**: Model calls via `C:\Users\ksrit\Downloads\cli_windows_x64.exe` with structured prompt injection and live JSON response parsing.
+1. **Local Antigravity Binary Execution**: Model calls via `<HOME>\Downloads\cli_windows_x64.exe` with structured prompt injection and live JSON response parsing.
 2. **Next.js 15 Production Build & Server**: Real production compilation (`npm run build`) and live HTTP server serving on `http://localhost:3456/`.
 3. **Headless Google Chrome Automation**: Playwright connecting to local Google Chrome (`C:\Program Files\Google\Chrome\Application\chrome.exe`) across Desktop (1440x900), Tablet (768x1024), and Mobile (375x812) viewports.
 4. **Independent Quality & Remediation Verification**: Real mathematical WCAG 2.2 contrast calculations ($L = 0.2126R + 0.7152G + 0.0722B$), zero-placeholder recursive scanning, defect injection, triage routing, patch application, and clean retesting.
