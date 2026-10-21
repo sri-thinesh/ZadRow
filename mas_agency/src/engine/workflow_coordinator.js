@@ -202,10 +202,19 @@ export class WorkflowCoordinator extends EventEmitter {
       mockArtifactFactory: (agentId, prompt, context) => this._buildMockArtifact(agentId, prompt, context),
     });
 
+    // A real run must not build a production site out of offline placeholder
+    // artifacts. Mock/synthetic runs may, because that is what they are for.
+    this.isMockExecution =
+      this.executionMode === 'test' ||
+      this.executionMode === 'mock' ||
+      this.executionMode === 'synthetic' ||
+      this.allowFallback === true;
+
     this.codeSynthesizer = options.codeSynthesizer || new CodeSynthesizer({
       agencyDir: this.agencyDir,
       artifactsDir: this.artifactsDir,
       outputDir: this.outputDir,
+      requireRealArtifacts: options.requireRealArtifacts ?? !this.isMockExecution,
     });
 
     this.qaVerifier = options.qaVerifier || new QAVerifier({

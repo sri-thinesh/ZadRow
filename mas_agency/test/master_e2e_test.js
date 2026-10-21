@@ -356,19 +356,17 @@ async function suite6_FrontendOnlyWebsite() {
     const backendArch = JSON.parse(fs.readFileSync(path.join(testDir, '42_backend_architecture.json'), 'utf8'));
     assert.strictEqual(backendArch.status, 'STANDBY_STATIC_ONLY');
 
-    // Verify frontend files generated on disk
-    const expectedFiles = [
+    // Verify the structural files exist. The *section* components are deliberately
+    // not listed here: which sections a page carries is an agent decision recorded in
+    // A52's page assemblies, not a fixed template this engine applies. Listing them
+    // would re-assert the hardcoded composition this suite exists to check for.
+    const structuralFiles = [
       'package.json',
       'tsconfig.json',
       'tailwind.config.ts',
       'src/app/layout.tsx',
       'src/app/page.tsx',
       'src/app/globals.css',
-      'src/components/Navigation.tsx',
-      'src/components/HeroStage.tsx',
-      'src/components/FeatureBento.tsx',
-      'src/components/InteractiveShowcase.tsx',
-      'src/components/FooterConversion.tsx',
       'src/components/MagneticCursor.tsx',
       'src/components/ProceduralGraphics.tsx',
       'src/components/SoundEffects.tsx',
@@ -377,18 +375,49 @@ async function suite6_FrontendOnlyWebsite() {
     ];
 
     let filesFound = 0;
-    for (const f of expectedFiles) {
+    for (const f of structuralFiles) {
       const fp = path.join(outputDir, f);
       assert(fs.existsSync(fp), `File must exist: ${fp}`);
       filesFound++;
     }
+
+    // Every component A52 prescribes must be generated, and nothing else may be.
+    const assemblies = JSON.parse(
+      fs.readFileSync(path.join(testDir, '52_page_assemblies.json'), 'utf8')
+    );
+    const prescribed = new Set(['Navigation']); // structural chrome, always present
+    for (const page of assemblies.pages || []) {
+      for (const section of page.assembled_sections || []) {
+        for (const component of section.components || []) prescribed.add(component);
+      }
+    }
+
+    const generatedComponents = fs
+      .readdirSync(path.join(outputDir, 'src', 'components'))
+      .map((f) => f.replace(/\.tsx$/, ''));
+
+    for (const component of prescribed) {
+      assert(
+        generatedComponents.includes(component),
+        `Component prescribed by A52 must be generated: ${component} (generated: ${generatedComponents.join(', ')})`
+      );
+      filesFound++;
+    }
+
+    assert(
+      !generatedComponents.includes('FeatureBento'),
+      'A bento grid is not prescribed by the wireframes and must not be forced into the deliverable'
+    );
 
     // Verify NO api routes generated for static site
     const apiRoute = path.join(outputDir, 'src/app/api/waitlist/route.ts');
     assert(!fs.existsSync(apiRoute), 'Static site must not generate api route handlers');
 
     recordTest('Static brief correctly certified with 0-backend architecture', backendArch.status === 'STANDBY_STATIC_ONLY');
-    recordTest(`Complete Next.js 15 frontend synthesized (${filesFound}/${expectedFiles.length} files)`, filesFound === expectedFiles.length);
+    recordTest(
+      `Complete Next.js 15 frontend synthesized (${filesFound} files, sections from A52: ${[...prescribed].join(', ')})`,
+      filesFound === structuralFiles.length + prescribed.size
+    );
     recordTest('Static site cleanly omits unnecessary server API routes', !fs.existsSync(apiRoute));
   } finally {
     cleanTestDir(testDir);

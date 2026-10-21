@@ -13,11 +13,90 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+/**
+ * The page's section composition is an agent deliverable, not a decision this
+ * module is entitled to make. A52 (Page Engineering Lead) emits
+ * `52_page_assemblies.json` describing the assembled sections per route, and its
+ * own specification forbids forcing a kinetic hero, a bento grid or a conversion
+ * footer unless the approved wireframes prescribe them. A31 emits
+ * `31_wireframe_ux_flow.json` with the approved screens and their sections.
+ *
+ * This table maps the vocabulary those artifacts use onto the bespoke component
+ * generators this engine owns. A section that matches nothing is reported as
+ * unmapped rather than silently replaced with a default.
+ */
+const SECTION_COMPONENTS = [
+  {
+    component: 'Navigation',
+    placement: 'chrome-top',
+    generate: '_generateNavigation',
+    match: ['navigation', 'navbar', 'nav', 'header', 'menu', 'topbar'],
+  },
+  {
+    component: 'HeroStage',
+    placement: 'main',
+    generate: '_generateHeroStage',
+    match: ['hero', 'masthead', 'opening', 'above-the-fold', 'abovefold'],
+  },
+  {
+    component: 'FeatureBento',
+    placement: 'main',
+    generate: '_generateFeatureBento',
+    match: ['bento', 'feature', 'capabilit', 'service', 'offering', 'value-prop', 'benefit'],
+  },
+  {
+    component: 'InteractiveShowcase',
+    placement: 'main',
+    generate: '_generateInteractiveShowcase',
+    match: [
+      'showcase',
+      'gallery',
+      'project',
+      'portfolio',
+      'work',
+      'telemetry',
+      'case stud',
+      'casestud',
+      'exhibit',
+      'stories',
+      'story',
+      'insight',
+    ],
+  },
+  {
+    component: 'FooterConversion',
+    placement: 'chrome-bottom',
+    generate: '_generateFooterConversion',
+    match: ['footer', 'contact', 'cta', 'conversion', 'inquire', 'enquir', 'get-in-touch', 'signup', 'waitlist'],
+  },
+];
+
+/** The engine's own default composition, used only when no artifact describes one. */
+const DEFAULT_SECTION_PLAN = [
+  { section_id: 'default_navigation', component: 'Navigation', placement: 'chrome-top' },
+  { section_id: 'default_hero', component: 'HeroStage', placement: 'main' },
+  { section_id: 'default_features', component: 'FeatureBento', placement: 'main' },
+  { section_id: 'default_showcase', component: 'InteractiveShowcase', placement: 'main' },
+  { section_id: 'default_footer', component: 'FooterConversion', placement: 'chrome-bottom' },
+];
+
+/**
+ * The section components a composition can select. Only these are subject to
+ * cleanup: the shared primitives (MediaPlaceholder, MagneticCursor, SoundEffects,
+ * ProceduralGraphics) are imported by whichever sections are generated, so
+ * removing them because no *section* names them would break the build.
+ */
+const SECTION_COMPONENT_NAMES = SECTION_COMPONENTS.map((entry) => entry.component);
+
 export class CodeSynthesizer {
   constructor(options = {}) {
     this.agencyDir = options.agencyDir || path.resolve(__dirname, '../..');
     this.artifactsDir = options.artifactsDir || path.join(this.agencyDir, 'workspace', 'artifacts');
     this.outputDir = options.outputDir || path.join(this.agencyDir, 'output', 'website');
+
+    // When true, synthesizing from offline placeholder artifacts is a hard error
+    // rather than a labelled preview. The coordinator enables this for real runs.
+    this.requireRealArtifacts = options.requireRealArtifacts === true;
   }
 
   _loadArtifact(filename, artifactsMap = {}, fallback = null) {
@@ -51,8 +130,39 @@ export class CodeSynthesizer {
                        this._loadArtifact('01_ux_architecture.json', artifactsMap) || {};
     const backendEndpoints = this._loadArtifact('61_server_endpoints.json', artifactsMap) || null;
 
+    // The composition of the page is itself an agent deliverable. A52 emits the
+    // assembled sections; A31 emits the approved wireframes they were assembled
+    // from. Either can drive the page; the engine's own default order is the last
+    // resort and is reported as such.
+    const pageAssemblies = this._loadArtifact('52_page_assemblies.json', artifactsMap) || null;
+    const wireframes = this._loadArtifact('31_wireframe_ux_flow.json', artifactsMap) || null;
+
     const brandName = briefData.brandName || charter.brandName || 'STUDIO SYNTHETIX';
     const clientVision = briefData.clientVision || charter.clientVision || 'High-Performance Generative Studio';
+
+    // Offline placeholder artifacts are not agent output. Building a site from them
+    // is legitimate for a preview and unacceptable for a deliverable, so it is
+    // detected, recorded, and refused outright when requireRealArtifacts is set.
+    const syntheticInputs = this._detectSyntheticInputs({
+      '01_scope_charter.json': charter,
+      '32_design_tokens_and_components.json': tokensArtifact,
+      '33_copywriting_and_conversion.json': copyArtifact,
+      '12_information_architecture.json': iaArtifact,
+      '61_server_endpoints.json': backendEndpoints,
+      '52_page_assemblies.json': pageAssemblies,
+      '31_wireframe_ux_flow.json': wireframes,
+    });
+    if (syntheticInputs.length > 0 && this.requireRealArtifacts) {
+      throw new Error(
+        `Refusing to synthesize a production site: ${syntheticInputs.length} input artifact(s) are ` +
+          `offline placeholders rather than agent output (${syntheticInputs.join(', ')}). A site built ` +
+          `from these would be presented as agent-authored work while containing none. Run the pipeline ` +
+          `against a real Antigravity CLI, or construct CodeSynthesizer without requireRealArtifacts to ` +
+          `build a clearly-labelled preview.`
+      );
+    }
+
+    const sectionPlan = this._resolveSectionPlan(pageAssemblies, wireframes);
 
     // Ensure output directories exist
     this._ensureDirectoryStructure();
@@ -78,19 +188,33 @@ export class CodeSynthesizer {
     this._generateGlobalsCss(tokensArtifact);
     this._generateLayout(brandName);
 
-    // 7. Generate page.tsx
-    this._generatePage(brandName);
+    // 7. Generate the section components the artifacts actually call for. A
+    //    component no route uses is not generated, so the deliverable carries no
+    //    section the wireframes did not ask for.
+    const usedComponents = new Set(
+      sectionPlan.routes.flatMap((route) => route.sections.map((section) => section.component))
+    );
 
-    // 8. Generate all interactive components with dynamic artifacts
-    this._generateNavigation(brandName, iaArtifact);
-    this._generateHeroStage(brandName, copyArtifact);
-    this._generateFeatureBento(brandName, copyArtifact, charter);
+    if (usedComponents.has('Navigation')) this._generateNavigation(brandName, iaArtifact);
+    if (usedComponents.has('HeroStage')) this._generateHeroStage(brandName, copyArtifact);
+    if (usedComponents.has('FeatureBento')) this._generateFeatureBento(brandName, copyArtifact, charter);
+    if (usedComponents.has('InteractiveShowcase')) this._generateInteractiveShowcase(brandName, copyArtifact);
+    if (usedComponents.has('FooterConversion')) this._generateFooterConversion(brandName, copyArtifact);
+
+    // Shared primitives the section components import.
     this._generateMediaPlaceholder();
-    this._generateInteractiveShowcase(brandName, copyArtifact);
-    this._generateFooterConversion(brandName, copyArtifact);
     this._generateMagneticCursor();
     this._generateSoundEffects();
     this._generateProceduralGraphics();
+
+    // Remove component files left behind by an earlier run that this composition
+    // no longer uses, so a stale section cannot survive into the deliverable.
+    this._removeUnusedComponents(usedComponents);
+
+    // 8. Generate the route files from the resolved plan
+    for (const route of sectionPlan.routes) {
+      this._generatePage(route);
+    }
 
     // 9. Generate server API endpoints if backend active; otherwise clean up stale api routes
     if (backendEndpoints) {
@@ -111,7 +235,213 @@ export class CodeSynthesizer {
       outputDir: this.outputDir,
       fileCount: this._countSynthesizedFiles(),
       brandName,
+      // Provenance of the deliverable, so no caller has to guess whether the site
+      // reflects the agents' decisions or this engine's defaults.
+      sectionPlanSource: sectionPlan.source,
+      artifactDriven: sectionPlan.source !== 'fallback',
+      routes: sectionPlan.routes.map((route) => route.route),
+      sectionsFromArtifact: sectionPlan.routes.reduce(
+        (total, route) => total + route.sections.length,
+        0
+      ),
+      unmappedSections: sectionPlan.unmapped,
+      syntheticInputs,
     };
+  }
+
+  /**
+   * Report which of the supplied artifacts are offline placeholders rather than
+   * agent output. `_executeMock` stamps every artifact it writes with `_mock` and
+   * `_execution_mode`, so this is a positive identification, not a heuristic.
+   */
+  _detectSyntheticInputs(artifactsByName = {}) {
+    const synthetic = [];
+    for (const [name, value] of Object.entries(artifactsByName)) {
+      if (!value || typeof value !== 'object' || Array.isArray(value)) continue;
+      const mode = value._execution_mode;
+      if (value._mock === true || value.synthetic === true || mode === 'mock' || mode === 'synthetic') {
+        synthetic.push(name);
+      }
+    }
+    return synthetic;
+  }
+
+  /**
+   * Decide which sections appear on which routes, and in what order.
+   *
+   * Precedence: A52's assembled sections, then A31's approved wireframes, then this
+   * engine's default order. The source is returned so callers can tell the
+   * difference between a site the agents designed and one this module defaulted to.
+   */
+  _resolveSectionPlan(pageAssemblies = null, wireframes = null) {
+    const routes = [];
+    const unmapped = [];
+
+    // A section may name its component outright (`components: ['HeroStage']`), which
+    // is authoritative, or describe itself in prose (`layout_type: 'editorial-split'`),
+    // which is matched against the section vocabulary.
+    const resolveSection = (section) => {
+      const explicit = section.components || section.component_file || section.component;
+      for (const candidate of Array.isArray(explicit) ? explicit : [explicit]) {
+        const name = this._canonicalComponent(candidate);
+        if (name) return { component: name, placement: this._placementOf(name) };
+      }
+
+      const name = this._canonicalComponent(
+        [
+          section.id,
+          section.section_id,
+          section.layout_type,
+          section.dom_element,
+          section.visitor_journey_stage,
+          ...(Array.isArray(section.features_included) ? section.features_included : []),
+        ]
+          .filter(Boolean)
+          .join(' ')
+      );
+      return name ? { component: name, placement: this._placementOf(name) } : null;
+    };
+
+    const collect = (rawSections, routeLabel) => {
+      const sections = [];
+      for (const raw of rawSections || []) {
+        if (!raw || typeof raw !== 'object') continue;
+        const match = resolveSection(raw);
+        if (!match) {
+          unmapped.push({
+            route: routeLabel,
+            section_id: raw.id || raw.section_id || '(unnamed)',
+            layout_type: raw.layout_type || null,
+          });
+          continue;
+        }
+        sections.push({
+          section_id: raw.id || raw.section_id || match.component,
+          component: match.component,
+          placement: match.placement,
+        });
+      }
+      return sections;
+    };
+
+    // Navigation is structural chrome, not a creative section: the accessibility
+    // scaffold declares header/main/footer landmarks and a mobile menu focus trap,
+    // so a page without it is a broken page. It is therefore always present unless
+    // the composition already places one. A conversion footer is NOT treated this
+    // way — A52's specification forbids forcing one that the wireframes did not ask
+    // for, so it appears only when a section prescribes it.
+    const withChrome = (sections) =>
+      sections.some((section) => section.component === 'Navigation')
+        ? sections
+        : [{ section_id: 'chrome_navigation', component: 'Navigation', placement: 'chrome-top' }, ...sections];
+
+    // 1. A52's page assemblies: `pages[].assembled_sections[]`.
+    const pages = pageAssemblies && Array.isArray(pageAssemblies.pages) ? pageAssemblies.pages : null;
+    if (pages && pages.length > 0) {
+      for (const page of pages) {
+        if (!page || typeof page !== 'object') continue;
+        const route = this._normalizeRoute(page.route);
+        const sections = collect(page.assembled_sections, route);
+        if (sections.length > 0) {
+          routes.push({ route, source: 'page_assemblies', sections: withChrome(sections) });
+        }
+      }
+      if (routes.length > 0) return { source: 'page_assemblies', routes, unmapped };
+    }
+
+    // 1b. A52 is also emitted with the sections at the top level.
+    const assembled =
+      pageAssemblies && Array.isArray(pageAssemblies.assembled_sections)
+        ? pageAssemblies.assembled_sections
+        : null;
+    if (assembled && assembled.length > 0) {
+      const sections = collect(assembled, '/');
+      if (sections.length > 0) {
+        routes.push({ route: '/', source: 'page_assemblies', sections: withChrome(sections) });
+        return { source: 'page_assemblies', routes, unmapped };
+      }
+    }
+
+    // 2. A31's approved wireframes, one page per screen.
+    const screens = wireframes && Array.isArray(wireframes.screens) ? wireframes.screens : null;
+    if (screens && screens.length > 0) {
+      for (const screen of screens) {
+        if (!screen || typeof screen !== 'object') continue;
+        const route = this._normalizeRoute(screen.route);
+        const sections = collect(screen.sections, route);
+        if (sections.length > 0) {
+          routes.push({ route, source: 'wireframe_ux_flow', sections: withChrome(sections) });
+        }
+      }
+      if (routes.length > 0) return { source: 'wireframe_ux_flow', routes, unmapped };
+    }
+
+    // 3. This engine's default order.
+    return {
+      source: 'fallback',
+      routes: [
+        { route: '/', source: 'fallback', sections: DEFAULT_SECTION_PLAN.map((s) => ({ ...s })) },
+      ],
+      unmapped,
+    };
+  }
+
+  /**
+   * Map a component name, file path or descriptive phrase onto one of the section
+   * components this engine can generate. Returns null when nothing matches, so an
+   * unrecognised section is reported rather than silently substituted.
+   */
+  _canonicalComponent(value) {
+    const normalise = (text) =>
+      String(text || '')
+        .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, ' ')
+        .trim();
+
+    const haystack = normalise(value);
+    if (!haystack) return null;
+
+    for (const entry of SECTION_COMPONENTS) {
+      if (normalise(entry.component) === haystack) return entry.component;
+    }
+    for (const entry of SECTION_COMPONENTS) {
+      if (entry.match.some((keyword) => haystack.includes(normalise(keyword)))) {
+        return entry.component;
+      }
+    }
+    return null;
+  }
+
+  /** Where a component sits in the document. */
+  _placementOf(component) {
+    const entry = SECTION_COMPONENTS.find((candidate) => candidate.component === component);
+    return entry ? entry.placement : 'main';
+  }
+
+  /** Normalise an artifact's route string into an app-router path. */
+  _normalizeRoute(route) {
+    const raw = String(route || '/').trim();
+    if (!raw || raw === '/' || raw === 'index' || raw === 'home') return '/';
+    const cleaned = raw.replace(/^https?:\/\/[^/]+/i, '').replace(/^\/+|\/+$/g, '');
+    return cleaned ? `/${cleaned}` : '/';
+  }
+
+  /**
+   * Delete section component files this composition does not use, so a section the
+   * wireframes dropped cannot survive into the deliverable from an earlier run.
+   * Shared primitives are never removed — they are dependencies, not sections.
+   */
+  _removeUnusedComponents(usedComponents) {
+    for (const name of SECTION_COMPONENT_NAMES) {
+      if (usedComponents.has(name)) continue;
+      const filePath = path.join(this.outputDir, 'src', 'components', `${name}.tsx`);
+      if (fs.existsSync(filePath)) {
+        try {
+          fs.rmSync(filePath, { force: true });
+        } catch (_) {}
+      }
+    }
   }
 
   _ensureDirectoryStructure() {
@@ -534,29 +864,64 @@ export default function RootLayout({
     this._writeFile('src/app/layout.tsx', content);
   }
 
-  _generatePage(brandName) {
-    const content = `
-import { Navigation } from '@/components/Navigation';
-import { HeroStage } from '@/components/HeroStage';
-import { FeatureBento } from '@/components/FeatureBento';
-import { InteractiveShowcase } from '@/components/InteractiveShowcase';
-import { FooterConversion } from '@/components/FooterConversion';
+  /**
+   * Emit a route file from a resolved section plan.
+   *
+   * The page is composed from the sections the artifacts prescribe, in the order
+   * they prescribe them. When no composition artifact was available the engine's
+   * default order is used, and the file says so on its face so nobody mistakes a
+   * default layout for an approved one.
+   */
+  _generatePage(plan) {
+    const route = plan.route || '/';
+    const sections = plan.sections || [];
+
+    const chromeTop = sections.filter((s) => s.placement === 'chrome-top').map((s) => s.component);
+    const main = sections.filter((s) => s.placement === 'main').map((s) => s.component);
+    const chromeBottom = sections
+      .filter((s) => s.placement === 'chrome-bottom')
+      .map((s) => s.component);
+
+    const used = [...new Set([...chromeTop, ...main, ...chromeBottom])];
+    const imports = used.map((name) => `import { ${name} } from '@/components/${name}';`).join('\n');
+
+    const provenance =
+      plan.source === 'fallback'
+        ? [
+            '// PROVENANCE: no page-composition artifact was available',
+            '// (52_page_assemblies.json from A52, or 31_wireframe_ux_flow.json from A31),',
+            '// so this route uses the synthesis engine\'s default section order. It is NOT',
+            '// derived from approved wireframes and should be treated as a preview layout.',
+          ].join('\n')
+        : `// PROVENANCE: section composition derived from ${
+            plan.source === 'page_assemblies'
+              ? '52_page_assemblies.json (A52, Page Engineering Lead)'
+              : '31_wireframe_ux_flow.json (A31, UX Architecture)'
+          }.`;
+
+    const renderRows = (list, indent) => list.map((name) => `${indent}<${name} />`).join('\n');
+
+    const content = `${provenance}
+${imports}
 
 export default function Home() {
   return (
     <div className="relative min-h-screen flex flex-col justify-between overflow-x-hidden">
-      <Navigation />
+${renderRows(chromeTop, '      ')}
       <main id="main-content" className="flex-1">
-        <HeroStage />
-        <FeatureBento />
-        <InteractiveShowcase />
+${renderRows(main, '        ')}
       </main>
-      <FooterConversion />
+${renderRows(chromeBottom, '      ')}
     </div>
   );
 }
 `;
-    this._writeFile('src/app/page.tsx', content);
+
+    const relativePath =
+      route === '/'
+        ? 'src/app/page.tsx'
+        : `src/app/${route.replace(/^\/+|\/+$/g, '')}/page.tsx`;
+    this._writeFile(relativePath, content);
   }
 
   _generateNavigation(brandName, iaArtifact = {}) {

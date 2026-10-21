@@ -34,6 +34,7 @@ let departments = null;
 let skipPhases = null;
 let allowFallback = false;
 let skipPermissions = false;
+let allowSyntheticArtifacts = false;
 
 for (let i = 0; i < args.length; i++) {
   const arg = args[i];
@@ -45,6 +46,8 @@ for (let i = 0; i < args.length; i++) {
     allowFallback = true;
   } else if (arg === '--skip-permissions') {
     skipPermissions = true;
+  } else if (arg === '--allow-synthetic-artifacts') {
+    allowSyntheticArtifacts = true;
   } else if (arg === '--skip-qa') {
     skipQA = true;
   } else if (arg === '--build-only') {
@@ -92,6 +95,11 @@ ${Colors.bold}OPTIONS:${Colors.reset}
                               anything this process can reach. Equivalent to setting
                               ANTIGRAVITY_SKIP_PERMISSIONS=1.
       --build-only            Assemble website directly from existing artifacts
+      --allow-synthetic-artifacts
+                              Permit synthesis from offline placeholder artifacts.
+                              Off by default: a site built from placeholders contains
+                              no agent-authored content and must not be presented as
+                              a deliverable.
       --validate-only         Execute QA verification suite on existing website
   -h, --help                  Show this help message
 
@@ -135,7 +143,7 @@ async function main() {
   // Build Only Mode
   if (buildOnly) {
     Logger.info('Synthesizing Next.js 15 website from existing artifacts...');
-    const synthesizer = new CodeSynthesizer({ agencyDir });
+    const synthesizer = new CodeSynthesizer({ agencyDir, requireRealArtifacts: !allowSyntheticArtifacts });
     const briefArtifactPath = path.join(agencyDir, 'workspace', 'artifacts', '00_executive_brief.json');
     let briefData = {};
     try {
@@ -219,7 +227,7 @@ async function main() {
 
     // Synthesize Complete Website
     Logger.tier('SYNTHESIS', 'Assembling Next.js 15 / React 19 Production Codebase');
-    const synthesizer = new CodeSynthesizer({ agencyDir });
+    const synthesizer = new CodeSynthesizer({ agencyDir, requireRealArtifacts: !allowSyntheticArtifacts });
     const briefData = dag.context.outputs['A01']?.data || dag.context.outputs['A00']?.data || {};
     const synthResult = await synthesizer.synthesize(briefData, dag.context.artifacts);
     Logger.success(`Synthesized ${synthResult.fileCount} clean production files into: ${Colors.bold}${synthResult.outputDir}${Colors.reset}`);
