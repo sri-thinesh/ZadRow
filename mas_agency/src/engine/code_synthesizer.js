@@ -359,7 +359,11 @@ export interface MediaPlaceholderProps {
   }
 
   _generateGlobalsCss(tokensArtifact = {}) {
-    const rawTokens = tokensArtifact.tokens || tokensArtifact.data?.tokens || {};
+    const tokenRoot = tokensArtifact.tokens || tokensArtifact.data?.tokens || {};
+    // `_buildDesignTokens` nests values under `colors`; agent-authored artifacts may
+    // be flat. Support both so design tokens actually reach the stylesheet instead of
+    // silently falling back to the hardcoded defaults below.
+    const rawTokens = tokenRoot.colors || tokenRoot;
     const primary = rawTokens['--color-primary'] || rawTokens.primary || '#00f0ff';
     const primaryGlow = rawTokens['--color-primary-glow'] || rawTokens.primaryGlow || 'rgba(0, 240, 255, 0.35)';
     const secondary = rawTokens['--color-secondary'] || rawTokens.secondary || '#7000ff';
@@ -471,11 +475,12 @@ body {
   }
 
   _generateLayout(brandName) {
-    const isThinesh = !brandName || brandName.toLowerCase().includes('thinesh') || brandName.toLowerCase().includes('sri');
-    const pageTitle = isThinesh ? 'Sri Thinesh | Student Engineer, AI & Product Portfolio' : `${brandName} | Autonomous Digital Studio`;
+    const isThinesh = process.env.ZADROW_AUTHOR_DEMO === '1';
+    const resolvedBrand = (brandName && String(brandName).trim()) || 'Autonomous Digital Studio';
+    const pageTitle = isThinesh ? 'Sri Thinesh | Student Engineer, AI & Product Portfolio' : `${resolvedBrand} | Autonomous Digital Studio`;
     const pageDesc = isThinesh
       ? 'Explore the personal portfolio of Sri Thinesh — engineering student exploring software development, artificial intelligence, product design, electronics, and entrepreneurship.'
-      : `Experience the digital frontier with ${brandName}. High-velocity kinetic systems, generative AI spatial design, and uncompromised aesthetic precision.`;
+      : `Experience the digital frontier with ${resolvedBrand}. High-velocity kinetic systems, generative AI spatial design, and uncompromised aesthetic precision.`;
     const content = `
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
@@ -486,7 +491,7 @@ import { ProceduralGraphics } from '@/components/ProceduralGraphics';
 export const metadata: Metadata = {
   title: '${pageTitle}',
   description: '${pageDesc}',
-  keywords: ['Sri Thinesh', 'Student Engineer', 'Software Development', 'Artificial Intelligence', 'Electronics Simulation', 'UI/UX Design', 'Next.js 15'],
+  keywords: ['${resolvedBrand}', 'Digital Studio', 'Design Engineering', 'Next.js 15', 'React 19'],
   openGraph: {
     title: '${pageTitle}',
     description: '${pageDesc}',
@@ -558,7 +563,10 @@ export default function Home() {
   }
 
   _generateNavigation(brandName, iaArtifact = {}) {
-    const isThinesh = !brandName || brandName.toLowerCase().includes('thinesh') || brandName.toLowerCase().includes('sri');
+    // Author demo mode is OPT-IN only. It previously triggered on `!brandName`, which meant
+    // any brief whose brand extraction failed silently produced the author's personal
+    // portfolio as the client's deliverable.
+    const isThinesh = process.env.ZADROW_AUTHOR_DEMO === '1';
     const displayBrand = isThinesh ? 'SRI THINESH' : brandName.toUpperCase();
     const ctaLabel = isThinesh ? 'TRANSMISSION' : 'INITIATE BRIEF';
     const content = `
@@ -690,7 +698,10 @@ export function Navigation() {
   }
 
   _generateHeroStage(brandName, copyArtifact = {}) {
-    const isThinesh = !brandName || brandName.toLowerCase().includes('thinesh') || brandName.toLowerCase().includes('sri');
+    // Author demo mode is OPT-IN only. It previously triggered on `!brandName`, which meant
+    // any brief whose brand extraction failed silently produced the author's personal
+    // portfolio as the client's deliverable.
+    const isThinesh = process.env.ZADROW_AUTHOR_DEMO === '1';
     const content = `
 'use client';
 
@@ -894,7 +905,10 @@ export function HeroStage() {
   }
 
   _generateFeatureBento(brandName, copyArtifact = {}, charter = {}) {
-    const isThinesh = !brandName || brandName.toLowerCase().includes('thinesh') || brandName.toLowerCase().includes('sri');
+    // Author demo mode is OPT-IN only. It previously triggered on `!brandName`, which meant
+    // any brief whose brand extraction failed silently produced the author's personal
+    // portfolio as the client's deliverable.
+    const isThinesh = process.env.ZADROW_AUTHOR_DEMO === '1';
     const content = `
 'use client';
 
@@ -1130,7 +1144,10 @@ export function FeatureBento() {
   }
 
   _generateInteractiveShowcase(brandName) {
-    const isThinesh = !brandName || brandName.toLowerCase().includes('thinesh') || brandName.toLowerCase().includes('sri');
+    // Author demo mode is OPT-IN only. It previously triggered on `!brandName`, which meant
+    // any brief whose brand extraction failed silently produced the author's personal
+    // portfolio as the client's deliverable.
+    const isThinesh = process.env.ZADROW_AUTHOR_DEMO === '1';
     const content = isThinesh ? `
 'use client';
 
@@ -2043,7 +2060,10 @@ export function MediaPlaceholder({
   }
 
   _generateFooterConversion(brandName) {
-    const isThinesh = !brandName || brandName.toLowerCase().includes('thinesh') || brandName.toLowerCase().includes('sri');
+    // Author demo mode is OPT-IN only. It previously triggered on `!brandName`, which meant
+    // any brief whose brand extraction failed silently produced the author's personal
+    // portfolio as the client's deliverable.
+    const isThinesh = process.env.ZADROW_AUTHOR_DEMO === '1';
     const content = isThinesh ? `
 'use client';
 

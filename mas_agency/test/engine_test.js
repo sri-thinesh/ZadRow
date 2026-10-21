@@ -113,15 +113,15 @@ async function testDAGParallelExecution() {
 
 async function testAgentRunnerAndArtifacts() {
   Logger.info('Testing AgentRunner execution & artifact generation...');
-  const runner = new AgentRunner({ agencyDir, executionMode: 'synthetic' });
+  const runner = new AgentRunner({ agencyDir, executionMode: 'mock' });
 
   const testPrompt = 'Create an award-winning portfolio for Studio Synthetix with kinetic canvas';
-  const result = await runner.executeAgent('E01_BriefAnalyst', testPrompt, {});
+  const result = await runner.executeAgent('A01', testPrompt, {});
 
   assert.strictEqual(result.status, 'COMPLETED');
   assert(result.data.brandName.toUpperCase().includes('SYNTHETIX'), 'Brand name should be extracted');
 
-  const artifactPath = path.join(agencyDir, 'workspace', 'artifacts', '00_executive_brief.json');
+  const artifactPath = path.join(agencyDir, 'workspace', 'artifacts', '01_scope_charter.json');
   assert(fs.existsSync(artifactPath), 'Artifact file must exist on disk');
 
   Logger.success('AgentRunner and artifact generation verified.');

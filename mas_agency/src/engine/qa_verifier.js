@@ -448,8 +448,11 @@ export class QAVerifier {
     const ratio = this.calculateContrastRatio(fgColor, bgColor);
     const roundedRatio = Number(ratio.toFixed(2));
 
-    const minAA = isLargeText || isUIComponent ? 3.0 : 4.5;
-    const minAAA = isLargeText ? 4.5 : 7.0;
+    // Callers may declare an explicit threshold for a specific pair (e.g. a focus
+    // ring is a UI component and is judged against 3.0:1, not 7.0:1). Honour the
+    // declared value so the reported threshold always matches the evaluated one.
+    const minAA = options.minAA ?? (isLargeText || isUIComponent ? 3.0 : 4.5);
+    const minAAA = options.minAAA ?? (isLargeText ? 4.5 : 7.0);
 
     return {
       ratio: roundedRatio,
@@ -522,6 +525,8 @@ export class QAVerifier {
       const audit = this.auditContrast(pair.fg, pair.bg, {
         isLargeText: pair.isLargeText,
         isUIComponent: pair.isUIComponent,
+        minAA: pair.minAA,
+        minAAA: pair.minAAA,
       });
 
       const record = {
@@ -532,8 +537,8 @@ export class QAVerifier {
         formattedRatio: audit.formattedRatio,
         passAA: audit.passAA,
         passAAA: audit.passAAA,
-        minAA: pair.minAA,
-        minAAA: pair.minAAA,
+        minAA: audit.minAA,
+        minAAA: audit.minAAA,
       };
 
       results.push(record);

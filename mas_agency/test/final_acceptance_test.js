@@ -374,17 +374,23 @@ async function testPhaseDependencyEnforcement() {
 async function testExecutionAuthenticityAndFailureHandling() {
   Logger.info('TEST 4: Verifying Execution Authenticity & Failure Handling...');
 
-  // 1. Distinguish "cli" vs "synthetic_fallback" execution modes
+  // 1. Offline execution is explicit and opt-in, and is labelled "mock".
+  //    The implicit "synthetic_fallback" mode was removed: a missing CLI must
+  //    fail loudly rather than silently fabricating an artifact.
   const runner = new AgentRunner({
     agencyDir,
     rootDir,
-    executionMode: 'synthetic',
-    allowFallback: true,
+    executionMode: 'mock',
   });
 
-  const fallbackResult = await runner.executeAgent('E01_BriefAnalyst', 'Test brand authenticity', {});
-  assert.strictEqual(fallbackResult.executionMode, 'synthetic_fallback', 'Fallback result must explicitly declare "synthetic_fallback"');
-  assert.strictEqual(fallbackResult.synthetic, true, 'synthetic boolean flag must be true');
+  const mockResult = await runner.executeAgent('A01', 'Test brand authenticity', {});
+  assert.strictEqual(mockResult.executionMode, 'mock', 'Offline result must explicitly declare "mock"');
+  assert.strictEqual(mockResult.synthetic, true, 'synthetic boolean flag must be true');
+
+  // 1b. The legacy "synthetic" alias must resolve to the same explicit mock mode.
+  const aliasRunner = new AgentRunner({ agencyDir, rootDir, executionMode: 'synthetic' });
+  const aliasResult = await aliasRunner.executeAgent('A01', 'Test brand authenticity', {});
+  assert.strictEqual(aliasResult.executionMode, 'mock', 'Legacy "synthetic" alias must resolve to "mock"');
 
   // 2. Accurate failure reporting when CLI is unavailable and allowFallback = false
   const strictRunner = new AgentRunner({

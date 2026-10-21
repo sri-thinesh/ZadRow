@@ -49,7 +49,7 @@ When executing automated agency waves or full-lifecycle website generation:
    ```bash
    node mas_agency/src/cli.js --prompt "<brief>"
    ```
-2. **Independent Child-Process Execution**: The engine's `WorkflowCoordinator` and `AgentRunner` dispatch each of the 42 specialized agents as an independent child process via the verified native AI runtime (`cli_windows_x64.exe`), with dynamically loaded markdown personas from `mas_agency/agents/`, assigned skills from `.agents/skills/`, and strict artifact persistence to `mas_agency/workspace/artifacts/`.
+2. **Independent Child-Process Execution**: The engine's `WorkflowCoordinator` and `AgentRunner` dispatch each of the 42 specialized agents as an independent child process via the verified native Antigravity AI runtime (resolved from `ANTIGRAVITY_CLI_PATH`, or `agy` on `PATH`), with dynamically loaded markdown personas from `mas_agency/agents/`, assigned skills from `.agents/skills/`, and strict artifact persistence to `mas_agency/workspace/artifacts/`.
 3. **Zero-Fabrication Reporting Rule**: Always report the actual execution mechanism used. Never claim that subagents were spawned if they were not, and never claim live model execution without verifiable process evidence and token metrics.
 
 ---

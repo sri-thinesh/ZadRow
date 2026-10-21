@@ -17,8 +17,21 @@ const __dirname = path.dirname(__filename);
 const agencyDir = path.resolve(__dirname, '..');
 const rootDir = path.resolve(agencyDir, '..');
 
-// Ensure ANTIGRAVITY_CLI_PATH is configured
-process.env.ANTIGRAVITY_CLI_PATH = process.env.ANTIGRAVITY_CLI_PATH || 'C:\\Users\\ksrit\\Downloads\\cli_windows_x64.exe';
+// This suite requires a REAL Antigravity CLI binary. It is deliberately not
+// hardcoded to any machine: set ANTIGRAVITY_CLI_PATH, or install `agy` on PATH.
+// When neither is available the suite reports NOT VERIFIED and exits non-zero,
+// because a skipped live test proves nothing.
+if (!process.env.ANTIGRAVITY_CLI_PATH) {
+  const onPath = (process.env.PATH || '').split(path.delimiter).filter(Boolean).some((dir) =>
+    ['agy', 'agy.exe', 'agy.cmd'].some((name) => fs.existsSync(path.join(dir, name)))
+  );
+  if (!onPath) {
+    console.log('[SKIP] verify_phase1_live_execution requires a real Antigravity CLI binary.');
+    console.log('       Set ANTIGRAVITY_CLI_PATH or install "agy" on PATH.');
+    console.log('       NOT VERIFIED — no live execution was performed.');
+    process.exit(1);
+  }
+}
 
 const Logger = {
   info: (msg) => console.log(`[\x1b[36mINFO\x1b[0m] ${msg}`),

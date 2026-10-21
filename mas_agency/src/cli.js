@@ -208,7 +208,7 @@ async function main() {
     // Synthesize Complete Website
     Logger.tier('SYNTHESIS', 'Assembling Next.js 15 / React 19 Production Codebase');
     const synthesizer = new CodeSynthesizer({ agencyDir });
-    const briefData = dag.context.outputs['E01_BriefAnalyst']?.data || {};
+    const briefData = dag.context.outputs['A01']?.data || dag.context.outputs['A00']?.data || {};
     const synthResult = await synthesizer.synthesize(briefData, dag.context.artifacts);
     Logger.success(`Synthesized ${synthResult.fileCount} clean production files into: ${Colors.bold}${synthResult.outputDir}${Colors.reset}`);
 

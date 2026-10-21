@@ -3,6 +3,7 @@
  * Runtime Orchestration Engine - Main Programmatic Entry
  */
 
+import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { DAGRunner, DAGNode } from './engine/dag_runner.js';
@@ -41,178 +42,61 @@ export {
 };
 
 /**
- * Run the full 18-agent DAG orchestration pipeline
+ * Run the registry-driven multi-agent DAG orchestration pipeline.
+ *
+ * Nodes are derived from `agents/agent_registry.json`, so the DAG can never drift
+ * from the registered agent roster. Tier ordering comes from each agent's declared
+ * tier and dependencies follow the supervisor chain.
  */
 export async function runOrchestration(prompt, options = {}) {
   const agencyDir = options.agencyDir || path.resolve(__dirname, '..');
   const maxConcurrency = options.concurrency || 6;
-  const skipQA = options.skipQA || false;
   const agentRunner = options.agentRunner || new AgentRunner({
     agencyDir,
     executionMode: options.executionMode || 'cli',
+    allowMissingCli: options.allowMissingCli,
+    mockArtifactFactory: options.mockArtifactFactory,
   });
+
+  const registryPath = path.join(agencyDir, 'agents', 'agent_registry.json');
+  const registry = JSON.parse(fs.readFileSync(registryPath, 'utf8'));
+  const agents = registry.agents || {};
+
+  const tierNumber = (tier) => {
+    const match = /(\d+)/.exec(String(tier || ''));
+    return match ? Number(match[1]) : 0;
+  };
+
   const dag = new DAGRunner({ maxConcurrency });
 
-  // 1. Build DAG Nodes for the 18 Agency Operatives
-  const agentDefinitions = [
-    // Tier 0: Executive
-    {
-      id: 'E01_BriefAnalyst',
-      name: 'Executive Brief Director',
-      tier: 0,
-      dependsOn: [],
-      primaryArtifact: '00_executive_brief.json',
-    },
-    // Tier 1: Strategy & Creative
-    {
-      id: 'CD_ArtDirector',
-      name: 'Creative Art Director',
-      tier: 1,
-      dependsOn: ['E01_BriefAnalyst'],
-      primaryArtifact: '01_art_direction.json',
-    },
-    {
-      id: 'UX_InfoArchitect',
-      name: 'Lead UX Architect',
-      tier: 1,
-      dependsOn: ['E01_BriefAnalyst'],
-      primaryArtifact: '01_ux_architecture.json',
-    },
-    {
-      id: 'ST_BrandCopywriter',
-      name: 'Chief Brand Copywriter',
-      tier: 1,
-      dependsOn: ['E01_BriefAnalyst'],
-      primaryArtifact: '01_brand_copy.json',
-    },
-    // Tier 2: Architecture & Tokens
-    {
-      id: 'SA_TechArchitect',
-      name: 'Principal Tech Architect',
-      tier: 2,
-      dependsOn: ['CD_ArtDirector', 'UX_InfoArchitect'],
-      primaryArtifact: '02_tech_architecture.json',
-    },
-    {
-      id: 'DS_TokenSpecifier',
-      name: 'Design System Lead',
-      tier: 2,
-      dependsOn: ['CD_ArtDirector'],
-      primaryArtifact: '02_design_tokens.json',
-    },
-    {
-      id: 'MO_MotionChoreographer',
-      name: 'Motion Choreographer',
-      tier: 2,
-      dependsOn: ['CD_ArtDirector', 'UX_InfoArchitect'],
-      primaryArtifact: '02_motion_choreography.json',
-    },
-    // Tier 3: Core Scaffolding & Component Specialists
-    {
-      id: 'ENG_ShellScaffolder',
-      name: 'Core Scaffolding Engineer',
-      tier: 3,
-      dependsOn: ['SA_TechArchitect', 'DS_TokenSpecifier'],
-      primaryArtifact: '03_shell_scaffold.json',
-    },
-    {
-      id: 'ENG_HeroStage',
-      name: 'Kinetic Hero Specialist',
-      tier: 3,
-      dependsOn: ['ENG_ShellScaffolder', 'MO_MotionChoreographer', 'ST_BrandCopywriter'],
-      primaryArtifact: '03_hero_stage.json',
-    },
-    {
-      id: 'ENG_FeatureBento',
-      name: 'Bento Grid Specialist',
-      tier: 3,
-      dependsOn: ['ENG_ShellScaffolder', 'ST_BrandCopywriter'],
-      primaryArtifact: '03_feature_bento.json',
-    },
-    {
-      id: 'ENG_InteractiveShowcase',
-      name: 'Showcase Specialist',
-      tier: 3,
-      dependsOn: ['ENG_ShellScaffolder', 'ST_BrandCopywriter'],
-      primaryArtifact: '03_interactive_showcase.json',
-    },
-    {
-      id: 'ENG_Navigation',
-      name: 'Navigation Specialist',
-      tier: 3,
-      dependsOn: ['ENG_ShellScaffolder', 'UX_InfoArchitect'],
-      primaryArtifact: '03_navigation.json',
-    },
-    {
-      id: 'ENG_FooterConversion',
-      name: 'Conversion Specialist',
-      tier: 3,
-      dependsOn: ['ENG_ShellScaffolder', 'ST_BrandCopywriter'],
-      primaryArtifact: '03_footer_conversion.json',
-    },
-    // Tier 4: Sub-Agents (Micro-Interactions & Assets)
-    {
-      id: 'SUB_MicroInteractions',
-      name: 'Micro-Interaction Sub-Agent',
-      tier: 4,
-      dependsOn: ['ENG_HeroStage', 'MO_MotionChoreographer'],
-      primaryArtifact: '04_micro_interactions.json',
-    },
-    {
-      id: 'SUB_ProceduralAssets',
-      name: 'Procedural Graphics Sub-Agent',
-      tier: 4,
-      dependsOn: ['ENG_ShellScaffolder', 'CD_ArtDirector'],
-      primaryArtifact: '04_procedural_assets.json',
-    },
-    // Tier 5: Quality Assurance
-    {
-      id: 'QA_AccessibilityAuditor',
-      name: 'WCAG 2.2 AAA Auditor',
-      tier: 5,
-      dependsOn: ['DS_TokenSpecifier', 'ENG_HeroStage', 'ENG_FeatureBento'],
-      primaryArtifact: '05_qa_accessibility_audit.json',
-    },
-    {
-      id: 'QA_PerformanceAuditor',
-      name: 'Web Vitals Auditor',
-      tier: 5,
-      dependsOn: ['ENG_HeroStage', 'SUB_MicroInteractions'],
-      primaryArtifact: '05_qa_performance_audit.json',
-    },
-    {
-      id: 'QA_DeviceGatekeeper',
-      name: 'Responsive Touch Auditor',
-      tier: 5,
-      dependsOn: ['ENG_Navigation', 'SUB_MicroInteractions'],
-      primaryArtifact: '05_qa_device_gatekeeper.json',
-    },
-    {
-      id: 'REL_ReleaseValidator',
-      name: 'Delivery & Release Lead',
-      tier: 5,
-      dependsOn: ['QA_AccessibilityAuditor', 'QA_PerformanceAuditor', 'QA_DeviceGatekeeper'],
-      primaryArtifact: '05_release_manifest.json',
-    },
-  ];
+  const ordered = Object.values(agents).sort((a, b) => {
+    const delta = tierNumber(a.tier) - tierNumber(b.tier);
+    return delta !== 0 ? delta : String(a.id).localeCompare(String(b.id));
+  });
 
-  for (const def of agentDefinitions) {
+  for (const agent of ordered) {
+    const supervisorId = (/^(A\d{2})/.exec(agent.supervisor || '') || [])[1];
+    const hasSupervisor = Boolean(supervisorId && supervisorId !== agent.id && agents[supervisorId]);
+    const deliverable = path.basename(agent.primary_deliverable || `${agent.id}.json`);
+
     dag.addNode({
-      id: def.id,
-      name: def.name,
-      tier: def.tier,
-      dependsOn: def.dependsOn,
-      primaryArtifact: def.primaryArtifact,
+      id: agent.id,
+      name: agent.title || agent.slug || agent.id,
+      tier: tierNumber(agent.tier),
+      dependsOn: hasSupervisor ? [supervisorId] : [],
+      primaryArtifact: deliverable,
       execute: async (context) => {
-        return await agentRunner.executeAgent(
-          def.id,
-          prompt,
-          context.upstream,
+        const delegation = await agentRunner.delegateTask(
+          hasSupervisor ? supervisorId : agent.id,
+          agent.id,
+          `Author artifact "${deliverable}" for project: ${prompt}`,
+          { upstreamPrompt: prompt, upstreamArtifacts: context.upstream },
           (progress, msg) => context.emitProgress(progress, msg)
         );
+        return delegation.result;
       },
     });
   }
 
-  return { dag, agentRunner };
+  return { dag, agentRunner, registry };
 }

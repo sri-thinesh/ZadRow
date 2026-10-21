@@ -255,7 +255,9 @@ class AgentGenerator:
         self.agency_dir = agency_dir
         self.artifacts_dir = agency_dir / "workspace" / "artifacts"
         self.artifacts_dir.mkdir(parents=True, exist_ok=True)
-        self.cli_path = Path(os.environ.get("ANTIGRAVITY_CLI_PATH", r"C:\Users\ksrit\Downloads\cli_windows_x64.exe"))
+        # No machine-specific default: set ANTIGRAVITY_CLI_PATH, or install `agy`
+        # on PATH. A missing binary is reported explicitly rather than guessed at.
+        self.cli_path = Path(os.environ.get("ANTIGRAVITY_CLI_PATH", "agy"))
 
     def extract_brand(self, prompt: str) -> str:
         match = re.search(r'(?:named|called|brand|for)\s+["\']?([A-Za-z0-9\s_-]+?)["\']?(?:,|\.|\s+with|\s+featuring|$)', prompt, re.IGNORECASE)

@@ -5,11 +5,14 @@
  * Responsibilities:
  * - Dynamic Persona Loading: Reads full persona markdown specifications from `mas_agency/agents/`
  * - Dynamic Skill Injection: Ingests assigned skills from `.agents/skills/` and `mas_agency/skills/`
- * - Antigravity CLI Execution: Dispatches prompts directly to native binary `cli_windows_x64.exe`
+ * - Antigravity CLI Execution: Dispatches prompts to the `agy` binary resolved via
+ *   options.cliPath -> ANTIGRAVITY_CLI_PATH -> PATH lookup (see `resolveCliPath`).
  * - High-Fidelity Prompt Construction: Assembles identity, guardrails, skills, briefs, and schemas
  * - Robust Output Sanitization: Strips reasoning tags, markdown fences, and repairs JSON anomalies
- * - Resilience & Fallback: Automatic retries with feedback, timeout bounds, and structured synthetic
- *   fallback explicitly flagged with `executionMode: "synthetic_fallback"`.
+ * - Resilience: Automatic retries with corrective feedback and bounded timeouts.
+ * - Offline Mode: An explicit, opt-in deterministic backend (`executionMode: "mock"`) that labels
+ *   every result with `synthetic: true`. There is NO silent fallback: when no CLI binary is
+ *   resolvable and mock mode is off, execution throws.
  * - Workspace Artifact Persistence: Writes all generated artifacts to `mas_agency/workspace/artifacts/`
  */
 
@@ -398,23 +401,37 @@ export class AgentRunner {
     ];
     this.artifactsDir = options.artifactsDir || path.join(this.agencyDir, 'workspace', 'artifacts');
 
-    this.cliTimeoutMs = options.cliTimeoutMs || options.timeoutMs || 120000;
+    this.cliTimeoutMs = options.cliTimeoutMs || options.timeoutMs || 300000;
     this.timeoutMs = this.cliTimeoutMs;
     this.sanitizer = ResponseSanitizer;
     this.maxRetries = options.maxRetries ?? 2;
-    this.effort = options.effort || process.env.ANTIGRAVITY_EFFORT || 'low';
+    this.effort = options.effort || process.env.ANTIGRAVITY_EFFORT || 'medium';
     this.executionMode = options.executionMode || 'cli';
+
+    // Offline/mock execution is an explicit, opt-in mode. It is never a silent
+    // fallback: every result from `_executeMock` is labelled `executionMode: 'mock'`
+    // and `synthetic: true` so downstream consumers can refuse it in production.
+    this.isMockMode =
+      this.executionMode === 'test' ||
+      this.executionMode === 'mock' ||
+      this.executionMode === 'synthetic' ||
+      options.allowMissingCli === true;
+
+    // Optional deterministic backend used only by `_executeMock`. Receives
+    // (agentId, prompt, upstreamContext) and returns the artifact object.
+    this.mockArtifactFactory = typeof options.mockArtifactFactory === 'function'
+      ? options.mockArtifactFactory
+      : null;
 
     // Resolve CLI binary path according to strict priority order:
     // 1. options.cliPath -> 2. process.env.ANTIGRAVITY_CLI_PATH -> 3. 'agy' on PATH -> 4. throw naming ANTIGRAVITY_CLI_PATH
-    const isMockOrTest = this.executionMode === 'test' || this.executionMode === 'mock' || this.executionMode === 'synthetic' || options.allowMissingCli === true;
     try {
       this.cliPath = resolveCliPath(options);
       this._cliResolveError = null;
     } catch (err) {
       this.cliPath = null;
       this._cliResolveError = err;
-      if (!isMockOrTest) {
+      if (!this.isMockMode) {
         throw err;
       }
     }
@@ -773,6 +790,13 @@ export class AgentRunner {
     }
 
     if (!this.cliPath || !fs.existsSync(this.cliPath)) {
+      if (this.isMockMode) {
+        const mockResult = await this._executeMock(agentId, prompt, upstreamContext, persona, progressCallback);
+        if (mockResult && mockResult.artifacts) {
+          this._saveArtifacts(mockResult.artifacts);
+        }
+        return mockResult;
+      }
       throw (this._cliResolveError || new Error(`Antigravity CLI binary not found at: ${this.cliPath}. Please set the ANTIGRAVITY_CLI_PATH environment variable to the CLI executable or ensure "agy" is installed on your PATH.`));
     }
 
@@ -788,6 +812,44 @@ export class AgentRunner {
     }
 
     return result;
+  }
+
+  /**
+   * Deterministic offline execution. Used ONLY when executionMode is explicitly
+   * mock/test/synthetic (or allowMissingCli is true). Every result is labelled so
+   * it can never be mistaken for a real model call.
+   */
+  async _executeMock(agentId, prompt, upstreamContext = {}, persona = {}, progressCallback = null) {
+    const deliverable = (persona && persona.primaryArtifact) || `${String(agentId).toLowerCase()}.json`;
+
+    let data = null;
+    if (this.mockArtifactFactory) {
+      data = await this.mockArtifactFactory(agentId, prompt, upstreamContext);
+    }
+    if (!data || typeof data !== 'object' || Array.isArray(data)) {
+      data = {
+        agent_id: agentId,
+        brandName: this._extractBrandName(prompt),
+        summary: `Deterministic offline placeholder for ${agentId}`,
+        prompt_excerpt: String(prompt || '').slice(0, 200),
+      };
+    }
+
+    data = { ...data, _execution_mode: 'mock', _mock: true, _mock_agent: agentId };
+
+    if (progressCallback) {
+      progressCallback(100, `[MOCK] ${agentId} produced ${deliverable} without invoking a model`);
+    }
+
+    return {
+      agentId,
+      status: 'COMPLETED',
+      summary: `[MOCK] Deterministic offline artifact for ${agentId}`,
+      artifacts: { [deliverable]: data },
+      data,
+      executionMode: 'mock',
+      synthetic: true,
+    };
   }
 
   /**
@@ -1004,9 +1066,22 @@ export class AgentRunner {
       prompt.match(/for\s+["']?([A-Za-z0-9\s_-]+?)["']?(?:,|\.|\s+featuring|\s+with|$)/i);
 
     if (namedMatch && namedMatch[1].trim().length > 1) {
-      return namedMatch[1].trim();
+      return this._cleanBrandName(namedMatch[1]);
     }
     return 'SYNTHETIX';
+  }
+
+  /**
+   * Normalises a captured brand name: strips leading articles/possessives and
+   * trailing generic nouns so a prompt like "a japanese concrete studio site"
+   * yields "Japanese Concrete Studio" rather than "a japanese concrete studio".
+   */
+  _cleanBrandName(raw) {
+    let name = String(raw || '').trim().replace(/[.,;:!?]+$/, '').trim();
+    name = name.replace(/^(?:a|an|the)\s+/i, '').trim();
+    name = name.replace(/['\u2019]s$/i, '').trim();
+    name = name.replace(/\s+(?:web\s?site|web\s?app|site|landing\s+page|homepage|home\s+page|page)$/i, '').trim();
+    return name.length > 1 ? name : 'SYNTHETIX';
   }
 
   _detectIndustry(prompt) {

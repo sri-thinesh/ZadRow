@@ -253,13 +253,24 @@ Open [http://localhost:3000](http://localhost:3000) to view your production-read
 
 ## 🧪 Comprehensive Testing & Verification Suite
 
-ZadRow includes a verified test harness covering unit, integration, parallel concurrency, and native agent execution:
+ZadRow includes a verified test harness covering unit, integration, parallel concurrency, and native agent execution.
+
+`npm test` runs the **offline** suites, which need no Antigravity CLI. The **live** suites exercise real model execution and are run with `npm run test:live`; without a CLI binary they report `NOT VERIFIED` and exit non-zero rather than passing silently.
 
 ```bash
+# Offline (no CLI required) — this is what `npm test` runs
+node mas_agency/test/engine_test.js
+node mas_agency/test/skill_loader_test.js
+node mas_agency/test/qa_verifier_test.js
+node mas_agency/test/workflow_coordinator_test.js
+node mas_agency/test/master_e2e_test.js
+
+# Live (requires a real Antigravity CLI) — `npm run test:live`
+
 # 1. Run full 7-phase workflow, gate barriers, and failure recovery acceptance suite
 node mas_agency/test/workflow_and_failure_acceptance_test.js
 
-# 2. Run all 43 agents native Antigravity CLI acceptance test
+# 2. Run all 42 agents native Antigravity CLI acceptance test
 node mas_agency/test/all_agents_acceptance_test.js
 
 # 3. Run workflow coordinator gate enforcement test
@@ -286,7 +297,7 @@ agy plugin validate
 ZadRow/
 ├── .agents/
 │   └── skills/                 # Assigned agent capability modules (Vercel, UI/UX, Motion)
-├── agents/                     # 44 registered Antigravity agent personas
+├── agents/                     # 42 registered Antigravity agent personas (+ 2 non-agent docs)
 │   ├── A00_ChiefOrchestrator.md ... A83_ReleaseReadinessAuditor.md
 │   ├── multiagent-system.md    # Primary orchestrator alias
 │   └── zadrow.md               # ZadRow brand entrypoint
