@@ -1255,7 +1255,14 @@ export class WorkflowCoordinator extends EventEmitter {
     // agent-authored matrix is authoritative.
     const simulateSpecDefect =
       options.simulateSpecDefect === true || options.simulateContradiction === true;
-    const docMatrix = simulateSpecDefect
+    // An explicit defect directive is a caller instruction, not a default, so it
+    // must be honoured in both directions. Passing `simulateContradiction: false`
+    // has to produce a clean matrix even when a previous run in the same
+    // artifacts directory left a FAILED one behind.
+    const defectDirectiveGiven =
+      Object.prototype.hasOwnProperty.call(options, 'simulateSpecDefect') ||
+      Object.prototype.hasOwnProperty.call(options, 'simulateContradiction');
+    const docMatrix = defectDirectiveGiven
       ? this._buildDocVerificationMatrix(masterSpec, charter, options)
       : this._resolveArtifact(
           '14_doc_verification_matrix.json',
