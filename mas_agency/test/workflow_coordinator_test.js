@@ -544,11 +544,18 @@ async function testRemediationLoop() {
     const patchLog = JSON.parse(fs.readFileSync(path.join(testDir, '82_remediation_patch_log.json'), 'utf8'));
     assert.strictEqual(patchLog.tickets_dispatched, 3);
     assert.strictEqual(patchLog.tickets_resolved, 3);
-    assert.strictEqual(patchLog.regression_testing_passed, true);
+    // No regression suite was executed in this run (skipCodeSynthesis), so the
+    // log must report the honest "not run" state rather than assert a pass.
+    assert.strictEqual(patchLog.regression_testing_passed, null);
+    assert.strictEqual(patchLog.regression_testing_status, 'NOT_RUN');
     assert.strictEqual(patchLog.patches.length, 3);
 
     for (const patch of patchLog.patches) {
-      assert.strictEqual(patch.verified_status, 'VERIFIED_FIXED', 'All patches must be verified fixed');
+      assert.strictEqual(
+        patch.verified_status,
+        'DISPATCHED_UNVERIFIED',
+        'A patch may only be VERIFIED_FIXED after a passing retest; dispatch alone is not verification'
+      );
     }
 
     // 3. Inspect 80_remediation_release_manifest.json (A80 Release & Remediation Director)

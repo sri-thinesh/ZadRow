@@ -289,7 +289,10 @@ async function testControlledEndToEndOrchestration() {
     // 7. Verify Retesting (Phase 6 loop)
     const patchLog = JSON.parse(fs.readFileSync(path.join(artifactsDir, '82_remediation_patch_log.json'), 'utf8'));
     assert(patchLog.tickets_resolved >= 1, 'At least 1 ticket must be resolved');
-    assert.strictEqual(patchLog.regression_testing_passed, true);
+    // This run skips code synthesis, so no retest is executed: the patch log
+    // must not claim a regression pass it never measured.
+    assert.strictEqual(patchLog.regression_testing_passed, null);
+    assert.strictEqual(patchLog.regression_testing_status, 'NOT_RUN');
 
     // 8. Verify Final Delivery Package & Orchestration Manifest (Phase 7)
     const releasePkg = JSON.parse(fs.readFileSync(path.join(artifactsDir, '83_production_release_package.json'), 'utf8'));

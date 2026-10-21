@@ -1929,9 +1929,11 @@ export class WorkflowCoordinator extends EventEmitter {
 
       // Retest: Verify fixes against real code if outputDir exists and code was synthesized
       let retestPassed = false;
+      let retestRan = false;
       if (options.runRealVerifier !== false && options.skipCodeSynthesis !== true && fs.existsSync(this.outputDir)) {
         try {
           const retestResult = await this.qaVerifier.runAllChecks();
+          retestRan = true;
           if (retestResult.passed) {
             currentDefects = [];
             retestPassed = true;
@@ -1948,6 +1950,21 @@ export class WorkflowCoordinator extends EventEmitter {
             }));
           }
         } catch (_) {}
+      }
+
+      // Record what the retest actually measured (or that it never ran) so the
+      // patch log cannot claim a verification the system did not perform.
+      patchLog = this._buildRemediationPatchLog(
+        triageMatrix,
+        cyclesRun,
+        retestRan ? { passed: retestPassed } : null
+      );
+      this.saveArtifact('82_remediation_patch_log.json', patchLog);
+      if (this.remediationHistory.length > 0) {
+        const lastCycle = this.remediationHistory[this.remediationHistory.length - 1];
+        if (lastCycle && lastCycle.cycle === cyclesRun) {
+          lastCycle.patchLog = patchLog;
+        }
       }
 
       if (!retestPassed) {
@@ -2073,30 +2090,31 @@ export class WorkflowCoordinator extends EventEmitter {
     );
     this.saveArtifact('83_production_release_package.json', releasePackage);
 
-    // Pre-record Phase 7 passing status so master manifest includes Phase 7 as APPROVED
+    // Pre-record Phase 7 so the master manifest lists every phase. This entry is
+    // provisional: Phase 7's own gate is decided below, and the manifest
+    // approval check deliberately ignores this phase to avoid self-certification.
     this.phaseResults.set(phaseIndex, {
       phase: phaseIndex,
       name: phaseDef.name,
-      passed: true,
+      passed: null,
+      provisional: true,
       artifacts: [
         '83_production_release_package.json',
         '00_master_orchestration_manifest.json',
       ],
     });
 
-    // 2. A00 Chief Orchestrator compiles master orchestration manifest
-    const masterManifest = this._buildMasterOrchestrationManifest(
+    // 2. A00 Chief Orchestrator compiles the master orchestration manifest.
+    //    This first pass is provisional: Phase 7 has not been decided yet, so it
+    //    is used only to evaluate the gate below and is rebuilt once the gate
+    //    actually passes. Nothing is persisted from this pass.
+    const provisionalManifest = this._buildMasterOrchestrationManifest(
       this.projectBrief,
       this.phaseResults,
       this.backendRequired,
       remediationManifest,
       releasePackage
     );
-    this.saveArtifact('00_master_orchestration_manifest.json', masterManifest);
-
-    // Markdown executive summary
-    const manifestMd = `# Production Release Manifest: ${this.projectBrief.project_name}\n\n- Status: **${masterManifest.status}**\n- Version: **${releasePackage.package_version}**\n- Quality Score: **${masterManifest.quality_certification.overall_score}/100**\n- Backend Enabled: **${this.backendRequired}**\n\n## Deployment Commands\n${releasePackage.deployment_instructions.local_run_commands.map((c) => `- \`${c}\``).join('\n')}\n`;
-    this.saveArtifact('00_master_orchestration_manifest.md', manifestMd);
 
     // Derived gate: the release package must be certified, the build must have
     // succeeded, and no defect may remain open from the remediation loop.
@@ -2114,11 +2132,15 @@ export class WorkflowCoordinator extends EventEmitter {
       qa_verdict_present: this._hasPath(qaVerdict, 'total_defects_found'),
       remediation_closed: Number(remediationManifest?.open_defects_count ?? 0) === 0,
       master_manifest_approved:
-        Array.isArray(masterManifest?.phases) &&
-        masterManifest.phases.length > 0 &&
-        masterManifest.phases.every((p) =>
-          ['APPROVED', 'CLEANLY_SKIPPED', 'CLEANLY_SKIPPED_DETACHED'].includes(p.gate_status)
-        ),
+        Array.isArray(provisionalManifest?.phases) &&
+        provisionalManifest.phases.length > 0 &&
+        provisionalManifest.phases
+          // Exclude the current phase: its status is provisional while this gate
+          // runs, so counting it would let the gate certify itself.
+          .filter((p) => p.phase_id !== `Phase-${phaseIndex}`)
+          .every((p) =>
+            ['APPROVED', 'CLEANLY_SKIPPED', 'CLEANLY_SKIPPED_DETACHED'].includes(p.gate_status)
+          ),
     };
     const productionPassed = Object.values(productionChecks).every(Boolean);
 
@@ -2142,6 +2164,32 @@ export class WorkflowCoordinator extends EventEmitter {
         `Production sign-off refused: ${failed.join(', ')}`
       );
     }
+
+    // The gate passed, so Phase 7's result is now real. Record it and rebuild the
+    // master manifest so the persisted artifact reflects a decided, not assumed,
+    // Phase 7 status.
+    this.phaseResults.set(phaseIndex, {
+      phase: phaseIndex,
+      name: phaseDef.name,
+      passed: true,
+      releaseApproved: true,
+      artifacts: [
+        '83_production_release_package.json',
+        '00_master_orchestration_manifest.json',
+      ],
+    });
+
+    const masterManifest = this._buildMasterOrchestrationManifest(
+      this.projectBrief,
+      this.phaseResults,
+      this.backendRequired,
+      remediationManifest,
+      releasePackage
+    );
+    this.saveArtifact('00_master_orchestration_manifest.json', masterManifest);
+
+    const manifestMd = `# Production Release Manifest: ${this.projectBrief.project_name}\n\n- Status: **${masterManifest.status}**\n- Version: **${releasePackage.package_version}**\n- Quality Score: **${masterManifest.quality_certification.overall_score}/100**\n- Backend Enabled: **${this.backendRequired}**\n\n## Deployment Commands\n${releasePackage.deployment_instructions.local_run_commands.map((c) => `- \`${c}\``).join('\n')}\n`;
+    this.saveArtifact('00_master_orchestration_manifest.md', manifestMd);
 
     this.status = 'COMPLETED';
     const durationMs = Date.now() - startTime;
@@ -2172,7 +2220,9 @@ export class WorkflowCoordinator extends EventEmitter {
     const result = {
       phase: phaseIndex,
       name: phaseDef.name,
-      passed: true,
+      // A skipped/detached phase never ran its gate, so it must not report a
+      // pass. `skipped`/`detached` carry the real meaning.
+      passed: null,
       detached: true,
       skipped: true,
       reason,
@@ -2455,7 +2505,14 @@ export class WorkflowCoordinator extends EventEmitter {
         phases.push({
           phase: i,
           name: p.name,
-          status: p.passed ? 'COMPLETED' : 'FAILED',
+          status:
+            p.detached || p.skipped
+              ? 'SKIPPED'
+              : p.passed === true
+                ? 'COMPLETED'
+                : p.passed === false
+                  ? 'FAILED'
+                  : 'NOT_VERIFIED',
           ...p,
         });
       }
@@ -4170,14 +4227,11 @@ ${masterSpec.acceptance_criteria
       overall_status: status,
       total_defects_found: totalDefects,
       defects_by_severity: { p0, p1, p2, p3 },
-      domain_scores: {
-        functional: p0 > 0 ? 60 : 98,
-        visual_responsive: p1 > 0 ? 70 : 97,
-        accessibility: p0 > 0 || p1 > 0 ? 75 : 99,
-        performance: 96,
-        security: 100,
-        seo: 98,
-      },
+      // This builder runs without executing any per-domain audit, so it has no
+      // basis for per-domain scores. Report them as unmeasured rather than
+      // inventing numbers that read like measurements.
+      domain_scores: null,
+      domain_scores_status: 'NOT_MEASURED',
       defects: allDefects,
     };
   }
@@ -4185,10 +4239,13 @@ ${masterSpec.acceptance_criteria
   _buildFunctionalTestReport(brief) {
     return {
       project_id: brief.project_id,
-      test_suites: 6,
-      tests_passed: 48,
-      tests_failed: 0,
-      status: 'PASSED',
+      test_suites: null,
+      tests_passed: null,
+      tests_failed: null,
+      status: 'NOT_VERIFIED',
+      synthetic: true,
+      measurement_source: 'offline_builder',
+      reason: 'no functional test suite was executed by this builder; nothing was measured',
     };
   }
 
@@ -4196,9 +4253,12 @@ ${masterSpec.acceptance_criteria
     return {
       project_id: brief.project_id,
       breakpoints_tested: ['320px', '768px', '1024px', '1440px'],
-      touch_targets_passed: true,
-      horizontal_overflow: false,
-      status: 'PASSED',
+      touch_targets_passed: null,
+      horizontal_overflow: null,
+      status: 'NOT_VERIFIED',
+      synthetic: true,
+      measurement_source: 'offline_builder',
+      reason: 'no agent-authored visual/responsive audit was produced; nothing was measured',
     };
   }
 
@@ -4206,46 +4266,58 @@ ${masterSpec.acceptance_criteria
     return {
       project_id: brief.project_id,
       wcag_level: 'WCAG 2.2 AA / AAA',
-      min_contrast_ratio: 7.2,
-      aria_roles_verified: true,
-      status: 'PASSED',
+      min_contrast_ratio: null,
+      aria_roles_verified: null,
+      status: 'NOT_VERIFIED',
+      synthetic: true,
+      measurement_source: 'offline_builder',
+      reason: 'no agent-authored accessibility audit was produced; nothing was measured',
     };
   }
 
   _buildPerformanceAudit(brief) {
     return {
       project_id: brief.project_id,
-      lighthouse_score: 98,
+      lighthouse_score: null,
       metrics: {
-        lcp: '0.8s',
-        cls: 0.0,
-        fid: '12ms',
-        fps: 60,
+        lcp: null,
+        cls: null,
+        fid: null,
+        fps: null,
       },
-      status: 'PASSED',
+      status: 'NOT_VERIFIED',
+      synthetic: true,
+      measurement_source: 'offline_builder',
+      reason: 'no agent-authored performance audit was produced; nothing was measured',
     };
   }
 
   _buildSecurityAudit(brief) {
     return {
       project_id: brief.project_id,
-      vulnerabilities_found: 0,
+      vulnerabilities_found: null,
       headers: {
         xFrameOptions: 'DENY',
         xContentTypeOptions: 'nosniff',
         strictTransportSecurity: 'max-age=63072000',
       },
-      status: 'PASSED',
+      status: 'NOT_VERIFIED',
+      synthetic: true,
+      measurement_source: 'offline_builder',
+      reason: 'no security scan was executed by this builder; the declared headers are a recommendation, not a finding',
     };
   }
 
   _buildSeoAudit(brief) {
     return {
       project_id: brief.project_id,
-      meta_tags_present: true,
-      open_graph_complete: true,
-      json_ld_structured_data: true,
-      status: 'PASSED',
+      meta_tags_present: null,
+      open_graph_complete: null,
+      json_ld_structured_data: null,
+      status: 'NOT_VERIFIED',
+      synthetic: true,
+      measurement_source: 'offline_builder',
+      reason: 'no SEO audit was executed by this builder; nothing was measured',
     };
   }
 
@@ -4301,16 +4373,22 @@ ${masterSpec.acceptance_criteria
     };
   }
 
-  _buildRemediationPatchLog(triageMatrix, cycle) {
+  _buildRemediationPatchLog(triageMatrix, cycle, verification = null) {
     // The offline registry invokes this with a null triage matrix (no defects
     // found yet), so it must degrade to an empty patch log rather than throw.
+    // `verification` is the result of the real post-remediation retest
+    // ({ passed: boolean }); when absent, nothing was re-run and we must say so
+    // rather than assert a pass.
     const tickets = Array.isArray(triageMatrix?.tickets) ? triageMatrix.tickets : [];
+    const verified = verification ? verification.passed === true : null;
     const patches = tickets.map((t) => ({
       ticket_ref: t.ticket_id,
       assigned_agent: t.assigned_agent,
       file_modified: t.target_file,
       patch_summary: `Applied targeted fix for ${t.priority} defect: ${t.recommended_fix}`,
-      verified_status: 'VERIFIED_FIXED',
+      // Dispatch is not verification: nothing here re-runs the regression suite
+      // or re-inspects the patched file, so we must not claim the fix is verified.
+      verified_status: verified === true ? 'VERIFIED_FIXED' : 'DISPATCHED_UNVERIFIED',
     }));
 
     return {
@@ -4318,7 +4396,9 @@ ${masterSpec.acceptance_criteria
       cycle,
       tickets_dispatched: triageMatrix?.total_tickets ?? tickets.length,
       tickets_resolved: patches.length,
-      regression_testing_passed: true,
+      // No regression suite is executed by this builder; report the truth.
+      regression_testing_passed: verified,
+      regression_testing_status: verified === null ? 'NOT_RUN' : verified ? 'PASSED' : 'FAILED',
       patches,
     };
   }
@@ -4603,12 +4683,78 @@ ${masterSpec.acceptance_criteria
         release_remediation: activePhases.includes(6) ? 'APPROVED' : 'CLEANLY_SKIPPED_DETACHED',
       },
       quality_certification: {
-        overall_score: 98.5,
-        wcag_passed: true,
-        zero_placeholders: true,
-        remediation_cycles: remediationManifest?.remediation_cycles_run || 0,
-        release_package_version: releasePackage.package_version || '2.0.0',
+        ...this._deriveQualityCertification(remediationManifest, releasePackage),
       },
+    };
+  }
+
+  /**
+   * Derive the manifest's quality certification from the QA verdict that was
+   * actually produced, instead of asserting a fixed score.
+   *
+   * The previous implementation hardcoded `overall_score: 98.5`,
+   * `wcag_passed: true` and `zero_placeholders: true`, so the top-level
+   * deliverable claimed a passing audit whether or not one had run — and
+   * whether or not it had passed. Every value here now traces to a field in
+   * `70_qa_comprehensive_verdict.json`, and the absence of that artifact is
+   * reported as NOT_VERIFIED rather than as success.
+   */
+  _deriveQualityCertification(remediationManifest, releasePackage = {}) {
+    const base = {
+      remediation_cycles: remediationManifest?.remediation_cycles_run || 0,
+      release_package_version: releasePackage.package_version || '2.0.0',
+    };
+
+    const verdict = this.getArtifact('70_qa_comprehensive_verdict.json');
+    if (!verdict || typeof verdict !== 'object') {
+      return {
+        ...base,
+        verification_status: 'NOT_VERIFIED',
+        overall_score: null,
+        wcag_passed: null,
+        zero_placeholders: null,
+        reason: 'no QA verdict artifact present; no audit was run against the deliverable',
+      };
+    }
+
+    const audits = verdict.audits || {};
+    const checks = {
+      wcag_contrast: audits.wcagContrast?.passed,
+      responsive_touch: audits.responsiveTouch?.passed,
+      accessibility_semantics: audits.accessibilitySemantics?.passed,
+      zero_placeholders: audits.zeroPlaceholder?.passed,
+      syntax_and_build: audits.syntaxAndBuild?.passed,
+    };
+    const measured = Object.entries(checks).filter(([, v]) => typeof v === 'boolean');
+
+    if (measured.length === 0) {
+      return {
+        ...base,
+        verification_status: 'NOT_VERIFIED',
+        overall_score: null,
+        wcag_passed: null,
+        zero_placeholders: null,
+        reason: 'QA verdict present but contains no boolean audit results',
+      };
+    }
+
+    const passedCount = measured.filter(([, v]) => v === true).length;
+
+    return {
+      ...base,
+      verification_status: measured.length === Object.keys(checks).length
+        ? 'MEASURED'
+        : 'PARTIALLY_MEASURED',
+      overall_score: Math.round((passedCount / measured.length) * 1000) / 10,
+      checks,
+      unmeasured_checks: Object.entries(checks)
+        .filter(([, v]) => typeof v !== 'boolean')
+        .map(([k]) => k),
+      wcag_passed: checks.wcag_contrast === true && checks.accessibility_semantics === true,
+      zero_placeholders: checks.zero_placeholders === true,
+      zero_placeholder_scanned_files: audits.zeroPlaceholder?.scannedFilesCount ?? null,
+      total_defects_found: verdict.total_defects_found ?? null,
+      source: verdict.agentId || 'A70_QA_ComprehensiveDirector',
     };
   }
 }
