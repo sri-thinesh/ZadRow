@@ -32,7 +32,16 @@ async function testFiveDefectLifecycle() {
   // 1. Broken link in Navigation.tsx
   const navPath = path.join(siteDir, 'src/components/Navigation.tsx');
   let nav = fs.readFileSync(navPath, 'utf8');
+  const navBefore = nav;
   nav = nav.replace(/href:\s*['"]#features['"]/, "href: '#missing-section-broken'");
+  // An injection that silently fails to apply would leave the suite asserting that a
+  // defect it never introduced went undetected, which reads as a detector failure.
+  if (nav === navBefore) {
+    throw new Error(
+      'Defect injection failed: no `href: \'#features\'` link found in Navigation.tsx. ' +
+        'The synthesizer changed how navigation links are emitted; update this injection.'
+    );
+  }
 
   // 4. Touch target below 44px
   nav = nav.replace(/min-h-\[44px\]/g, 'min-h-[24px]');

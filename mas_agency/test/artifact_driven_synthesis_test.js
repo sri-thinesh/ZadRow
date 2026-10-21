@@ -454,6 +454,79 @@ async function testRealAssemblyShapeAndChrome() {
 }
 
 // =====================================================================
+// Test 8: navigation links only to sections the composition contains
+// =====================================================================
+async function testNavigationAnchorsFollowTheComposition() {
+  Logger.info('Verifying navigation links only to sections the composition contains...');
+
+  // A composition with no matrix section, no showcase and no contact portal. The old
+  // navigation hardcoded `#features`, `#showcase` and `#contact` regardless, so it
+  // shipped four links of which three went nowhere.
+  const artifactsDir = writeArtifacts('anchors', {
+    '52_page_assemblies.json': {
+      agentId: 'A52',
+      project_id: 'northwind',
+      pages: [
+        {
+          route: '/',
+          assembled_sections: [
+            { id: 'hero', layout_type: 'bespoke_split_stage', components: ['HeroStage'] },
+          ],
+        },
+      ],
+    },
+  });
+  const outputDir = makeFixtureDir('anchors_out');
+
+  try {
+    const synthesizer = makeSynthesizer(artifactsDir, outputDir);
+    await synthesizer.synthesize({ brandName: 'NORTHWIND' });
+
+    const nav = fs.readFileSync(path.join(outputDir, 'src/components/Navigation.tsx'), 'utf8');
+    const hero = fs.readFileSync(path.join(outputDir, 'src/components/HeroStage.tsx'), 'utf8');
+
+    // Every anchor the navigation links to must exist as a section id in the site.
+    const linked = [...nav.matchAll(/href=\s*["']#([a-z-]+)["']/g)].map((m) => m[1]);
+    const sectionIds = new Set();
+    for (const file of ['HeroStage', 'FeatureBento', 'InteractiveShowcase', 'FooterConversion']) {
+      const p = path.join(outputDir, 'src', 'components', `${file}.tsx`);
+      if (!fs.existsSync(p)) continue;
+      for (const m of fs.readFileSync(p, 'utf8').matchAll(/id="([a-z-]+)"/g)) sectionIds.add(m[1]);
+    }
+    sectionIds.add('main-content');
+
+    for (const id of linked) {
+      assert(
+        sectionIds.has(id),
+        `Navigation links to "#${id}", but no generated section declares that id ` +
+          `(available: ${[...sectionIds].join(', ')})`
+      );
+    }
+
+    // The unprescribed sections must not be linked at all.
+    for (const absent of ['features', 'showcase', 'contact']) {
+      assert(
+        !linked.includes(absent),
+        `Navigation must not link to "#${absent}": that section is not in the composition`
+      );
+    }
+
+    // A hero on a page with no sibling section must not offer a call to action that
+    // leads nowhere, nor a scroll cue pointing at a section that does not exist.
+    const heroAnchors = [...hero.matchAll(/href=\s*["']#([a-z-]+)["']/g)].map((m) => m[1]);
+    for (const id of heroAnchors) {
+      assert(
+        sectionIds.has(id),
+        `HeroStage links to "#${id}", but no generated section declares that id`
+      );
+    }
+  } finally {
+    clean(artifactsDir);
+    clean(outputDir);
+  }
+}
+
+// =====================================================================
 // Test Runner
 // =====================================================================
 async function runAllTests() {
@@ -469,6 +542,7 @@ async function runAllTests() {
     { name: 'Unrecognised Sections Are Reported, Not Substituted', fn: testUnmappedSectionsAreReported },
     { name: 'Offline Placeholder Artifacts Are Identified And Refused', fn: testSyntheticArtifactsAreRefused },
     { name: 'Real Assembly Shape Is Read And Chrome Rules Hold', fn: testRealAssemblyShapeAndChrome },
+    { name: 'Navigation Anchors Follow The Composition', fn: testNavigationAnchorsFollowTheComposition },
   ];
 
   for (const t of tests) {

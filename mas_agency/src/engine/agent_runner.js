@@ -1026,59 +1026,194 @@ export class AgentRunner {
       });
 
       proc.on('close', (code) => {
-        if (!isSettled) {
-          isSettled = true;
-          clearTimeout(timer);
+        if (isSettled) return;
+        isSettled = true;
+        clearTimeout(timer);
 
+        let interpreted;
+        try {
+          interpreted = this._interpretCliStdout(stdout, code);
+        } catch (err) {
           if (code !== 0) {
-            try {
-              const envelope = JSON.parse(stdout);
-              if (envelope && envelope.status && envelope.status !== 'SUCCESS') {
-                reject(new Error(`Antigravity CLI returned ${envelope.status}: ${envelope.error || envelope.message || 'Unknown CLI error'}`));
-                return;
-              }
-            } catch (_) {}
-            const outMsg = stderr.trim() || stdout.trim() || 'none';
-            reject(new Error(`Antigravity CLI exited with code ${code}. Output: ${outMsg}`));
+            const detail = stderr.trim() || stdout.trim() || 'none';
+            reject(new Error(`Antigravity CLI exited with code ${code}. ${err.message} Stderr: ${detail.slice(0, 400)}`));
             return;
           }
-
-          try {
-            const envelope = JSON.parse(stdout);
-            if (envelope && envelope.status && envelope.status !== 'SUCCESS') {
-              reject(new Error(`Antigravity CLI returned ${envelope.status}: ${envelope.error || envelope.message || 'Unknown CLI error'}`));
-              return;
-            }
-            resolve({
-              rawStdout: stdout,
-              wrapper: envelope,
-              responseText: envelope.response || envelope.text || stdout,
-              durationSeconds: envelope.duration_seconds || null,
-              usage: envelope.usage || null,
-              promptChars,
-              promptTransport: 'argv',
-              permissionsSkipped: skipPermissions,
-            });
-          } catch (err) {
-            if (err.message && err.message.startsWith('Antigravity CLI returned')) {
-              reject(err);
-              return;
-            }
-            resolve({
-              rawStdout: stdout,
-              wrapper: null,
-              responseText: stdout,
-              durationSeconds: null,
-              usage: null,
-              promptChars,
-              promptTransport: 'argv',
-              permissionsSkipped: skipPermissions,
-            });
-          }
+          reject(err);
+          return;
         }
+
+        if (code !== 0) {
+          reject(
+            new Error(
+              `Antigravity CLI exited with code ${code} while reporting status ` +
+                `"${interpreted.envelope.status}". Output: ${(stderr.trim() || stdout.trim() || 'none').slice(0, 400)}`
+            )
+          );
+          return;
+        }
+
+        resolve({
+          rawStdout: stdout,
+          wrapper: interpreted.envelope,
+          responseText: interpreted.responseText,
+          durationSeconds: interpreted.durationSeconds,
+          usage: interpreted.usage,
+          promptChars,
+          promptTransport: 'argv',
+          permissionsSkipped: skipPermissions,
+        });
       });
 
     });
+  }
+
+  /**
+   * Interpret the CLI's stdout, enforcing the contract `--output-format json` implies.
+   *
+   * The CLI is invoked with `--output-format json`, so stdout is one JSON envelope.
+   * This method requires that envelope and refuses to guess. A previous version fell
+   * back to treating unparseable stdout as the agent's response and to using the raw
+   * envelope when it carried no `response` field, which meant a wrapper script, a
+   * banner, or an entirely different binary at the configured path would be read as a
+   * successful agent run and its text parsed as the agent's deliverable.
+   *
+   * NOTE: the envelope field names below are asserted from the CLI contract. They have
+   * not been verified against a real Antigravity binary in this environment, so the
+   * parser accepts every plausible framing (bare object, object after a log line,
+   * JSON array, JSONL) and fails loudly, naming what it saw, on anything else.
+   */
+  _interpretCliStdout(stdout, exitCode) {
+    const trimmed = String(stdout || '').trim();
+    const envelope = this._parseJsonEnvelope(trimmed);
+
+    if (!envelope) {
+      throw new Error(
+        `Antigravity CLI did not return the JSON envelope that --output-format json promises ` +
+          `(exit code ${exitCode}). Unrecognised output began: "${trimmed.slice(0, 200) || '(empty)'}". ` +
+          `Check that the configured binary is the Antigravity CLI and that its output format matches.`
+      );
+    }
+
+    const status = typeof envelope.status === 'string' ? envelope.status.toUpperCase() : null;
+    const reportedError = envelope.error || envelope.message || null;
+
+    if (status && !['SUCCESS', 'OK', 'COMPLETED', 'COMPLETE'].includes(status)) {
+      throw new Error(
+        `Antigravity CLI returned ${envelope.status}: ${reportedError || 'Unknown CLI error'}`
+      );
+    }
+
+    const responseText =
+      typeof envelope.response === 'string'
+        ? envelope.response
+        : typeof envelope.text === 'string'
+          ? envelope.text
+          : typeof envelope.result === 'string'
+            ? envelope.result
+            : null;
+
+    if (responseText === null) {
+      // Never fall back to the raw envelope: it would be parsed as if it were the
+      // agent's own output, silently substituting transport metadata for a deliverable.
+      if (!status && reportedError) {
+        throw new Error(`Antigravity CLI reported an error without a status: ${reportedError}`);
+      }
+      throw new Error(
+        `Antigravity CLI envelope carries no response payload. Expected a string in one of ` +
+          `"response", "text" or "result"; found keys: ${Object.keys(envelope).join(', ') || '(none)'}.`
+      );
+    }
+
+    return {
+      envelope,
+      responseText,
+      durationSeconds: envelope.duration_seconds ?? envelope.durationSeconds ?? null,
+      usage: envelope.usage ?? null,
+    };
+  }
+
+  /**
+   * Find the CLI's JSON envelope in stdout, tolerating the framings a CLI might use:
+   * a bare object, an object after a log line, a JSON array of messages, or JSONL.
+   * Returns null when nothing in stdout is JSON, so the caller can fail loudly.
+   */
+  _parseJsonEnvelope(text) {
+    if (!text) return null;
+
+    // An envelope must carry at least one field the contract recognises. Without this
+    // a stray log object ({"type":"log"}) would be mistaken for the envelope and the
+    // real one would be ignored.
+    const ENVELOPE_KEYS = ['status', 'response', 'text', 'result', 'error', 'message'];
+    const looksLikeEnvelope = (value) =>
+      value &&
+      typeof value === 'object' &&
+      !Array.isArray(value) &&
+      ENVELOPE_KEYS.some((key) => value[key] !== undefined);
+
+    // A JSON array of messages: the envelope is the last element that carries a payload.
+    const pickFromArray = (arr) => {
+      for (let i = arr.length - 1; i >= 0; i--) {
+        if (looksLikeEnvelope(arr[i])) return arr[i];
+      }
+      return null;
+    };
+
+    // 1. The whole of stdout is JSON.
+    try {
+      const parsed = JSON.parse(text);
+      if (looksLikeEnvelope(parsed)) return parsed;
+      if (Array.isArray(parsed)) return pickFromArray(parsed);
+    } catch (_) {}
+
+    // 2. JSON preceded by a log line, or followed by trailing text. Every candidate
+    //    object is tried, not just the first, so a log line that happens to be JSON
+    //    does not mask the envelope behind it.
+    for (let start = text.indexOf('{'); start !== -1; start = text.indexOf('{', start + 1)) {
+      const candidate = this._balancedJsonSlice(text, start);
+      if (!candidate) continue;
+      try {
+        const parsed = JSON.parse(candidate);
+        if (looksLikeEnvelope(parsed)) return parsed;
+      } catch (_) {}
+    }
+
+    // 3. JSONL: the last line that parses to an object.
+    const lines = text.split('\n');
+    for (let i = lines.length - 1; i >= 0; i--) {
+      const line = lines[i].trim();
+      if (!line.startsWith('{')) continue;
+      try {
+        const parsed = JSON.parse(line);
+        if (looksLikeEnvelope(parsed)) return parsed;
+      } catch (_) {}
+    }
+
+    return null;
+  }
+
+  /** Slice out the balanced JSON object starting at `start`, respecting strings. */
+  _balancedJsonSlice(text, start) {
+    let depth = 0;
+    let inString = false;
+    let escaped = false;
+
+    for (let i = start; i < text.length; i++) {
+      const ch = text[i];
+      if (inString) {
+        if (escaped) escaped = false;
+        else if (ch === '\\') escaped = true;
+        else if (ch === '"') inString = false;
+        continue;
+      }
+      if (ch === '"') inString = true;
+      else if (ch === '{') depth++;
+      else if (ch === '}') {
+        depth--;
+        if (depth === 0) return text.slice(start, i + 1);
+      }
+    }
+    return null;
   }
 
   /**

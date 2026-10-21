@@ -81,6 +81,19 @@ const DEFAULT_SECTION_PLAN = [
 ];
 
 /**
+ * The in-page anchor each section component renders, and the label the navigation
+ * gives it. A generator that links to a sibling section must consult this map and the
+ * resolved section plan: the composition varies per brief now, so a hardcoded
+ * `href="#features"` can point at a section the wireframes never asked for.
+ */
+const SECTION_ANCHORS = {
+  HeroStage: { id: 'hero', label: 'Studio' },
+  FeatureBento: { id: 'features', label: 'Matrix' },
+  InteractiveShowcase: { id: 'showcase', label: 'Telemetry' },
+  FooterConversion: { id: 'contact', label: 'Transmission' },
+};
+
+/**
  * The section components a composition can select. Only these are subject to
  * cleanup: the shared primitives (MediaPlaceholder, MagneticCursor, SoundEffects,
  * ProceduralGraphics) are imported by whichever sections are generated, so
@@ -164,6 +177,12 @@ export class CodeSynthesizer {
 
     const sectionPlan = this._resolveSectionPlan(pageAssemblies, wireframes);
 
+    // The anchors the site will actually have, so no generator links to a section the
+    // wireframes did not prescribe.
+    const entryRoute =
+      sectionPlan.routes.find((route) => route.route === '/') || sectionPlan.routes[0] || { sections: [] };
+    const anchorManifest = this._buildAnchorManifest(entryRoute.sections, sectionPlan.routes.length);
+
     // Ensure output directories exist
     this._ensureDirectoryStructure();
 
@@ -195,11 +214,11 @@ export class CodeSynthesizer {
       sectionPlan.routes.flatMap((route) => route.sections.map((section) => section.component))
     );
 
-    if (usedComponents.has('Navigation')) this._generateNavigation(brandName, iaArtifact);
-    if (usedComponents.has('HeroStage')) this._generateHeroStage(brandName, copyArtifact);
+    if (usedComponents.has('Navigation')) this._generateNavigation(brandName, iaArtifact, anchorManifest);
+    if (usedComponents.has('HeroStage')) this._generateHeroStage(brandName, copyArtifact, anchorManifest);
     if (usedComponents.has('FeatureBento')) this._generateFeatureBento(brandName, copyArtifact, charter);
     if (usedComponents.has('InteractiveShowcase')) this._generateInteractiveShowcase(brandName, copyArtifact);
-    if (usedComponents.has('FooterConversion')) this._generateFooterConversion(brandName, copyArtifact);
+    if (usedComponents.has('FooterConversion')) this._generateFooterConversion(brandName, copyArtifact, anchorManifest);
 
     // Shared primitives the section components import.
     this._generateMediaPlaceholder();
@@ -413,6 +432,41 @@ export class CodeSynthesizer {
     return null;
   }
 
+  /**
+   * Describe the in-page anchors the generated site will actually have, so every
+   * generator links only to sections that exist.
+   *
+   * `primarySections` are the sections on the site's entry route: in-page anchors are
+   * only meaningful there. When the site has more than one route the links are made
+   * absolute (`/#hero`) so they work from any page instead of silently doing nothing.
+   */
+  _buildAnchorManifest(primarySections = [], routeCount = 1) {
+    const present = new Set(primarySections.map((section) => section.component));
+    const multiRoute = routeCount > 1;
+
+    const available = {};
+    const links = [];
+    for (const [component, anchor] of Object.entries(SECTION_ANCHORS)) {
+      const isPresent = present.has(component);
+      available[anchor.id] = isPresent;
+      if (isPresent) {
+        links.push({
+          id: anchor.id,
+          label: anchor.label,
+          href: multiRoute ? `/#${anchor.id}` : `#${anchor.id}`,
+        });
+      }
+    }
+
+    return { available, links, multiRoute, home: '#main-content' };
+  }
+
+  /** The href for an anchor id, or null when the site has no such section. */
+  _anchorHref(manifest, id) {
+    if (!manifest || !manifest.available[id]) return null;
+    return manifest.multiRoute ? `/#${id}` : `#${id}`;
+  }
+
   /** Where a component sits in the document. */
   _placementOf(component) {
     const entry = SECTION_COMPONENTS.find((candidate) => candidate.component === component);
@@ -498,7 +552,10 @@ export class CodeSynthesizer {
         lint: 'next lint',
       },
       dependencies: {
-        next: '15.2.0',
+        // Pinned to a patched release. 15.2.0 carried CVE-2025-66478, so every site
+        // this engine generated shipped a known-vulnerable framework. Verified by
+        // `npm audit` and a production build against the generated output.
+        next: '15.5.28',
         react: '19.0.0',
         'react-dom': '19.0.0',
         'lucide-react': '^0.475.0',
@@ -924,24 +981,65 @@ ${renderRows(chromeBottom, '      ')}
     this._writeFile(relativePath, content);
   }
 
-  _generateNavigation(brandName, iaArtifact = {}) {
+  _generateNavigation(brandName, iaArtifact = {}, anchorManifest = null) {
     // Author demo mode is OPT-IN only. It previously triggered on `!brandName`, which meant
     // any brief whose brand extraction failed silently produced the author's personal
     // portfolio as the client's deliverable.
     const displayBrand = brandName.toUpperCase();
     const ctaLabel = 'INITIATE BRIEF';
+
+    // Links are built from the sections this site actually has. A hardcoded list pointed
+    // at `#features` and `#contact` whatever the wireframes prescribed, so a composition
+    // without those sections shipped navigation that went nowhere.
+    const manifest = anchorManifest || { available: {}, links: [], multiRoute: false, home: '#main-content' };
+    const navLinks = manifest.links;
+
+    // Emitted as hand-written-looking source rather than JSON: the generated site is a
+    // deliverable the client reads, and quoted JSON keys with one field per line read
+    // like machine output.
+    const navLinksSource = navLinks.length
+      ? `[\n${navLinks
+          .map((link) => `  { id: '${link.id}', label: '${link.label}', href: '${link.href}' },`)
+          .join('\n')}\n]`
+      : '[]';
+    const logoHref = this._anchorHref(manifest, 'hero') || manifest.home;
+    const ctaHref = this._anchorHref(manifest, 'contact');
+
+    // A call to action with no destination is worse than no call to action: it is
+    // rendered only when the site has a section to convert into.
+    const desktopCta = ctaHref
+      ? `          {/* Direct CTA */}
+          <div className="hidden md:flex items-center gap-4">
+            <a
+              href="${ctaHref}"
+              className="group relative inline-flex items-center gap-2 px-5 py-2.5 min-h-[44px] rounded-full text-xs font-mono font-medium tracking-wide bg-primary/10 text-primary border border-primary/30 hover:bg-primary hover:text-black transition-all duration-300 shadow-sm hover:shadow-[0_0_20px_rgba(0,240,255,0.4)]"
+            >
+              <span>${ctaLabel}</span>
+              <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            </a>
+          </div>`
+      : '';
+
+    const mobileCta = ctaHref
+      ? `          <div className="pt-4 border-t border-subtle">
+            <a
+              href="${ctaHref}"
+              onClick={() => setMobileMenuOpen(false)}
+              className="w-full min-h-[44px] inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-sm font-mono font-semibold bg-primary text-black hover:bg-white transition-colors"
+            >
+              <span>${ctaLabel}</span>
+              <ArrowUpRight className="w-4 h-4" />
+            </a>
+          </div>`
+      : '';
+
     const content = `
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { Menu, X, ArrowUpRight, Sparkles } from 'lucide-react';
 
-const NAV_LINKS = ${`[
-  { id: 'hero', label: 'Studio', href: '#hero' },
-  { id: 'features', label: 'Matrix', href: '#features' },
-  { id: 'showcase', label: 'Telemetry', href: '#showcase' },
-  { id: 'contact', label: 'Transmission', href: '#contact' },
-]`};
+const NAV_LINKS = ${navLinksSource};
 
 export function Navigation() {
   const [scrolled, setScrolled] = useState(false);
@@ -967,7 +1065,7 @@ export function Navigation() {
         <div className="flex items-center justify-between">
           {/* Studio / Personal Brand */}
           <a
-            href="#hero"
+            href="${logoHref}"
             className="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-primary rounded-lg p-1 min-h-[44px]"
           >
             <div className="w-8 h-8 rounded-lg bg-surface border border-subtle flex items-center justify-center text-primary group-hover:border-primary transition-colors">
@@ -993,16 +1091,7 @@ export function Navigation() {
             ))}
           </nav>
 
-          {/* Direct CTA */}
-          <div className="hidden md:flex items-center gap-4">
-            <a
-              href="#contact"
-              className="group relative inline-flex items-center gap-2 px-5 py-2.5 min-h-[44px] rounded-full text-xs font-mono font-medium tracking-wide bg-primary/10 text-primary border border-primary/30 hover:bg-primary hover:text-black transition-all duration-300 shadow-sm hover:shadow-[0_0_20px_rgba(0,240,255,0.4)]"
-            >
-              <span>${ctaLabel}</span>
-              <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-            </a>
-          </div>
+${desktopCta}
 
           {/* Mobile Menu Trigger */}
           <button
@@ -1032,16 +1121,7 @@ export function Navigation() {
               </a>
             ))}
           </nav>
-          <div className="pt-4 border-t border-subtle">
-            <a
-              href="#contact"
-              onClick={() => setMobileMenuOpen(false)}
-              className="w-full min-h-[44px] inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-sm font-mono font-semibold bg-primary text-black hover:bg-white transition-colors"
-            >
-              <span>${ctaLabel}</span>
-              <ArrowUpRight className="w-4 h-4" />
-            </a>
-          </div>
+${mobileCta}
         </div>
       )}
     </header>
@@ -1051,7 +1131,50 @@ export function Navigation() {
     this._writeFile('src/components/Navigation.tsx', content);
   }
 
-  _generateHeroStage(brandName, copyArtifact = {}) {
+  _generateHeroStage(brandName, copyArtifact = {}, anchorManifest = null) {
+    // The hero's calls to action and its scroll cue must lead somewhere. They are built
+    // from the sections this composition actually contains, so a hero on a page with no
+    // matrix section does not ship a button pointing at nothing.
+    const manifest = anchorManifest || { available: {}, links: [], multiRoute: false, home: '#main-content' };
+    const heroActions = [
+      { id: 'features', label: 'EXPLORE MATRIX', icon: 'Cpu', primary: true },
+      { id: 'showcase', label: 'LIVE TELEMETRY', icon: 'Zap', primary: false },
+    ].filter((action) => manifest.available[action.id]);
+
+    const heroActionMarkup = heroActions
+      .map((action) => {
+        const href = this._anchorHref(manifest, action.id);
+        const className = action.primary
+          ? 'w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 min-h-[44px] rounded-full bg-primary text-black font-mono font-semibold text-sm tracking-wide hover:bg-white hover:shadow-[0_0_30px_rgba(0,240,255,0.5)] transition-all duration-300'
+          : 'w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 min-h-[44px] rounded-full glass-panel hover:bg-white/10 text-text-primary font-mono text-sm tracking-wide transition-all duration-300';
+        const iconClass = action.primary ? 'w-4 h-4' : 'w-4 h-4 text-primary';
+        return `          <a
+            href="${href}"
+            className="${className}"
+          >
+            <${action.icon} className="${iconClass}" />
+            <span>${action.label}</span>
+          </a>`;
+      })
+      .join('\n');
+
+    const scrollTarget =
+      this._anchorHref(manifest, 'features') ||
+      this._anchorHref(manifest, 'showcase') ||
+      this._anchorHref(manifest, 'contact');
+
+    const scrollIndicator = scrollTarget
+      ? `        {/* Scroll Indicator */}
+        <div className="pt-12 flex justify-center">
+          <a
+            href="${scrollTarget}"
+            aria-label="Scroll to Next Section"
+            className="text-text-muted hover:text-primary transition-colors min-w-[44px] min-h-[44px] inline-flex items-center justify-center p-2.5"
+          >
+            <ArrowDown className="w-5 h-5 animate-bounce" />
+          </a>
+        </div>`
+      : '';
     // Author demo mode is OPT-IN only. It previously triggered on `!brandName`, which meant
     // any brief whose brand extraction failed silently produced the author's personal
     // portfolio as the client's deliverable.
@@ -1210,32 +1333,10 @@ export function HeroStage() {
         
         {/* Action Controls */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-          <a
-            href="${'#features'}"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 min-h-[44px] rounded-full bg-primary text-black font-mono font-semibold text-sm tracking-wide hover:bg-white hover:shadow-[0_0_30px_rgba(0,240,255,0.5)] transition-all duration-300"
-          >
-            <Cpu className="w-4 h-4" />
-            <span>${'EXPLORE MATRIX'}</span>
-          </a>
-          <a
-            href="${'#showcase'}"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 min-h-[44px] rounded-full glass-panel hover:bg-white/10 text-text-primary font-mono text-sm tracking-wide transition-all duration-300"
-          >
-            <Zap className="w-4 h-4 text-primary" />
-            <span>${'LIVE TELEMETRY'}</span>
-          </a>
+${heroActionMarkup}
         </div>
 
-        {/* Scroll Indicator */}
-        <div className="pt-12 flex justify-center">
-          <a
-            href="${'#features'}"
-            aria-label="Scroll to Next Section"
-            className="text-text-muted hover:text-primary transition-colors min-w-[44px] min-h-[44px] inline-flex items-center justify-center p-2.5"
-          >
-            <ArrowDown className="w-5 h-5 animate-bounce" />
-          </a>
-        </div>
+${scrollIndicator}
       </div>
     </section>
   );
@@ -1729,7 +1830,23 @@ export function MediaPlaceholder({
     this._writeFile('src/components/MediaPlaceholder.tsx', content);
   }
 
-  _generateFooterConversion(brandName) {
+  _generateFooterConversion(brandName, copyArtifact = {}, anchorManifest = null) {
+    // Footer quick links are built from the sections this site has. The hardcoded
+    // TOP/MATRIX/TELEMETRY row pointed at `#hero`, `#features` and `#showcase` whatever
+    // the wireframes prescribed, so a composition without them shipped dead links.
+    const manifest = anchorManifest || { available: {}, links: [], multiRoute: false, home: '#main-content' };
+    const footerLinks = [
+      { label: 'TOP', href: this._anchorHref(manifest, 'hero') || manifest.home },
+      ...manifest.links
+        .filter((link) => link.id !== 'hero')
+        .map((link) => ({ label: link.label.toUpperCase(), href: link.href })),
+    ];
+    const footerLinkMarkup = footerLinks
+      .map(
+        (link) =>
+          `            <a href="${link.href}" className="hover:text-primary transition-colors min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-2">${link.label}</a>`
+      )
+      .join('\n');
     // Author demo mode is OPT-IN only. It previously triggered on `!brandName`, which meant
     // any brief whose brand extraction failed silently produced the author's personal
     // portfolio as the client's deliverable.
@@ -1815,9 +1932,7 @@ export function FooterConversion() {
             &copy; {new Date().getFullYear()} ${brandName.toUpperCase()}. Engineered by ZadRow Multi-Agent Digital Studio (MAS 2.0).
           </div>
           <div className="flex items-center gap-6">
-            <a href="#hero" className="hover:text-primary transition-colors min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-2">TOP</a>
-            <a href="#features" className="hover:text-primary transition-colors min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-2">MATRIX</a>
-            <a href="#showcase" className="hover:text-primary transition-colors min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-2">TELEMETRY</a>
+${footerLinkMarkup}
             <span className="text-primary font-bold">NEXT.JS 15 // REACT 19</span>
           </div>
         </div>
