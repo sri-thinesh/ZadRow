@@ -310,8 +310,7 @@ ZadRow/
 │   ├── output/
 │   │   └── website/            # Synthesized Next.js 15 production website
 │   ├── scripts/
-│   │   ├── sync_agents.js      # Role-based tool synchronization engine
-│   │   └── run_thinesh_orchestration.js
+│   │   └── sync_agents.js      # Role-based tool synchronization engine
 │   ├── src/
 │   │   ├── cli.js              # Command-line interface and interactive runner
 │   │   ├── index.js            # Main programmatic API exports

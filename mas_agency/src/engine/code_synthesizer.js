@@ -475,12 +475,9 @@ body {
   }
 
   _generateLayout(brandName) {
-    const isThinesh = process.env.ZADROW_AUTHOR_DEMO === '1';
     const resolvedBrand = (brandName && String(brandName).trim()) || 'Autonomous Digital Studio';
-    const pageTitle = isThinesh ? 'Sri Thinesh | Student Engineer, AI & Product Portfolio' : `${resolvedBrand} | Autonomous Digital Studio`;
-    const pageDesc = isThinesh
-      ? 'Explore the personal portfolio of Sri Thinesh — engineering student exploring software development, artificial intelligence, product design, electronics, and entrepreneurship.'
-      : `Experience the digital frontier with ${resolvedBrand}. High-velocity kinetic systems, generative AI spatial design, and uncompromised aesthetic precision.`;
+    const pageTitle = `${resolvedBrand} | Autonomous Digital Studio`;
+    const pageDesc = `Experience the digital frontier with ${resolvedBrand}. High-velocity kinetic systems, generative AI spatial design, and uncompromised aesthetic precision.`;
     const content = `
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
@@ -566,22 +563,15 @@ export default function Home() {
     // Author demo mode is OPT-IN only. It previously triggered on `!brandName`, which meant
     // any brief whose brand extraction failed silently produced the author's personal
     // portfolio as the client's deliverable.
-    const isThinesh = process.env.ZADROW_AUTHOR_DEMO === '1';
-    const displayBrand = isThinesh ? 'SRI THINESH' : brandName.toUpperCase();
-    const ctaLabel = isThinesh ? 'TRANSMISSION' : 'INITIATE BRIEF';
+    const displayBrand = brandName.toUpperCase();
+    const ctaLabel = 'INITIATE BRIEF';
     const content = `
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { Menu, X, ArrowUpRight, Sparkles } from 'lucide-react';
 
-const NAV_LINKS = ${isThinesh ? `[
-  { id: 'hero', label: 'Overview', href: '#hero' },
-  { id: 'about', label: 'Mindset', href: '#about' },
-  { id: 'domains', label: 'Domains', href: '#domains' },
-  { id: 'projects', label: 'Work', href: '#projects' },
-  { id: 'contact', label: 'Transmission', href: '#contact' },
-]` : `[
+const NAV_LINKS = ${`[
   { id: 'hero', label: 'Studio', href: '#hero' },
   { id: 'features', label: 'Matrix', href: '#features' },
   { id: 'showcase', label: 'Telemetry', href: '#showcase' },
@@ -622,8 +612,7 @@ export function Navigation() {
               <span className="font-display font-bold text-lg tracking-widest text-text-primary group-hover:text-primary transition-colors">
                 ${displayBrand}
               </span>
-              ${isThinesh ? `<span className="font-mono text-[10px] text-text-muted tracking-wider">ENGINEERING // AI & SYSTEMS</span>` : ''}
-            </div>
+                          </div>
           </a>
 
           {/* Desktop Navigation */}
@@ -701,7 +690,6 @@ export function Navigation() {
     // Author demo mode is OPT-IN only. It previously triggered on `!brandName`, which meant
     // any brief whose brand extraction failed silently produced the author's personal
     // portfolio as the client's deliverable.
-    const isThinesh = process.env.ZADROW_AUTHOR_DEMO === '1';
     const content = `
 'use client';
 
@@ -839,57 +827,44 @@ export function HeroStage() {
         {/* Live Status Pill */}
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-panel border-primary/20 text-xs font-mono text-text-secondary">
           <Activity className="w-3.5 h-3.5 text-primary animate-pulse" />
-          <span>${isThinesh ? 'STUDENT ENGINEER // AI, PRODUCT & ELECTRONICS' : 'ZADROW MAS 2.0 // HIGH-FIDELITY ACTIVE'}</span>
+          <span>${'ZADROW MAS 2.0 // HIGH-FIDELITY ACTIVE'}</span>
         </div>
 
         {/* Hero Title */}
         <h1 className="font-display font-extrabold text-5xl sm:text-7xl lg:text-8xl tracking-tight leading-[1.05]">
-          ${isThinesh ? `Engineering Practical Systems. <br />
-          <span className="text-gradient">Driven by Curiosity & High Standards.</span>` : `Forging Impossible <br />
+          ${`Forging Impossible <br />
           <span className="text-gradient">Digital Realities.</span>`}
         </h1>
 
         {/* Narrative Description */}
         <p className="max-w-2xl mx-auto text-lg sm:text-xl text-text-secondary font-light leading-relaxed">
-          ${isThinesh ? `I am <strong className="text-text-primary font-medium">Sri Thinesh</strong>, an engineering student exploring the intersection of software development, artificial intelligence, product design, electronics, and entrepreneurship. Focused on building useful, polished, and purposeful digital experiences.` : `Welcome to <strong className="text-text-primary font-medium">${brandName}</strong>. An autonomous digital studio coordinating specialized AI swarms to choreograph kinetic typography, 60FPS canvas shaders, and mathematical WCAG AAA fidelity.`}
+          ${`Welcome to <strong className="text-text-primary font-medium">${brandName}</strong>. An autonomous digital studio coordinating specialized AI swarms to choreograph kinetic typography, 60FPS canvas shaders, and mathematical WCAG AAA fidelity.`}
         </p>
 
         {/* Character / Personality Attributes Bar */}
-        ${isThinesh ? `
-        <div className="flex flex-wrap items-center justify-center gap-2 max-w-3xl mx-auto pt-2">
-          {['Ambitious', 'Analytical', 'High Standards', 'Practical', 'Curious & Experimental', 'Efficiency-Focused'].map((trait) => (
-            <span
-              key={trait}
-              className="px-3 py-1 rounded-full bg-white/5 border border-subtle text-xs font-mono text-text-muted hover:text-primary hover:border-primary/40 transition-colors"
-            >
-              {trait}
-            </span>
-          ))}
-        </div>
-        ` : ''}
-
+        
         {/* Action Controls */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
           <a
-            href="${isThinesh ? '#projects' : '#features'}"
+            href="${'#features'}"
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 min-h-[44px] rounded-full bg-primary text-black font-mono font-semibold text-sm tracking-wide hover:bg-white hover:shadow-[0_0_30px_rgba(0,240,255,0.5)] transition-all duration-300"
           >
             <Cpu className="w-4 h-4" />
-            <span>${isThinesh ? 'EXPLORE PROJECTS' : 'EXPLORE MATRIX'}</span>
+            <span>${'EXPLORE MATRIX'}</span>
           </a>
           <a
-            href="${isThinesh ? '#contact' : '#showcase'}"
+            href="${'#showcase'}"
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 min-h-[44px] rounded-full glass-panel hover:bg-white/10 text-text-primary font-mono text-sm tracking-wide transition-all duration-300"
           >
             <Zap className="w-4 h-4 text-primary" />
-            <span>${isThinesh ? 'DIRECT TRANSMISSION' : 'LIVE TELEMETRY'}</span>
+            <span>${'LIVE TELEMETRY'}</span>
           </a>
         </div>
 
         {/* Scroll Indicator */}
         <div className="pt-12 flex justify-center">
           <a
-            href="${isThinesh ? '#about' : '#features'}"
+            href="${'#features'}"
             aria-label="Scroll to Next Section"
             className="text-text-muted hover:text-primary transition-colors min-w-[44px] min-h-[44px] inline-flex items-center justify-center p-2.5"
           >
@@ -908,51 +883,13 @@ export function HeroStage() {
     // Author demo mode is OPT-IN only. It previously triggered on `!brandName`, which meant
     // any brief whose brand extraction failed silently produced the author's personal
     // portfolio as the client's deliverable.
-    const isThinesh = process.env.ZADROW_AUTHOR_DEMO === '1';
     const content = `
 'use client';
 
 import React, { useState } from 'react';
 import { Layers, ShieldCheck, Zap, Compass, Cpu, Wrench, Sparkles, Binary, CircuitBoard } from 'lucide-react';
 
-const BENTO_CARDS = ${isThinesh ? `[
-  {
-    id: 'analytical-rigor',
-    icon: Binary,
-    tag: 'COGNITIVE RIGOR',
-    title: 'Analytical & Root-Cause Investigation',
-    description: 'Investigating why a system fails and identifying the underlying cause rather than repeatedly trying the same superficial approach. Questioning recommendations and expecting clear reasoning behind technical decisions.',
-    metric: 'Root Cause',
-    stat: 'First-Principles Analysis',
-  },
-  {
-    id: 'high-standards',
-    icon: ShieldCheck,
-    tag: 'EXECUTION QUALITY',
-    title: 'High Standards & Craftsmanship',
-    description: 'Refusing to settle for something that merely works. Cares deeply about details, quality, responsive ergonomics, and whether the final result meets demanding expectations without compromises.',
-    metric: 'Zero Shortcuts',
-    stat: 'WCAG AAA & 60FPS Invariants',
-  },
-  {
-    id: 'curious-experimental',
-    icon: Compass,
-    tag: 'EMERGING TECH',
-    title: 'Curious & Experimental Exploration',
-    description: 'Exploring emerging technologies, multi-agent systems, and novel tools to discover better ways of building. Passionate about translating concepts into hands-on projects and testing hypotheses.',
-    metric: 'Active Explorer',
-    stat: 'AI, Web & Circuit Simulations',
-  },
-  {
-    id: 'practical-results',
-    icon: Zap,
-    tag: 'OUTCOME FOCUS',
-    title: 'Practical & Results-Oriented Execution',
-    description: 'Valuing working outcomes over impressive explanations or hollow promises. Dislikes unnecessary complexity, repetitive work, and wasted effort. Focused on shipping clean, functional products.',
-    metric: 'Working Results',
-    stat: 'Zero Bloat / 0-Backend Certified',
-  },
-]` : `[
+const BENTO_CARDS = ${`[
   {
     id: 'agentic-swarm',
     icon: Layers,
@@ -991,43 +928,9 @@ const BENTO_CARDS = ${isThinesh ? `[
   },
 ]`};
 
-${isThinesh ? `
-const EXPLORATION_DOMAINS = [
-  {
-    icon: Cpu,
-    title: 'Artificial Intelligence',
-    description: 'AI-powered applications, multi-agent systems, and AI-assisted engineering workflows.',
-    badge: 'Autonomous Systems',
-  },
-  {
-    icon: Layers,
-    title: 'Modern Web Development',
-    description: 'Next.js App Router, React 19, strict TypeScript, Tailwind CSS, and performance-first responsive interfaces.',
-    badge: 'Next.js 15 & React 19',
-  },
-  {
-    icon: Sparkles,
-    title: 'UI/UX Design',
-    description: 'User-centered design, visual hierarchy, spatial usability, and tactile interaction design.',
-    badge: 'Human-Centered UX',
-  },
-  {
-    icon: CircuitBoard,
-    title: 'Electronics Engineering',
-    description: 'Schematic capture in KiCad, SPICE-based circuit simulation, 555 timer multivibrators, and engineering fundamentals.',
-    badge: 'KiCad & SPICE',
-  },
-  {
-    icon: Wrench,
-    title: 'Entrepreneurship',
-    description: 'Product ideation, problem-solving, user need identification, service design, and business model exploration.',
-    badge: 'Ideation to Product',
-  },
-];
-` : ''}
 
 export function FeatureBento() {
-  const [activeCard, setActiveCard] = useState<string>(${isThinesh ? `'analytical-rigor'` : `'agentic-swarm'`});
+  const [activeCard, setActiveCard] = useState<string>(${`'agentic-swarm'`});
 
   return (
     <section
@@ -1040,13 +943,13 @@ export function FeatureBento() {
 
       <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
         <span className="font-mono text-xs uppercase tracking-widest text-primary">
-          ${isThinesh ? '// MINDSET & PHILOSOPHY ARCHITECTURE' : '// CAPABILITIES ARCHITECTURE'}
+          ${'// CAPABILITIES ARCHITECTURE'}
         </span>
         <h2 className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl tracking-tight">
-          ${isThinesh ? `Core Mindset & <span className="text-gradient">Engineering Philosophy.</span>` : `Engineered for <span className="text-gradient">Unbounded Precision.</span>`}
+          ${`Engineered for <span className="text-gradient">Unbounded Precision.</span>`}
         </h2>
         <p className="text-text-secondary text-base sm:text-lg">
-          ${isThinesh ? 'Translating analytical curiosity, high standards, and practical problem-solving into reliable, well-designed systems.' : 'Each card represents a modular system layer engineered by ZadRow&apos;s concurrent agent network.'}
+          ${'Each card represents a modular system layer engineered by ZadRow&apos;s concurrent agent network.'}
         </p>
       </div>
 
@@ -1093,50 +996,7 @@ export function FeatureBento() {
         })}
       </div>
 
-      ${isThinesh ? `
-      {/* Areas of Interest Section */}
-      <div id="domains" className="mt-24 space-y-12">
-        <div className="text-center max-w-3xl mx-auto space-y-3">
-          <span className="font-mono text-xs uppercase tracking-widest text-primary">
-            // AREAS OF EXPLORATION
-          </span>
-          <h2 className="font-display font-bold text-3xl sm:text-4xl text-text-primary tracking-tight">
-            Connecting Technology, Engineering & <span className="text-gradient">Product Design.</span>
-          </h2>
-          <p className="text-text-secondary text-sm sm:text-base">
-            Exploring practical intersections to build purposeful digital solutions.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {EXPLORATION_DOMAINS.map((domain) => {
-            const DomainIcon = domain.icon;
-            return (
-              <div
-                key={domain.title}
-                className="p-6 rounded-2xl glass-panel hover:border-primary/40 transition-all duration-300 space-y-4"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="w-10 h-10 rounded-xl bg-surface border border-subtle flex items-center justify-center text-primary">
-                    <DomainIcon className="w-5 h-5" />
-                  </div>
-                  <span className="px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20 text-[11px] font-mono text-primary">
-                    {domain.badge}
-                  </span>
-                </div>
-                <h3 className="font-display font-semibold text-lg text-text-primary">
-                  {domain.title}
-                </h3>
-                <p className="text-text-secondary text-xs leading-relaxed">
-                  {domain.description}
-                </p>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-      ` : ''}
-    </section>
+          </section>
   );
 }
 `;
@@ -1147,562 +1007,7 @@ export function FeatureBento() {
     // Author demo mode is OPT-IN only. It previously triggered on `!brandName`, which meant
     // any brief whose brand extraction failed silently produced the author's personal
     // portfolio as the client's deliverable.
-    const isThinesh = process.env.ZADROW_AUTHOR_DEMO === '1';
-    const content = isThinesh ? `
-'use client';
-
-import React, { useState, useEffect } from 'react';
-import { MediaPlaceholder } from '@/components/MediaPlaceholder';
-import {
-  ExternalLink,
-  Layers,
-  Sparkles,
-  CircuitBoard,
-  Cpu,
-  Terminal,
-  Sliders,
-  Gauge,
-  CheckCircle2,
-  X,
-  FolderGit2,
-  Filter,
-  Info,
-  Activity,
-} from 'lucide-react';
-
-interface Project {
-  id: string;
-  title: string;
-  category: 'core' | 'web' | 'electronics';
-  categoryLabel: string;
-  tagline: string;
-  description: string;
-  details: string[];
-  tags: string[];
-  metric: string;
-  status: string;
-  href?: string;
-  note?: string;
-}
-
-const PROJECTS: Project[] = [
-  {
-    id: 'portfolio-v2',
-    title: 'Personal Portfolio (v2.0)',
-    category: 'core',
-    categoryLabel: 'Core Initiative // Web',
-    tagline: 'Multi-Agent System 2.0 Autonomous Engineering',
-    description:
-      'High-performance personal digital platform engineered using ZadRow Multi-Agent System with atomic cognitive scoping. Built with Next.js 15 App Router, React 19, TypeScript strict mode, and Tailwind CSS.',
-    details: [
-      'Engineered with an enterprise hierarchy of specialized AI agents with zero cognitive hallucination.',
-      'Mathematical WCAG AAA contrast ratio (18.79:1) verified across all typography and states.',
-      '60FPS hardware-accelerated interactive hero canvas with coarse-touch gating.',
-      'Zero-stub standard: 100% verified authentic copy and production-grade TypeScript components.',
-    ],
-    tags: ['Next.js 15', 'React 19', 'TypeScript', 'Tailwind CSS', 'Motion'],
-    metric: 'WCAG AAA / 60FPS',
-    status: 'Active Flagship',
-    href: '#hero',
-  },
-  {
-    id: 'need-it',
-    title: 'NEED IT',
-    category: 'core',
-    categoryLabel: 'Core Initiative // Concept',
-    tagline: 'Campus Errand & Peer Item Collection Concept',
-    description:
-      'A campus-oriented service design concept created to connect individuals who need items or errands collected with nearby students or helpers available to pick them up and deliver them.',
-    details: [
-      'Exploration of campus logistics, errand delegation workflows, and student peer dynamics.',
-      'End-to-end service design including request dispatching, helper matching, and status verification flows.',
-      'Business model viability modeling for university campus micro-communities.',
-      'Focus on practical usability, clear communication, and friction-free user flows.',
-    ],
-    tags: ['Service Design', 'User Flows', 'Product Ideation', 'Campus Logistics'],
-    metric: 'Service Design Flow',
-    status: 'Concept Exploration',
-  },
-  {
-    id: 'e-cell',
-    title: 'E-Cell Website',
-    category: 'core',
-    categoryLabel: 'Core Initiative // Web',
-    tagline: 'Entrepreneurship Cell Digital Information Architecture',
-    description:
-      'Contributions to the Entrepreneurship Cell digital portal, focusing on structured digital navigation, clear requirement communication, and purposeful design for student innovators.',
-    details: [
-      'Defined intuitive information architecture to communicate club initiatives, events, and resources.',
-      'Emphasized structured requirement gathering and clean visual presentation.',
-      'Collaborated on user-centered digital experience to support entrepreneurship awareness.',
-      'Ensured responsive accessibility across mobile and desktop viewports.',
-    ],
-    tags: ['Web Development', 'Information Architecture', 'Entrepreneurship', 'UI/UX'],
-    metric: 'Portal Architecture',
-    status: 'Active Contribution',
-  },
-  {
-    id: 'electronics-555',
-    title: '555 Timer & SPICE Simulation',
-    category: 'electronics',
-    categoryLabel: 'Electronics // Simulation',
-    tagline: 'KiCad & SPICE Analog Circuit Analysis',
-    description:
-      'Practical exploration of analog electronics and circuit behavior through schematic capture in KiCad and SPICE-based simulation of 555 timer multivibrator configurations.',
-    details: [
-      'Astable and monostable 555 timer multivibrator circuit simulation and transient timing analysis.',
-      'Schematic capture and design rule validation using KiCad open-source EDA suite.',
-      'Investigation of RC time constants, frequency stability, duty cycle tuning, and trigger thresholds.',
-      'Strengthening practical engineering fundamentals through simulation before breadboard prototyping.',
-    ],
-    tags: ['KiCad', 'SPICE', 'Circuit Simulation', 'Analog Electronics', '555 Timer'],
-    metric: 'Transient SPICE Analysis',
-    status: 'Engineering Study',
-  },
-  {
-    id: 'harish-profile',
-    title: 'Harish Profile (TCS Experience)',
-    category: 'web',
-    categoryLabel: 'Web & UI/UX // Showcase',
-    tagline: 'Professional Consultant Showcase',
-    description:
-      'Showcase portfolio designed for Harish, highlighting technical consulting and professional experience at TCS. Structured with clean visual hierarchy and responsive typography.',
-    details: [
-      'Clear typographic hierarchy highlighting enterprise consulting capabilities.',
-      'Structured career milestones and project timeline presentations.',
-      'Responsive multi-breakpoint layout with fast page load performance.',
-      'Authored in Webflow with modern CSS grid and flexbox architecture.',
-    ],
-    tags: ['Webflow', 'Visual Hierarchy', 'Personal Branding', 'Responsive Web'],
-    metric: 'Enterprise Showcase',
-    status: 'Archive Reference',
-    href: 'https://sri-thinesh-portfolio.webflow.io/',
-  },
-  {
-    id: 'pane-and-frame',
-    title: 'Pane & Frame Studio',
-    category: 'web',
-    categoryLabel: 'Web & UI/UX // Studio',
-    tagline: 'Framing & Art Display Showcase',
-    description:
-      'Digital web experience for an art and framing studio, emphasizing tactile visual layout, clean portfolio showcases, and clear inquiry paths.',
-    details: [
-      'Refined visual layout emphasizing spatial framing aesthetics.',
-      'Tactile portfolio gallery with smooth responsive reflow.',
-      'Optimized image loading and elegant editorial typography.',
-      'Structured conversion paths for customer consultation bookings.',
-    ],
-    tags: ['Responsive Web', 'Visual Storytelling', 'Brand Design', 'UI/UX'],
-    metric: 'Editorial Grid',
-    status: 'Archive Reference',
-    href: 'https://sri-thinesh-portfolio.webflow.io/',
-  },
-  {
-    id: 'veloura-escapes',
-    title: 'Veloura Escapes',
-    category: 'web',
-    categoryLabel: 'Web & UI/UX // Travel',
-    tagline: 'Boutique Luxury Retreat Experience',
-    description:
-      'Immersive digital exploration for boutique holiday retreats, combining sophisticated color palettes, smooth page flows, and conversion-oriented booking discovery.',
-    details: [
-      'Luxury aesthetic design system with warm, premium color harmony.',
-      'Interactive itinerary exploration cards and visual storytelling.',
-      'Clear value propositions and friction-free inquiry funnels.',
-      'Mobile-first responsive typography and touch ergonomics.',
-    ],
-    tags: ['Luxury Travel', 'Micro-Interactions', 'UI/UX Design', 'Visual Branding'],
-    metric: 'Boutique UX Flow',
-    status: 'Archive Reference',
-    href: 'https://sri-thinesh-portfolio.webflow.io/',
-  },
-  {
-    id: 'forma-gym',
-    title: 'Forma Modern Gym',
-    category: 'web',
-    categoryLabel: 'Web & UI/UX // Fitness',
-    tagline: 'High-Energy Athletic Fitness Portal',
-    description:
-      'Dynamic fitness club website featuring bold typographic contrast, class schedules, and membership conversion funnels engineered for high engagement.',
-    details: [
-      'High-impact kinetic design and bold typographic pacing.',
-      'Clear class timetable breakdowns and trainer profile cards.',
-      'Streamlined membership tier comparison and signup triggers.',
-      'Accessible contrast and keyboard-navigable interactive controls.',
-    ],
-    tags: ['Fitness Branding', 'Kinetic Layout', 'Typography', 'Conversion Design'],
-    metric: 'High-Impact Brand',
-    status: 'Archive Reference',
-    href: 'https://sri-thinesh-portfolio.webflow.io/',
-  },
-  {
-    id: 'northframe-studio',
-    title: 'Northframe Studio',
-    category: 'web',
-    categoryLabel: 'Web & UI/UX // Architecture',
-    tagline: 'Architectural & Spatial Portfolio',
-    description:
-      'Architectural studio website utilizing structured whitespace, editorial typography, and minimalist portfolio presentation to showcase spatial projects.',
-    details: [
-      'Minimalist structural layout allowing project photography to take center stage.',
-      'Carefully proportioned whitespace and architectural grid alignment.',
-      'Subtle transitions and refined micro-interactions.',
-      'Comprehensive project metadata tables and blueprint callouts.',
-    ],
-    tags: ['Minimalist Editorial', 'Architecture', 'Spatial UI', 'Grid Systems'],
-    metric: 'Spatial Grid Layout',
-    status: 'Archive Reference',
-    href: 'https://sri-thinesh-portfolio.webflow.io/',
-  },
-];
-
-type FilterType = 'all' | 'core' | 'web' | 'electronics' | 'telemetry';
-
-export function InteractiveShowcase() {
-  const [filter, setFilter] = useState<FilterType>('all');
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-
-  // Telemetry state
-  const [swarmDensity, setSwarmDensity] = useState(18);
-  const [shaderQuality, setShaderQuality] = useState(90);
-  const computedThroughput = Math.round(swarmDensity * 240);
-  const latencyMs = (0.2 + (100 - shaderQuality) * 0.005).toFixed(2);
-
-  // Close modal on Escape key
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setSelectedProject(null);
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
-  const filteredProjects =
-    filter === 'all'
-      ? PROJECTS
-      : filter === 'telemetry'
-      ? []
-      : PROJECTS.filter((p) => p.category === filter);
-
-  return (
-    <section
-      id="projects"
-      aria-label="Featured Projects and Telemetry Showcase"
-      className="relative py-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto"
-    >
-      {/* Anchor alias for backwards compatibility */}
-      <div id="showcase" className="sr-only" aria-hidden="true" />
-
-      {/* Section Header */}
-      <div className="text-center max-w-3xl mx-auto mb-12 space-y-4">
-        <span className="font-mono text-xs uppercase tracking-widest text-primary flex items-center justify-center gap-2">
-          <FolderGit2 className="w-4 h-4" />
-          // SELECTED WORKS & INITIATIVES
-        </span>
-        <h2 className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl tracking-tight">
-          Featured Projects & <span className="text-gradient">Technical Explorations.</span>
-        </h2>
-        <p className="text-text-secondary text-base sm:text-lg">
-          Hands-on initiatives across software development, AI systems, user experience, and analog electronics simulation.
-        </p>
-      </div>
-
-      {/* Filter Tabs */}
-      <div className="flex flex-wrap items-center justify-center gap-2 mb-12">
-        {[
-          { key: 'all', label: 'All Work' },
-          { key: 'core', label: 'Core Initiatives' },
-          { key: 'web', label: 'Web & UI/UX' },
-          { key: 'electronics', label: 'Electronics & Simulation' },
-          { key: 'telemetry', label: 'System Telemetry' },
-        ].map((tab) => (
-          <button
-            key={tab.key}
-            type="button"
-            onClick={() => setFilter(tab.key as FilterType)}
-            className={\`px-5 py-2.5 rounded-full text-xs font-mono font-medium min-h-[44px] transition-all duration-200 \${
-              filter === tab.key
-                ? 'bg-primary text-black font-semibold shadow-[0_0_20px_rgba(0,240,255,0.4)]'
-                : 'glass-panel text-text-secondary hover:text-text-primary hover:border-white/30'
-            }\`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Telemetry View */}
-      {filter === 'telemetry' ? (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          <div className="lg:col-span-5 glass-panel p-8 rounded-3xl space-y-8">
-            <div className="flex items-center gap-3 pb-4 border-b border-subtle">
-              <Sliders className="w-5 h-5 text-primary" />
-              <h3 className="font-display font-bold text-xl text-text-primary">
-                Runtime Simulator
-              </h3>
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex justify-between text-xs font-mono">
-                <label htmlFor="swarm-density" className="text-text-secondary cursor-pointer">
-                  ACTIVE AGENT SWARMS
-                </label>
-                <span className="text-primary font-bold">{swarmDensity} Operatives</span>
-              </div>
-              <input
-                id="swarm-density"
-                type="range"
-                min="4"
-                max="24"
-                value={swarmDensity}
-                onChange={(e) => setSwarmDensity(Number(e.target.value))}
-                className="w-full accent-primary cursor-pointer h-2 bg-elevated rounded-lg"
-                aria-label="Swarm Density"
-              />
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex justify-between text-xs font-mono">
-                <label htmlFor="shader-quality" className="text-text-secondary cursor-pointer">
-                  SHADER PRECISION TIER
-                </label>
-                <span className="text-primary font-bold">{shaderQuality}% Target</span>
-              </div>
-              <input
-                id="shader-quality"
-                type="range"
-                min="30"
-                max="100"
-                value={shaderQuality}
-                onChange={(e) => setShaderQuality(Number(e.target.value))}
-                className="w-full accent-primary cursor-pointer h-2 bg-elevated rounded-lg"
-                aria-label="Shader Quality"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 pt-4">
-              <div className="p-4 rounded-2xl bg-surface border border-subtle">
-                <div className="flex items-center gap-2 text-xs font-mono text-text-muted mb-1">
-                  <Gauge className="w-3.5 h-3.5 text-primary" />
-                  <span>THROUGHPUT</span>
-                </div>
-                <div className="text-2xl font-mono font-bold text-text-primary">
-                  {computedThroughput} <span className="text-xs text-text-muted">tok/s</span>
-                </div>
-              </div>
-              <div className="p-4 rounded-2xl bg-surface border border-subtle">
-                <div className="flex items-center gap-2 text-xs font-mono text-text-muted mb-1">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
-                  <span>FRAME DELTA</span>
-                </div>
-                <div className="text-2xl font-mono font-bold text-primary">
-                  {latencyMs} <span className="text-xs text-text-muted">ms</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="lg:col-span-7 glass-panel-elevated p-8 rounded-3xl space-y-6">
-            <div className="flex items-center justify-between pb-4 border-b border-subtle">
-              <div className="flex items-center gap-3">
-                <Terminal className="w-5 h-5 text-primary" />
-                <span className="font-mono text-xs tracking-wider text-text-primary">
-                  MAS 2.0 // SYSTEM HEALTH & SPECS
-                </span>
-              </div>
-            </div>
-
-            <div className="space-y-3 font-mono text-xs text-text-secondary leading-relaxed bg-black/40 p-5 rounded-2xl border border-subtle">
-              <div className="text-primary">&gt; PORTFOLIO ENGINE: Next.js 15 App Router + React 19</div>
-              <div>&gt; Architecture: Static 0-Backend Export Certified (Zero Server Overhead)</div>
-              <div>&gt; Performance: 60FPS Hardware-Accelerated Kinetic Canvas Active</div>
-              <div>&gt; Accessibility: WCAG 2.2 AAA Contrast Validated (18.79:1 Ratio)</div>
-              <div>&gt; Integrity: Production-Grade Authentic Content Enforced (100% Complete)</div>
-              <div className="text-text-primary font-bold pt-2">
-                &gt; STATUS: Production-Grade Portfolio System Online.
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between text-xs font-mono text-text-muted pt-2">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-primary animate-ping" />
-                <span>RUNTIME HEALTHY</span>
-              </div>
-              <span>MAS 2.0 VERIFIED</span>
-            </div>
-          </div>
-        </div>
-      ) : (
-        /* Projects Grid */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProjects.map((project) => (
-            <div
-              key={project.id}
-              onClick={() => setSelectedProject(project)}
-              className="glass-panel hover:glass-panel-elevated p-7 rounded-3xl transition-all duration-300 flex flex-col justify-between group cursor-pointer border border-subtle hover:border-primary/40 focus-within:ring-2 focus-within:ring-primary"
-            >
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-mono text-primary px-3 py-1 rounded-full bg-primary/10 border border-primary/20">
-                    {project.categoryLabel}
-                  </span>
-                  <span className="text-[11px] font-mono text-text-muted">
-                    {project.status}
-                  </span>
-                </div>
-
-                <div className="space-y-1">
-                  <h3 className="font-display font-bold text-2xl text-text-primary group-hover:text-primary transition-colors">
-                    {project.title}
-                  </h3>
-                  <p className="text-xs font-mono text-text-muted">
-                    {project.tagline}
-                  </p>
-                </div>
-
-                <p className="text-sm text-text-secondary leading-relaxed line-clamp-3">
-                  {project.description}
-                </p>
-
-                <div className="flex flex-wrap gap-1.5 pt-2">
-                  {project.tags.slice(0, 4).map((tag) => (
-                    <span
-                      key={tag}
-                      className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-text-muted border border-subtle/50"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                  {project.tags.length > 4 && (
-                    <span className="text-[10px] font-mono px-1.5 py-0.5 text-text-muted">
-                      +{project.tags.length - 4}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              <div className="pt-6 mt-6 border-t border-subtle/60 flex items-center justify-between">
-                <span className="text-xs font-mono text-text-muted">
-                  {project.metric}
-                </span>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedProject(project);
-                  }}
-                  className="inline-flex items-center gap-1.5 text-xs font-mono font-semibold text-primary group-hover:underline min-h-[44px] min-w-[44px] px-2"
-                >
-                  <span>INSPECT</span>
-                  <Info className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Project Detail Modal */}
-      {selectedProject && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="modal-project-title"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
-          onClick={() => setSelectedProject(null)}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="glass-panel-elevated max-w-2xl w-full p-8 rounded-3xl space-y-6 max-h-[90vh] overflow-y-auto border border-primary/30"
-          >
-            <div className="flex items-start justify-between">
-              <div>
-                <span className="text-xs font-mono text-primary px-3 py-1 rounded-full bg-primary/10 border border-primary/20">
-                  {selectedProject.categoryLabel}
-                </span>
-                <h3 id="modal-project-title" className="font-display font-bold text-3xl text-text-primary mt-2">
-                  {selectedProject.title}
-                </h3>
-                <p className="text-xs font-mono text-text-muted mt-1">
-                  {selectedProject.tagline}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setSelectedProject(null)}
-                aria-label="Close Project Details"
-                className="p-2 text-text-muted hover:text-white rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center hover:bg-white/10 transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <p className="text-sm text-text-secondary leading-relaxed">
-              {selectedProject.description}
-            </p>
-
-            <div className="space-y-2">
-              <h4 className="text-xs font-mono uppercase tracking-wider text-text-primary">
-                Key Technical & Exploration Details:
-              </h4>
-              <ul className="space-y-2 text-xs font-mono text-text-secondary">
-                {selectedProject.details.map((detail, idx) => (
-                  <li key={idx} className="flex items-start gap-2">
-                    <span className="text-primary flex-shrink-0">&gt;</span>
-                    <span>{detail}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="space-y-2">
-              <h4 className="text-xs font-mono uppercase tracking-wider text-text-primary">
-                Technologies & Tools:
-              </h4>
-              <div className="flex flex-wrap gap-2">
-                {selectedProject.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="text-xs font-mono px-2.5 py-1 rounded-full bg-white/5 border border-subtle text-primary"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className="pt-4 border-t border-subtle flex flex-col sm:flex-row items-center justify-between gap-4">
-              <span className="text-xs font-mono text-text-muted">
-                Status: <strong className="text-text-primary font-medium">{selectedProject.status}</strong>
-              </span>
-              <div className="flex items-center gap-3 w-full sm:w-auto">
-                {selectedProject.href && (
-                  <a
-                    href={selectedProject.href}
-                    target={selectedProject.href.startsWith('http') ? '_blank' : undefined}
-                    rel={selectedProject.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-                    className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-primary text-black font-mono font-semibold text-xs min-h-[44px] hover:bg-white transition-colors"
-                  >
-                    <span>VIEW REFERENCE</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
-                )}
-                <button
-                  type="button"
-                  onClick={() => setSelectedProject(null)}
-                  className="flex-1 sm:flex-none px-6 py-3 rounded-full glass-panel text-text-primary font-mono text-xs min-h-[44px] hover:bg-white/10 transition-colors"
-                >
-                  CLOSE
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </section>
-  );
-}
-` : `
+    const content = `
 'use client';
 
 import React, { useState } from 'react';
@@ -2063,228 +1368,7 @@ export function MediaPlaceholder({
     // Author demo mode is OPT-IN only. It previously triggered on `!brandName`, which meant
     // any brief whose brand extraction failed silently produced the author's personal
     // portfolio as the client's deliverable.
-    const isThinesh = process.env.ZADROW_AUTHOR_DEMO === '1';
-    const content = isThinesh ? `
-'use client';
-
-import React, { useState } from 'react';
-import { Send, CheckCircle2, Sparkles, Mail, MessageSquare, Linkedin, MapPin, ArrowUpRight } from 'lucide-react';
-
-export function FooterConversion() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [domain, setDomain] = useState('Software / Web Development');
-  const [message, setMessage] = useState('');
-  const [submitted, setSubmitted] = useState(false);
-  const [error, setError] = useState('');
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim()) {
-      setError('Please provide your name.');
-      return;
-    }
-    if (!email || !email.includes('@') || !email.includes('.')) {
-      setError('Please provide a valid email address.');
-      return;
-    }
-    if (!message.trim()) {
-      setError('Please enter a brief message or inquiry.');
-      return;
-    }
-    setError('');
-    setSubmitted(true);
-  };
-
-  return (
-    <footer
-      id="contact"
-      aria-label="Contact and Transmission"
-      className="relative border-t border-subtle pt-24 pb-16 px-4 sm:px-6 lg:px-8 mt-24 overflow-hidden"
-    >
-      <div className="max-w-7xl mx-auto space-y-16">
-        {/* Main Transmission Card */}
-        <div className="glass-panel-elevated p-8 sm:p-14 rounded-3xl relative overflow-hidden">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-            {/* Left Column: Direct Channels & Context */}
-            <div className="lg:col-span-5 space-y-6">
-              <span className="font-mono text-xs uppercase tracking-widest text-primary flex items-center gap-2">
-                <Sparkles className="w-4 h-4" />
-                // INITIATE CONTACT // TRANSMISSION
-              </span>
-              <h2 className="font-display font-extrabold text-3xl sm:text-5xl text-text-primary tracking-tight leading-tight">
-                Let&apos;s Build Something <span className="text-gradient">Functional &amp; Extraordinary.</span>
-              </h2>
-              <p className="text-text-secondary text-sm sm:text-base leading-relaxed">
-                Have an interesting engineering problem, an AI product concept, or an opportunity to collaborate? Feel free to reach out directly through any of these communication channels.
-              </p>
-
-              {/* Direct Channels List */}
-              <div className="space-y-3 pt-2">
-                <a
-                  href="mailto:satorweb@gmail.com"
-                  className="flex items-center gap-3 p-3.5 rounded-2xl glass-panel hover:border-primary/40 text-text-primary hover:text-primary transition-all duration-200 min-h-[44px]"
-                >
-                  <Mail className="w-4 h-4 text-primary flex-shrink-0" />
-                  <span className="font-mono text-xs sm:text-sm">satorweb@gmail.com</span>
-                </a>
-
-                <a
-                  href="https://wa.me/918608991345"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-3.5 rounded-2xl glass-panel hover:border-primary/40 text-text-primary hover:text-primary transition-all duration-200 min-h-[44px]"
-                >
-                  <MessageSquare className="w-4 h-4 text-primary flex-shrink-0" />
-                  <span className="font-mono text-xs sm:text-sm">+91 8608991345 (WhatsApp)</span>
-                  <ArrowUpRight className="w-3.5 h-3.5 text-text-muted ml-auto" />
-                </a>
-
-                <a
-                  href="https://www.linkedin.com/in/sri-thinesh-00ba54410/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-3.5 rounded-2xl glass-panel hover:border-primary/40 text-text-primary hover:text-primary transition-all duration-200 min-h-[44px]"
-                >
-                  <Linkedin className="w-4 h-4 text-primary flex-shrink-0" />
-                  <span className="font-mono text-xs sm:text-sm">linkedin.com/in/sri-thinesh</span>
-                  <ArrowUpRight className="w-3.5 h-3.5 text-text-muted ml-auto" />
-                </a>
-
-                <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-white/5 border border-subtle/50 text-text-muted">
-                  <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
-                  <span className="font-mono text-xs">Salem, Tamil Nadu, India</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column: Interactive Transmission Form */}
-            <div className="lg:col-span-7 bg-black/40 p-6 sm:p-8 rounded-3xl border border-subtle/80 flex flex-col justify-center">
-              {submitted ? (
-                <div className="p-8 rounded-2xl bg-primary/10 border border-primary/30 space-y-4 text-center">
-                  <div className="w-12 h-12 rounded-full bg-primary/20 text-primary mx-auto flex items-center justify-center">
-                    <CheckCircle2 className="w-6 h-6" />
-                  </div>
-                  <h3 className="font-display font-bold text-xl text-text-primary">
-                    Transmission Logged
-                  </h3>
-                  <p className="text-xs font-mono text-text-secondary leading-relaxed">
-                    Thank you, <strong className="text-primary">{name}</strong>. Your message regarding {domain} has been received. Sri Thinesh will get back to you shortly.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSubmitted(false);
-                      setName('');
-                      setEmail('');
-                      setMessage('');
-                    }}
-                    className="px-6 py-2.5 rounded-full bg-primary text-black font-mono font-semibold text-xs min-h-[44px] hover:bg-white transition-colors"
-                  >
-                    SEND ANOTHER MESSAGE
-                  </button>
-                </div>
-              ) : (
-                <form noValidate onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <label htmlFor="contact-name" className="text-xs font-mono text-text-muted">
-                        YOUR NAME
-                      </label>
-                      <input
-                        id="contact-name"
-                        type="text"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        placeholder="Sri Thinesh"
-                        required
-                        className="w-full px-4 py-3 min-h-[44px] rounded-xl bg-surface border border-subtle text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary text-xs font-mono"
-                      />
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label htmlFor="contact-email" className="text-xs font-mono text-text-muted">
-                        EMAIL ADDRESS
-                      </label>
-                      <input
-                        id="contact-email"
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="name@domain.com"
-                        required
-                        className="w-full px-4 py-3 min-h-[44px] rounded-xl bg-surface border border-subtle text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary text-xs font-mono"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label htmlFor="contact-domain" className="text-xs font-mono text-text-muted">
-                      AREA OF COLLABORATION
-                    </label>
-                    <select
-                      id="contact-domain"
-                      value={domain}
-                      onChange={(e) => setDomain(e.target.value)}
-                      className="w-full px-4 py-3 min-h-[44px] rounded-xl bg-surface border border-subtle text-text-primary focus:outline-none focus:ring-2 focus:ring-primary text-xs font-mono"
-                    >
-                      <option value="Software / Web Development">Software / Web Development</option>
-                      <option value="Artificial Intelligence & Agents">Artificial Intelligence &amp; Multi-Agent Systems</option>
-                      <option value="UI/UX & Product Design">UI/UX &amp; Product Design</option>
-                      <option value="Electronics & Simulation">Electronics &amp; Circuit Simulation</option>
-                      <option value="Entrepreneurship / General Inquiry">Entrepreneurship / General Inquiry</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label htmlFor="contact-message" className="text-xs font-mono text-text-muted">
-                      MESSAGE / BRIEF
-                    </label>
-                    <textarea
-                      id="contact-message"
-                      rows={4}
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                      placeholder="Outline your project, question, or discussion point..."
-                      required
-                      className="w-full px-4 py-3 min-h-[80px] rounded-xl bg-surface border border-subtle text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary text-xs font-mono resize-none"
-                    />
-                  </div>
-
-                  {error && <p className="text-xs font-mono text-red-400 pl-1">{error}</p>}
-
-                  <button
-                    type="submit"
-                    className="w-full inline-flex items-center justify-center gap-2 px-8 py-3.5 min-h-[44px] rounded-xl bg-primary text-black font-mono font-semibold text-xs tracking-wider hover:bg-white hover:shadow-[0_0_25px_rgba(0,240,255,0.4)] transition-all duration-300"
-                  >
-                    <span>TRANSMIT MESSAGE</span>
-                    <Send className="w-4 h-4" />
-                  </button>
-                </form>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Studio Bottom Bar */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-8 border-t border-subtle/50 text-xs font-mono text-text-muted">
-          <div>
-            &copy; {new Date().getFullYear()} SRI THINESH. Engineered with ZadRow Multi-Agent System.
-          </div>
-          <div className="flex flex-wrap items-center gap-4 sm:gap-6">
-            <a href="#hero" className="hover:text-primary transition-colors min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-2">TOP</a>
-            <a href="#about" className="hover:text-primary transition-colors min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-2">MINDSET</a>
-            <a href="#domains" className="hover:text-primary transition-colors min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-2">DOMAINS</a>
-            <a href="#projects" className="hover:text-primary transition-colors min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-2">PROJECTS</a>
-            <a href="#contact" className="hover:text-primary transition-colors min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-2">CONTACT</a>
-            <span className="text-primary font-bold hidden sm:inline">NEXT.JS 15 // REACT 19</span>
-          </div>
-        </div>
-      </div>
-    </footer>
-  );
-}
-` : `
+    const content = `
 'use client';
 
 import React, { useState } from 'react';
@@ -2632,7 +1716,17 @@ npm run start
 import path from 'path';
 
 const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&\\x27*+/=?^_\\x60{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
-export const DEFAULT_ADMIN_KEY = process.env.ADMIN_API_KEY || 'zadrow-admin-secure-key-2026';
+export function getAdminKey(): string | null {
+  const key = process.env.ADMIN_API_KEY;
+  return typeof key === 'string' && key.length > 0 ? key : null;
+}
+
+function constantTimeEquals(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
 
 class MutexManager {
   private locks: Map<string, Promise<void>> = new Map();
@@ -2738,15 +1832,18 @@ export function validateAndSanitizeInput(
 }
 
 export function verifyAdminAuth(headers: Headers): boolean {
+  const expected = getAdminKey();
+  // Fail closed: with no ADMIN_API_KEY configured, nothing is authorized.
+  if (!expected) return false;
+
   const authHeader = headers.get('authorization') || '';
   const adminKeyHeader = headers.get('x-admin-key') || '';
 
   if (authHeader.startsWith('Bearer ')) {
-    const token = authHeader.substring(7).trim();
-    if (token === DEFAULT_ADMIN_KEY) return true;
+    if (constantTimeEquals(authHeader.substring(7).trim(), expected)) return true;
   }
 
-  if (adminKeyHeader && adminKeyHeader === DEFAULT_ADMIN_KEY) {
+  if (adminKeyHeader && constantTimeEquals(adminKeyHeader, expected)) {
     return true;
   }
 

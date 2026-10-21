@@ -17,8 +17,31 @@ import path from 'path';
 // RFC 5322 compliant email regex
 const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&\x27*+/=?^_\x60{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
 
-// Standard Admin Key for local verification (configurable via env)
-export const DEFAULT_ADMIN_KEY = process.env.ADMIN_API_KEY || 'zadrow-admin-secure-key-2026';
+/**
+ * Admin key for protected routes, read from the environment on every call so a
+ * rotated key takes effect without a restart.
+ *
+ * There is deliberately no fallback value. The previous implementation defaulted
+ * to a hardcoded string and additionally accepted two legacy literals, which
+ * meant every deployment that forgot to set ADMIN_API_KEY shipped a
+ * publicly-known administrative credential.
+ */
+export function getAdminKey() {
+  const key = process.env.ADMIN_API_KEY;
+  return typeof key === 'string' && key.length > 0 ? key : null;
+}
+
+/**
+ * Length-safe string comparison, so a wrong key cannot be recovered by timing
+ * the response.
+ */
+function constantTimeEquals(a, b) {
+  if (typeof a !== 'string' || typeof b !== 'string') return false;
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
 
 /**
  * Mutex lock manager for concurrent filesystem operations
@@ -135,17 +158,18 @@ export function validateAndSanitizeInput(data, rules = {}) {
  * Verify administrative authorization
  */
 export function verifyAdminAuth(reqHeaders = {}) {
+  const expected = getAdminKey();
+  // Fail closed: with no key configured, nothing is authorized.
+  if (!expected) return false;
+
   const authHeader = reqHeaders['authorization'] || reqHeaders['Authorization'] || '';
   const adminKeyHeader = reqHeaders['x-admin-key'] || reqHeaders['X-Admin-Key'] || '';
 
   if (authHeader.startsWith('Bearer ')) {
-    const token = authHeader.substring(7).trim();
-    if (token === DEFAULT_ADMIN_KEY || token === 'zadrow-admin-secure-key-2026' || token === 'aura-admin-secure-key-2026') return true;
+    if (constantTimeEquals(authHeader.substring(7).trim(), expected)) return true;
   }
 
-  if (adminKeyHeader && (adminKeyHeader === DEFAULT_ADMIN_KEY || adminKeyHeader === 'zadrow-admin-secure-key-2026' || adminKeyHeader === 'aura-admin-secure-key-2026')) {
-    return true;
-  }
+  if (adminKeyHeader && constantTimeEquals(adminKeyHeader, expected)) return true;
 
   return false;
 }

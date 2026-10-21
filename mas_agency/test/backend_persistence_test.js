@@ -18,7 +18,7 @@ import {
   AtomicStore,
   validateAndSanitizeInput,
   verifyAdminAuth,
-  DEFAULT_ADMIN_KEY,
+  getAdminKey,
 } from '../src/lib/persistence.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -173,14 +173,33 @@ async function runBackendPersistenceTests() {
   // TEST 5: Authorization & Information Shielding
   // -------------------------------------------------------------------------
   console.log('[TEST 5] Testing API authorization & data exposure protection...');
+  // The key is read from the environment; there is no shipped default.
+  process.env.ADMIN_API_KEY = 'test-admin-key-9f3c1a';
+  const configuredKey = getAdminKey();
+  assert.strictEqual(configuredKey, 'test-admin-key-9f3c1a', 'Admin key must come from the environment');
   // Valid bearer token
-  assert.strictEqual(verifyAdminAuth({ authorization: `Bearer ${DEFAULT_ADMIN_KEY}` }), true);
+  assert.strictEqual(verifyAdminAuth({ authorization: `Bearer ${configuredKey}` }), true);
   // Valid x-admin-key header
-  assert.strictEqual(verifyAdminAuth({ 'x-admin-key': DEFAULT_ADMIN_KEY }), true);
+  assert.strictEqual(verifyAdminAuth({ 'x-admin-key': configuredKey }), true);
   // Unauthorized: invalid token
   assert.strictEqual(verifyAdminAuth({ authorization: 'Bearer wrong-secret' }), false);
   // Unauthorized: missing headers
   assert.strictEqual(verifyAdminAuth({}), false);
+  // Unauthorized: the retired shipped default must no longer be accepted
+  assert.strictEqual(
+    verifyAdminAuth({ authorization: 'Bearer zadrow-admin-secure-key-2026' }),
+    false,
+    'A previously-shipped default key must not be accepted'
+  );
+  // Fail closed: with no key configured, nothing is authorized
+  delete process.env.ADMIN_API_KEY;
+  assert.strictEqual(getAdminKey(), null, 'No configured key means no key');
+  assert.strictEqual(
+    verifyAdminAuth({ authorization: 'Bearer anything' }),
+    false,
+    'Authorization must fail closed when no admin key is configured'
+  );
+  assert.strictEqual(verifyAdminAuth({}), false, 'Authorization must fail closed when no admin key is configured');
 
   console.log('[PASS] Administrative authorization correctly gates protected access.');
 

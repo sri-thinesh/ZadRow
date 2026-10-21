@@ -703,10 +703,19 @@ async function testDimension7_BackendRequiredAPI() {
       { name: { required: true, type: 'string', maxLength: 100 } }
     );
     assert(!xss.sanitized.name.includes('<script>'), 'XSS payloads must be sanitized');
-    const authValid = verifyAdminAuth({ authorization: 'Bearer aura-admin-secure-key-2026' });
+    process.env.ADMIN_API_KEY = 'rigorous-test-admin-key';
+    const authValid = verifyAdminAuth({ authorization: 'Bearer rigorous-test-admin-key' });
     assert.strictEqual(authValid, true, 'Admin bearer token authorization must be verified');
     const authInvalid = verifyAdminAuth({ authorization: 'Bearer invalid_token' });
     assert.strictEqual(authInvalid, false, 'Invalid bearer token must be rejected');
+    const authRetiredDefault = verifyAdminAuth({ authorization: 'Bearer aura-admin-secure-key-2026' });
+    assert.strictEqual(authRetiredDefault, false, 'A previously-shipped default key must not be accepted');
+    delete process.env.ADMIN_API_KEY;
+    assert.strictEqual(
+      verifyAdminAuth({ authorization: 'Bearer rigorous-test-admin-key' }),
+      false,
+      'Authorization must fail closed when no admin key is configured'
+    );
     recordTest(7, 'Input sanitization against XSS & Bearer token API authorization verified', true);
   } finally {
     try { fs.rmSync(testDir, { recursive: true, force: true }); } catch (_) {}
